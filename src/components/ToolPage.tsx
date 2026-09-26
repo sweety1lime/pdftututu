@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ShieldCheck } from "lucide-react";
+import { pageMetadata } from "@/lib/metadata";
 import { getTool, type ToolId } from "@/lib/tools";
 import { cn } from "@/lib/utils";
 
@@ -25,9 +27,11 @@ export async function ToolPage({ id, children }: { id: ToolId; children: React.R
   );
 }
 
-/** Метаданные страницы инструмента (title/description для поисковиков). */
-export async function toolMetadata(params: Promise<{ locale: string }>, id: ToolId) {
+/** Метаданные страницы инструмента (title/description, адреса и превью для поисковиков). */
+export async function toolMetadata(params: Promise<{ locale: string }>, id: ToolId): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: `tools.${id}` });
-  return { title: t("title"), description: t("description") };
+  const title = t("title");
+  const path = getTool(id).href.split("?")[0];
+  return { title, ...(await pageMetadata({ locale, path, title, description: t("description") })) };
 }

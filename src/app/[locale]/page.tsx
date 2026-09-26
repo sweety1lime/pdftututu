@@ -1,8 +1,15 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BadgeCheck, ShieldCheck, UserX } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { pageMetadata } from "@/lib/metadata";
 import { TOOL_GROUPS, TOOLS } from "@/lib/tools";
 import { cn } from "@/lib/utils";
+
+export async function generateMetadata({ params }: PageProps<"/[locale]">) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return pageMetadata({ locale, path: "", title: t("title"), description: t("description") });
+}
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;

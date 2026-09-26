@@ -18,13 +18,12 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
+  // canonical, hreflang и Open Graph — у каждой страницы свои (см. pageMetadata)
   return {
     metadataBase: new URL(SITE_URL),
     title: { default: t("title"), template: `%s · ${t("siteName")}` },
     description: t("description"),
     applicationName: t("siteName"),
-    openGraph: { title: t("title"), description: t("description"), siteName: t("siteName"), type: "website", locale },
-    alternates: { languages: { ru: "/ru", en: "/en" } },
   };
 }
 
