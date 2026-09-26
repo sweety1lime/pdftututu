@@ -13,8 +13,8 @@ const nextConfig: NextConfig = {
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
       },
       {
-        // Файлы pdf.js меняются только при обновлении библиотеки
-        source: "/pdfjs/:path*",
+        // Файлы pdf.js и tesseract.js меняются только при обновлении библиотек
+        source: "/:dir(pdfjs|tesseract)/:path*",
         headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }],
       },
     ];

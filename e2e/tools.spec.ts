@@ -67,3 +67,32 @@ test("редактор: добавить текст с кириллицей и �
   expect(text).toContain("Page 1");
   expect(text).toContain("Привет, мир");
 });
+
+test("OCR распознаёт текст и не ходит на сторонние сайты", async ({ page, baseURL }) => {
+  test.setTimeout(120_000);
+  const external: string[] = [];
+  await page.context().route(
+    (url) => url.origin !== new URL(baseURL!).origin,
+    (route) => {
+      external.push(route.request().url());
+      return route.abort();
+    },
+  );
+
+  const doc = await PDFDocument.create();
+  doc.addPage([595, 842]).drawText("HELLO OCR 2026", {
+    x: 60,
+    y: 700,
+    size: 40,
+    font: await doc.embedFont(StandardFonts.Helvetica),
+  });
+  await page.goto("/ru/ocr");
+  await dropPdf(page, { name: "scan.pdf", bytes: await doc.save() });
+  // На странице уже есть текст — без этого её пропустят
+  await page.getByLabel("Пропускать страницы, где уже есть текст").uncheck();
+  await page.getByRole("button", { name: "Распознать" }).click();
+
+  const txt = await download(page, () => page.getByRole("button", { name: "Скачать .txt" }).click());
+  expect(Buffer.from(txt.bytes).toString("utf8")).toContain("HELLO OCR 2026");
+  expect(external).toEqual([]);
+});

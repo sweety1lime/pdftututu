@@ -12,8 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Копия pdf.js из node_modules (scripts/copy-pdfjs.mjs)
+    // Копии pdf.js и tesseract.js из node_modules (scripts/copy-*.mjs)
     "public/pdfjs/**",
+    "public/tesseract/**",
   ]),
 ]);
 
