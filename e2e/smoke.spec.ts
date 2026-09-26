@@ -59,3 +59,12 @@ test("разметка schema.org совпадает с вопросами на 
   const questions = faq.mainEntity.map((q: { name: string }) => q.name);
   await expect(page.locator("details summary")).toHaveText(questions);
 });
+
+test("картинка для превью ссылки отдаётся", async ({ page, request }) => {
+  await page.goto("/ru/merge");
+  const og = await page.locator('meta[property="og:image"]').getAttribute("content");
+  const url = new URL(og!);
+  const res = await request.get(url.pathname + url.search);
+  expect(res.status()).toBe(200);
+  expect(res.headers()["content-type"]).toBe("image/png");
+});

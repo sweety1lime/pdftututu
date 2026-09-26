@@ -20,6 +20,8 @@ export async function pageMetadata(opts: {
   return {
     description,
     alternates: { canonical: url, languages: languageAlternates(path) },
+    // Картинку превью Next.js добавит сам из opengraph-image.tsx страницы
     openGraph: { title, description, url, siteName: t("siteName"), type: "website", locale },
+    twitter: { card: "summary_large_image" },
   };
 }
