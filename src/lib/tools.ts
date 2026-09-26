@@ -12,6 +12,7 @@ import {
   ScanText,
   Scissors,
   Signature,
+  Stamp,
   TextCursorInput,
   type LucideIcon,
 } from "lucide-react";
@@ -30,7 +31,8 @@ export type ToolId =
   | "ocr"
   | "compress"
   | "protect"
-  | "unlock";
+  | "unlock"
+  | "watermark";
 
 export type ToolGroup = "edit" | "pages" | "convert" | "secure";
 
@@ -57,6 +59,7 @@ export const TOOLS: Tool[] = [
   { id: "ocr", href: "/ocr", icon: ScanText, group: "convert", accent: "text-yellow-600 bg-yellow-500/10 dark:text-yellow-400" },
   { id: "compress", href: "/compress", icon: Minimize2, group: "secure", accent: "text-rose-600 bg-rose-500/10 dark:text-rose-400" },
   { id: "protect", href: "/protect", icon: Lock, group: "secure", accent: "text-red-600 bg-red-500/10 dark:text-red-400" },
+  { id: "watermark", href: "/watermark", icon: Stamp, group: "secure", accent: "text-blue-600 bg-blue-500/10 dark:text-blue-400" },
   { id: "unlock", href: "/unlock", icon: LockOpen, group: "secure", accent: "text-pink-600 bg-pink-500/10 dark:text-pink-400" },
 ];
 

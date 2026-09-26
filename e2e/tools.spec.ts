@@ -135,3 +135,15 @@ test("номера страниц: «2 / 3» в правом верхнем уг
   const text = await extractText(out.bytes);
   expect(text[1]).toContain("2 / 3");
 });
+
+test("водяной знак: надпись плиткой на всех страницах", async ({ page }) => {
+  await page.goto("/ru/watermark");
+  await dropPdf(page, { name: "doc.pdf", bytes: await makePdf(2) });
+  await page.getByLabel("Надпись").fill("ЧЕРНОВИК");
+  await page.getByRole("radio", { name: "Плиткой по всей странице" }).click();
+  // Превью показывает надписи на миниатюре
+  await expect(page.getByText("ЧЕРНОВИК").first()).toBeVisible();
+  const out = await download(page, () => page.getByRole("button", { name: "Добавить водяной знак" }).click());
+  const text = await extractText(out.bytes);
+  expect(text.every((t) => t.includes("ЧЕРНОВИК"))).toBe(true);
+});

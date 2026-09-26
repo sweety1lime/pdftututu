@@ -100,6 +100,9 @@ export interface ViewText {
   y: number;
   /** Текст идёт слева направо, без поворота */
   upright: boolean;
+  /** Угол наклона на экране, градусы по часовой (0 — горизонтально) */
+  angle: number;
+  width: number;
 }
 
 /** Текст страниц с положением на экране — чтобы проверять, куда что нарисовано. */
@@ -114,7 +117,8 @@ export async function textInView(bytes: Uint8Array): Promise<{ width: number; he
     for (const it of (await page.getTextContent()).items) {
       if (!("str" in it) || !it.str.trim()) continue;
       const m = pdfjs.Util.transform(viewport.transform, it.transform);
-      items.push({ str: it.str, x: m[4], y: m[5], upright: m[0] > 0 && Math.abs(m[1]) < 1e-6 });
+      const angle = Math.round((Math.atan2(m[1], m[0]) * 180) / Math.PI);
+      items.push({ str: it.str, x: m[4], y: m[5], upright: m[0] > 0 && Math.abs(m[1]) < 1e-6, angle, width: it.width });
     }
     out.push({ width: viewport.width, height: viewport.height, items });
   }

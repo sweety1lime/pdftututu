@@ -69,6 +69,7 @@
     "ocr": { "title": "Recognize text (OCR)", "description": "Make text in scans selectable and searchable" },
     "compress": { "title": "Compress PDF", "description": "Reduce file size with minimal quality loss" },
     "protect": { "title": "Add password", "description": "Protect a PDF with a password and restrict permissions (AES-256)" },
+    "watermark": { "title": "Watermark", "description": "Add text or a logo on top of PDF pages" },
     "unlock": { "title": "Remove password", "description": "Remove the password from a PDF if you know it" }
   },
   "errors": {
@@ -202,6 +203,30 @@
     "allowAnnotate": "Allow comments and form filling",
     "action": "Protect PDF",
     "note": "AES-256 encryption. If you forget the password, the file can't be opened."
+  },
+  "watermark": {
+    "text": "Text",
+    "image": "Image",
+    "textLabel": "Text",
+    "defaultText": "CONFIDENTIAL",
+    "color": "Color",
+    "customColor": "Custom color",
+    "chooseImage": "Choose image",
+    "changeImage": "Change image",
+    "size": "Size",
+    "transparency": "Transparency",
+    "angle": "Angle",
+    "angleDiagonal": "Diagonal",
+    "angleNone": "Horizontal",
+    "angleVertical": "Vertical",
+    "layout": "Layout",
+    "layoutCenter": "Once, centered",
+    "layoutTile": "Tiled across the page",
+    "pages": "Pages",
+    "pagesAll": "All",
+    "pagesCustom": "Choose",
+    "preview": "Preview",
+    "action": "Add watermark"
   },
   "unlock": {
     "notEncrypted": "This file is not password-protected",
@@ -581,6 +606,24 @@
           {
             "q": "What if I forget the password?",
             "a": "The file can't be opened — the password isn't stored anywhere and can't be recovered. Keep it somewhere safe."
+          }
+        ]
+      },
+      "watermark": {
+        "howTo": "How to watermark a PDF",
+        "steps": [
+          "Choose a PDF file.",
+          "Type your text or pick an image (such as a logo), then adjust size, transparency and angle.",
+          "Click “Add watermark” and download the file."
+        ],
+        "faq": [
+          {
+            "q": "Can the watermark be removed later?",
+            "a": "Not in regular PDF viewers, but PDF editors can find and delete it. To make that harder, compress the file with “Maximum” compression afterwards — pages become images."
+          },
+          {
+            "q": "Will the text under the watermark stay readable?",
+            "a": "Yes, at 60–80% transparency. Search and copying in the document keep working."
           }
         ]
       },
