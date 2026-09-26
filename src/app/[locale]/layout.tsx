@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Onest } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/site";
@@ -41,6 +43,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             {children}
           </Providers>
         </NextIntlClientProvider>
+        {/* Без cookies; скрипты и отправка — через /_vercel на этом же домене */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

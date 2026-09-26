@@ -1,7 +1,11 @@
+import { track } from "@vercel/analytics";
 import { zipSync, type Zippable } from "fflate";
 
 /** Скачать данные как файл (через временную ссылку). */
 export function downloadBlob(data: Uint8Array | Blob, fileName: string, type = "application/pdf") {
+  // Какими инструментами реально пользуются: только адрес страницы, без имени и
+  // содержимого файла. Свои события Vercel показывает на тарифе Pro.
+  track("download", { tool: location.pathname.replace(/^\/[a-z]{2}(?=\/|$)/, "") || "/" });
   const blob = data instanceof Blob ? data : new Blob([data as BlobPart], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
