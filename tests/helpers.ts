@@ -92,3 +92,32 @@ export function makePng(width = 2, height = 2, { noise = false } = {}): Uint8Arr
     chunk("IEND", Buffer.alloc(0)),
   ]);
 }
+
+export interface ViewText {
+  str: string;
+  /** Начало базовой линии в координатах вида (как видит пользователь: y вниз) */
+  x: number;
+  y: number;
+  /** Текст идёт слева направо, без поворота */
+  upright: boolean;
+}
+
+/** Текст страниц с положением на экране — чтобы проверять, куда что нарисовано. */
+export async function textInView(bytes: Uint8Array): Promise<{ width: number; height: number; items: ViewText[] }[]> {
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const doc = await pdfjs.getDocument({ data: bytes.slice(), useSystemFonts: false }).promise;
+  const out = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const viewport = page.getViewport({ scale: 1 });
+    const items: ViewText[] = [];
+    for (const it of (await page.getTextContent()).items) {
+      if (!("str" in it) || !it.str.trim()) continue;
+      const m = pdfjs.Util.transform(viewport.transform, it.transform);
+      items.push({ str: it.str, x: m[4], y: m[5], upright: m[0] > 0 && Math.abs(m[1]) < 1e-6 });
+    }
+    out.push({ width: viewport.width, height: viewport.height, items });
+  }
+  await doc.loadingTask.destroy();
+  return out;
+}

@@ -19,6 +19,7 @@ const MUTED = "#5f6573";
 // Tailwind-600 для акцентов плиток (tools.ts: "text-sky-600 …")
 const ACCENT: Record<string, string> = {
   sky: "#0284c7",
+  cyan: "#0891b2",
   indigo: "#4f46e5",
   violet: "#7c3aed",
   fuchsia: "#c026d3",

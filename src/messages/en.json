@@ -63,6 +63,7 @@
     "merge": { "title": "Merge PDF", "description": "Combine several files into one, in any order" },
     "split": { "title": "Split PDF", "description": "Extract pages or split a document into parts" },
     "organize": { "title": "Organize pages", "description": "Rotate, delete, reorder and insert pages" },
+    "pageNumbers": { "title": "Page numbers", "description": "Number the pages of a PDF at the top or bottom, in any corner" },
     "imagesToPdf": { "title": "Images to PDF", "description": "Turn JPG, PNG and other images into one PDF" },
     "pdfToImages": { "title": "PDF to images", "description": "Save pages as PNG or JPG" },
     "ocr": { "title": "Recognize text (OCR)", "description": "Make text in scans selectable and searchable" },
@@ -122,6 +123,29 @@
     "empty": "No pages left",
     "action": "Save PDF",
     "blank": "Blank"
+  },
+  "pageNumbers": {
+    "position": "Where to put the number",
+    "positions": {
+      "top-left": "Top left",
+      "top-center": "Top center",
+      "top-right": "Top right",
+      "bottom-left": "Bottom left",
+      "bottom-center": "Bottom center",
+      "bottom-right": "Bottom right"
+    },
+    "format": "Format",
+    "formatPageOf": "Page {n} of {total}",
+    "pages": "Pages to number",
+    "pagesAll": "All",
+    "pagesSkipFirst": "All but the first",
+    "pagesCustom": "Choose",
+    "start": "Start from",
+    "size": "Size",
+    "sizeSmall": "Small",
+    "sizeMedium": "Medium",
+    "sizeLarge": "Large",
+    "action": "Add page numbers"
   },
   "imagesToPdf": {
     "pageSize": "Page size",
@@ -449,6 +473,24 @@
           {
             "q": "Does page quality change?",
             "a": "No. Pages are copied without recompression, and rotation doesn't affect quality."
+          }
+        ]
+      },
+      "pageNumbers": {
+        "howTo": "How to add page numbers to a PDF",
+        "steps": [
+          "Choose a PDF file.",
+          "Pick where the number goes, how it looks and which pages to number.",
+          "Click “Add page numbers” and download the file."
+        ],
+        "faq": [
+          {
+            "q": "How do I skip the title page?",
+            "a": "Choose “All but the first”: numbering starts on the second page, which gets “2”. You can change the starting number."
+          },
+          {
+            "q": "Can I use “Page 1 of 10”?",
+            "a": "Yes, it's one of the formats. The total number of pages is filled in automatically."
           }
         ]
       },

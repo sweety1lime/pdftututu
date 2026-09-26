@@ -125,3 +125,13 @@ test("подпись: напечатать имя, вставить и скач�
   const res = (await PDFDocument.load(out.bytes)).getPage(0).node.Resources();
   expect(res?.lookup(PDFName.of("XObject"), PDFDict).keys().length).toBeGreaterThan(0);
 });
+
+test("номера страниц: «2 / 3» в правом верхнем углу", async ({ page }) => {
+  await page.goto("/ru/page-numbers");
+  await dropPdf(page, { name: "doc.pdf", bytes: await makePdf(3) });
+  await page.getByRole("radio", { name: "1 / 3" }).click();
+  await page.getByRole("radio", { name: "Сверху справа" }).click();
+  const out = await download(page, () => page.getByRole("button", { name: "Пронумеровать" }).click());
+  const text = await extractText(out.bytes);
+  expect(text[1]).toContain("2 / 3");
+});
