@@ -76,6 +76,9 @@ export function ObjectsLayer({ pageIndex, width, height, zoom, fontsVersion }: P
     const s = useEditor.getState();
     const p = pointer();
     if (s.tool === "text") {
+      // Иначе следом придёт mousedown по холсту и заберёт фокус у только что
+      // открытого поля ввода — пустой текст тут же удалится
+      e.evt.preventDefault();
       const obj = makeText(pageIndex, p.x, p.y, s.defaults);
       // Создание + ввод текста = один шаг истории (жест закроет TextEditOverlay)
       beginGesture();
