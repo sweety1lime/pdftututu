@@ -81,6 +81,9 @@ export type Tool =
   | "sign"
   | "forms";
 
+/** Страницы сайта, которые открывают редактор (у каждой свой адрес в поиске) */
+export type EditorEntry = "editor" | "editText" | "sign" | "forms";
+
 export interface PageInfo extends PageGeometry {
   /** Размер в координатах вида (с учётом поворота) */
   width: number;

@@ -32,6 +32,5 @@ export async function toolMetadata(params: Promise<{ locale: string }>, id: Tool
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: `tools.${id}` });
   const title = t("title");
-  const path = getTool(id).href.split("?")[0];
-  return { title, ...(await pageMetadata({ locale, path, title, description: t("description") })) };
+  return { title, ...(await pageMetadata({ locale, path: getTool(id).href, title, description: t("description") })) };
 }

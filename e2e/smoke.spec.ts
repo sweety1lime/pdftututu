@@ -39,3 +39,11 @@ test("заголовки безопасности и CSP", async ({ request }) =
   expect(headers["x-content-type-options"]).toBe("nosniff");
   expect(headers["x-frame-options"]).toBe("DENY");
 });
+
+test("старые адреса /editor?tool=… ведут на отдельные страницы", async ({ page }) => {
+  await page.goto("/ru/editor?tool=sign");
+  await expect(page).toHaveURL(/\/ru\/sign(\?|$)/);
+  await expect(page.getByRole("heading", { name: "Подписать PDF" })).toBeVisible();
+  await page.goto("/en/editor?tool=forms");
+  await expect(page).toHaveURL(/\/en\/fill-form(\?|$)/);
+});

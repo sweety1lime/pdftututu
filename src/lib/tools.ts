@@ -43,9 +43,9 @@ export interface Tool {
 
 export const TOOLS: Tool[] = [
   { id: "editor", href: "/editor", icon: FilePenLine, group: "edit", accent: "text-sky-600 bg-sky-500/10 dark:text-sky-400" },
-  { id: "editText", href: "/editor?tool=editText", icon: TextCursorInput, group: "edit", accent: "text-indigo-600 bg-indigo-500/10 dark:text-indigo-400" },
-  { id: "sign", href: "/editor?tool=sign", icon: Signature, group: "edit", accent: "text-violet-600 bg-violet-500/10 dark:text-violet-400" },
-  { id: "forms", href: "/editor?tool=forms", icon: FormInput, group: "edit", accent: "text-fuchsia-600 bg-fuchsia-500/10 dark:text-fuchsia-400" },
+  { id: "editText", href: "/edit-text", icon: TextCursorInput, group: "edit", accent: "text-indigo-600 bg-indigo-500/10 dark:text-indigo-400" },
+  { id: "sign", href: "/sign", icon: Signature, group: "edit", accent: "text-violet-600 bg-violet-500/10 dark:text-violet-400" },
+  { id: "forms", href: "/fill-form", icon: FormInput, group: "edit", accent: "text-fuchsia-600 bg-fuchsia-500/10 dark:text-fuchsia-400" },
   { id: "merge", href: "/merge", icon: Combine, group: "pages", accent: "text-emerald-600 bg-emerald-500/10 dark:text-emerald-400" },
   { id: "split", href: "/split", icon: Scissors, group: "pages", accent: "text-teal-600 bg-teal-500/10 dark:text-teal-400" },
   { id: "organize", href: "/organize", icon: LayoutGrid, group: "pages", accent: "text-green-600 bg-green-500/10 dark:text-green-400" },

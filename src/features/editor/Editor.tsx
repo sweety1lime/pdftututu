@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { History, Info } from "lucide-react";
 import { FileDropzone } from "@/components/FileDropzone";
@@ -24,18 +23,14 @@ import { ShortcutsDialog } from "./ShortcutsDialog";
 import { SignatureDialog, type SignatureImage } from "./SignatureDialog";
 import { useEditor } from "./store";
 import { Toolbar, useImagePicker } from "./Toolbar";
-import type { Asset, ImageObject, Tool } from "./types";
+import type { Asset, EditorEntry, ImageObject } from "./types";
 
-const START_TOOLS: Tool[] = ["text", "editText", "forms", "highlight", "pen"];
-
-export default function Editor() {
+/** @param entry — с какой страницы открыт редактор: от неё зависят заголовок и стартовый инструмент */
+export default function Editor({ entry = "editor" }: { entry?: EditorEntry }) {
   const t = useTranslations("editor");
   const tRoot = useTranslations();
   const source = useEditor((s) => s.source);
   const showError = useErrorToast();
-  const search = useSearchParams();
-  const startTool = search.get("tool");
-  const startToolId = startTool === "editText" || startTool === "sign" || startTool === "forms" ? startTool : "editor";
   const [draft, setDraft] = useState<Draft | null>(null);
   const [loading, setLoading] = useState(false);
   const [signOpen, setSignOpen] = useState(false);
@@ -62,9 +57,9 @@ export default function Editor() {
           assets: restore?.assets,
         });
         const s = useEditor.getState();
-        if (startTool === "sign") setSignOpen(true);
-        else if (startTool === "forms" && !doc.widgets.length) toast.info(t("formsNone"));
-        else if (START_TOOLS.includes(startTool as Tool)) s.setTool(startTool as Tool);
+        if (entry === "sign") setSignOpen(true);
+        else if (entry === "forms" && !doc.widgets.length) toast.info(t("formsNone"));
+        else if (entry === "forms" || entry === "editText") s.setTool(entry);
         setDraft(null);
       } catch (e) {
         showError(e);
@@ -72,7 +67,7 @@ export default function Editor() {
         setLoading(false);
       }
     },
-    [showError, startTool, t, tRoot],
+    [showError, entry, t, tRoot],
   );
 
   const openFile = async (files: File[]) => {
@@ -92,8 +87,8 @@ export default function Editor() {
   if (!source) {
     return (
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
-        <h1 className="mb-2 text-center text-3xl font-bold tracking-tight">{tRoot(`tools.${startToolId}.title`)}</h1>
-        <p className="mb-8 text-center text-muted-foreground">{tRoot(`tools.${startToolId}.description`)}</p>
+        <h1 className="mb-2 text-center text-3xl font-bold tracking-tight">{tRoot(`tools.${entry}.title`)}</h1>
+        <p className="mb-8 text-center text-muted-foreground">{tRoot(`tools.${entry}.description`)}</p>
         {draft && <DraftBanner draft={draft} onRestore={() => open({ id: draft.sourceId, name: draft.name, bytes: draft.bytes, wasEncrypted: false }, draft)} onDiscard={() => clearDraft().then(() => setDraft(null))} />}
         <FileDropzone onFiles={openFile} disabled={loading} />
       </main>

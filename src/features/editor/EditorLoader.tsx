@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
+import type { EditorEntry } from "./types";
 
 // Редактор (pdf.js + Konva) работает только в браузере — на сервере не рендерим
 const Editor = dynamic(() => import("./Editor"), {
@@ -13,6 +14,6 @@ const Editor = dynamic(() => import("./Editor"), {
   ),
 });
 
-export function EditorLoader() {
-  return <Editor />;
+export function EditorLoader({ entry }: { entry?: EditorEntry }) {
+  return <Editor entry={entry} />;
 }

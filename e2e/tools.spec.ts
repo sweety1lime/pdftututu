@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts } from "@cantoo/pdf-lib";
+import { PDFDict, PDFDocument, PDFName, StandardFonts } from "@cantoo/pdf-lib";
 import { extractText, fileContains, makePdf, makePng } from "../tests/helpers";
 import { download, dropPdf, expect, test } from "./fixtures";
 
@@ -109,4 +109,19 @@ test("OCR распознаёт текст и не ходит на сторонн
   const txt = await download(page, () => page.getByRole("button", { name: "Скачать .txt" }).click());
   expect(Buffer.from(txt.bytes).toString("utf8")).toContain("HELLO OCR 2026");
   expect(external).toEqual([]);
+});
+
+test("подпись: напечатать имя, вставить и скачать", async ({ page }) => {
+  await page.goto("/ru/sign");
+  await dropPdf(page, { name: "doc.pdf", bytes: await makePdf(1) });
+  // На странице подписи диалог открывается сам
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("tab", { name: "Напечатать" }).click();
+  await dialog.getByPlaceholder("Ваше имя").fill("Иван Петров");
+  await dialog.getByRole("button", { name: "Вставить" }).click();
+  await expect(dialog).toBeHidden();
+
+  const out = await download(page, () => page.getByRole("button", { name: "Скачать PDF" }).click());
+  const res = (await PDFDocument.load(out.bytes)).getPage(0).node.Resources();
+  expect(res?.lookup(PDFName.of("XObject"), PDFDict).keys().length).toBeGreaterThan(0);
 });

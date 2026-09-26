@@ -36,6 +36,17 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    // Раньше подпись, правка текста и формы открывались как /editor?tool=…
+    // Старые ссылки (закладки, поиск) ведём на отдельные страницы.
+    const moved = { sign: "sign", editText: "edit-text", forms: "fill-form" };
+    return Object.entries(moved).map(([tool, path]) => ({
+      source: "/:locale(ru|en)/editor",
+      has: [{ type: "query" as const, key: "tool", value: tool }],
+      destination: `/:locale/${path}`,
+      permanent: true,
+    }));
+  },
   async headers() {
     return [
       {

@@ -21,7 +21,7 @@ export function LocaleSwitcher() {
   const pathname = usePathname();
 
   const switchTo = (next: Locale) => {
-    // Параметры (?tool=sign) читаем в момент клика — useSearchParams
+    // Параметры адреса читаем в момент клика — useSearchParams
     // в шапке сломал бы статическую генерацию страниц
     const query = window.location.search;
     router.replace(`${pathname}${query}`, { locale: next });

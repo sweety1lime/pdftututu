@@ -4,8 +4,7 @@ import { languageAlternates, localizedPath, SITE_URL } from "@/lib/site";
 import { TOOLS } from "@/lib/tools";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  // Главная + страницы инструментов (без ?tool=… — это вкладки редактора)
-  const paths = ["", ...new Set(TOOLS.map((t) => t.href.split("?")[0]))];
+  const paths = ["", ...TOOLS.map((t) => t.href)];
   return paths.flatMap((path) =>
     routing.locales.map((locale) => ({
       url: SITE_URL + localizedPath(locale, path),
