@@ -37,6 +37,8 @@ export function makeBox(
       return { ...base, type, fill: d.highlight.fill, stroke: null, strokeWidth: 0, opacity: 0.45 };
     case "whiteout":
       return { ...base, type, fill: "#ffffff", stroke: null, strokeWidth: 0, opacity: 1 };
+    case "redact":
+      return { ...base, type, fill: "#000000", stroke: null, strokeWidth: 0, opacity: 1 };
     default:
       return { ...base, type, ...d.shape };
   }

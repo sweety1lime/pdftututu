@@ -14,6 +14,7 @@ const TOOL_BY_KEY: Record<string, Tool> = {
   a: "arrow",
   h: "highlight",
   w: "whiteout",
+  x: "redact",
   p: "pen",
 };
 

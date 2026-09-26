@@ -6,6 +6,7 @@ import { loadForEdit } from "./pdf/load";
 import { renderPageToNewCanvas } from "./pdf/pdfjs";
 import { addInvisibleText, type OcrWord } from "./pdf/textLayer";
 
+// Модели для этих языков копирует scripts/copy-tesseract.mjs — списки должны совпадать
 export const OCR_LANGUAGES = [
   { code: "rus", label: "Русский" },
   { code: "eng", label: "English" },
@@ -57,6 +58,12 @@ export async function runOcr(
   const { createWorker } = await import("tesseract.js");
   let currentPage = 0;
   const worker = await createWorker(opts.languages, 1, {
+    // Всё со своего сайта, без CDN: файлы копирует scripts/copy-tesseract.mjs
+    workerPath: "/tesseract/worker.min.js",
+    corePath: "/tesseract/core",
+    langPath: "/tesseract/lang",
+    // Воркер прямо по адресу, а не через blob: — так проще с CSP
+    workerBlobURL: false,
     logger: (m: { status: string; progress: number }) => {
       if (m.status === "recognizing text") {
         onProgress({ stage: "recognizing", page: currentPage, total, pageProgress: m.progress });

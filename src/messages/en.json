@@ -60,15 +60,21 @@
     "editText": { "title": "Edit text", "description": "Fix a typo or replace words in an existing PDF" },
     "sign": { "title": "Sign PDF", "description": "Draw your signature, type it or upload an image" },
     "forms": { "title": "Fill form", "description": "Fill in form fields, tick checkboxes and save" },
+    "redact": { "title": "Redact PDF", "description": "Black out passport numbers, amounts or names so they can't be recovered" },
     "merge": { "title": "Merge PDF", "description": "Combine several files into one, in any order" },
     "split": { "title": "Split PDF", "description": "Extract pages or split a document into parts" },
     "organize": { "title": "Organize pages", "description": "Rotate, delete, reorder and insert pages" },
+    "pageNumbers": { "title": "Page numbers", "description": "Number the pages of a PDF at the top or bottom, in any corner" },
     "imagesToPdf": { "title": "Images to PDF", "description": "Turn JPG, PNG and other images into one PDF" },
     "pdfToImages": { "title": "PDF to images", "description": "Save pages as PNG or JPG" },
+    "pdfToWord": { "title": "PDF to Word", "description": "Convert a PDF to an editable Word document (.docx) or plain text" },
     "ocr": { "title": "Recognize text (OCR)", "description": "Make text in scans selectable and searchable" },
+    "grayscale": { "title": "Grayscale PDF", "description": "Convert a color PDF to grayscale for printing" },
     "compress": { "title": "Compress PDF", "description": "Reduce file size with minimal quality loss" },
     "protect": { "title": "Add password", "description": "Protect a PDF with a password and restrict permissions (AES-256)" },
-    "unlock": { "title": "Remove password", "description": "Remove the password from a PDF if you know it" }
+    "watermark": { "title": "Watermark", "description": "Add text or a logo on top of PDF pages" },
+    "unlock": { "title": "Remove password", "description": "Remove the password from a PDF if you know it" },
+    "metadata": { "title": "PDF metadata", "description": "View, edit or remove the author, title and other hidden file properties" }
   },
   "errors": {
     "notPdf": "“{name}” doesn't look like a PDF",
@@ -123,6 +129,29 @@
     "action": "Save PDF",
     "blank": "Blank"
   },
+  "pageNumbers": {
+    "position": "Where to put the number",
+    "positions": {
+      "top-left": "Top left",
+      "top-center": "Top center",
+      "top-right": "Top right",
+      "bottom-left": "Bottom left",
+      "bottom-center": "Bottom center",
+      "bottom-right": "Bottom right"
+    },
+    "format": "Format",
+    "formatPageOf": "Page {n} of {total}",
+    "pages": "Pages to number",
+    "pagesAll": "All",
+    "pagesSkipFirst": "All but the first",
+    "pagesCustom": "Choose",
+    "start": "Start from",
+    "size": "Size",
+    "sizeSmall": "Small",
+    "sizeMedium": "Medium",
+    "sizeLarge": "Large",
+    "action": "Add page numbers"
+  },
   "imagesToPdf": {
     "pageSize": "Page size",
     "sizeFit": "Same as image",
@@ -149,6 +178,24 @@
     "pagesAll": "All",
     "pagesRange": "Choose",
     "action": "Convert"
+  },
+  "pdfToWord": {
+    "format": "Convert to",
+    "formatDocx": "Word (.docx)",
+    "formatDocxHint": "Paragraphs, headings, bold and italic",
+    "formatTxt": "Text (.txt)",
+    "formatTxtHint": "Text only, paragraphs separated by a blank line",
+    "noText": "This looks like a scan: the file has no text, only page images.",
+    "ocr": "Recognize the text first (OCR, English and Russian)",
+    "recognizing": "Recognizing page {page} of {total}…",
+    "limits": "Text, paragraphs, headings, bold and italic are kept. Tables, columns and images are not.",
+    "nothing": "No text found in the file",
+    "action": "Convert"
+  },
+  "grayscale": {
+    "before": "Before",
+    "after": "After",
+    "action": "Convert to grayscale"
   },
   "compress": {
     "level": "Compression level",
@@ -179,10 +226,51 @@
     "action": "Protect PDF",
     "note": "AES-256 encryption. If you forget the password, the file can't be opened."
   },
+  "watermark": {
+    "text": "Text",
+    "image": "Image",
+    "textLabel": "Text",
+    "defaultText": "CONFIDENTIAL",
+    "color": "Color",
+    "customColor": "Custom color",
+    "chooseImage": "Choose image",
+    "changeImage": "Change image",
+    "size": "Size",
+    "transparency": "Transparency",
+    "angle": "Angle",
+    "angleDiagonal": "Diagonal",
+    "angleNone": "Horizontal",
+    "angleVertical": "Vertical",
+    "layout": "Layout",
+    "layoutCenter": "Once, centered",
+    "layoutTile": "Tiled across the page",
+    "pages": "Pages",
+    "pagesAll": "All",
+    "pagesCustom": "Choose",
+    "preview": "Preview",
+    "action": "Add watermark"
+  },
   "unlock": {
     "notEncrypted": "This file is not password-protected",
     "action": "Remove protection",
     "unlocked": "Protection removed"
+  },
+  "metadata": {
+    "fields": {
+      "title": "Title",
+      "author": "Author",
+      "subject": "Subject",
+      "keywords": "Keywords",
+      "creator": "Created with",
+      "producer": "PDF made with"
+    },
+    "created": "Created",
+    "modified": "Modified",
+    "hiddenData": "The file contains hidden service data (XMP or data from the app it was made in). It will be removed when you save.",
+    "clearAll": "Clear all",
+    "clearAllHint": "Remove all properties, dates and hidden data",
+    "clearAllReady": "All properties, dates and hidden data will be removed when you save",
+    "action": "Save PDF"
   },
   "ocr": {
     "languages": "Text language",
@@ -209,6 +297,7 @@
       "arrow": "Arrow",
       "highlight": "Highlight",
       "whiteout": "Whiteout",
+      "redact": "Redact",
       "pen": "Pen",
       "sign": "Signature",
       "forms": "Form"
@@ -253,7 +342,9 @@
       "options": "Save options",
       "rasterize": "Rasterize pages with text edits",
       "rasterizeHint": "Covered text is removed from the file completely (it can't be copied), but those pages become images.",
-      "flattenForms": "Make form fields read-only"
+      "flattenForms": "Make form fields read-only",
+      "redactNote": "Pages with redactions become images: the covered content is removed from the file completely. File properties (author, title) are removed too.",
+      "redactOcr": "Keep text searchable on these pages (recognition, English and Russian)"
     },
     "draft": {
       "title": "Unsaved draft found",
@@ -263,6 +354,7 @@
     },
     "newText": "Text",
     "editTextHint": "Click a line of text in the document to edit it",
+    "redactHint": "Cover what needs to be hidden. On download these pages become images, so the covered content is removed from the file completely rather than just hidden under a black box.",
     "editTextNone": "No text found on this page (it may be a scan — try OCR)",
     "formsHint": "Form fields are highlighted — just fill them in",
     "formsNone": "This document has no form fields",
@@ -298,5 +390,376 @@
   "notFound": {
     "title": "Page not found",
     "back": "Go home"
+  },
+  "errorPage": {
+    "title": "Something broke",
+    "description": "An error occurred on this page. Your files were not sent anywhere — please try again.",
+    "retry": "Try again"
+  },
+  "guide": {
+    "relatedTitle": "More PDF tools",
+    "faqTitle": "FAQ",
+    "common": [
+      {
+        "q": "Is it really free?",
+        "a": "Yes. No sign-up, no subscription, no watermarks and no limit on the number of files."
+      },
+      {
+        "q": "Are my files uploaded anywhere?",
+        "a": "No. Files are processed right in your browser and never leave your device — the site doesn't even have a server to upload them to."
+      },
+      {
+        "q": "Is there a file size limit?",
+        "a": "There is no hard limit; it depends on your device's memory. Files of tens of megabytes work fine, while very large ones (150 MB and up) may run out of browser memory."
+      },
+      {
+        "q": "Does it work on a phone?",
+        "a": "Yes, in any modern browser, with nothing to install. The editor is more comfortable on a computer, where a bigger screen makes precise placement easier."
+      }
+    ],
+    "tools": {
+      "editor": {
+        "howTo": "How to edit a PDF",
+        "steps": [
+          "Open a PDF: drop the file on the page or click “Choose file”.",
+          "Pick a tool in the toolbar: text, image, shapes, highlighter, pen or whiteout.",
+          "Click “Download PDF” to save your changes to a new file."
+        ],
+        "faq": [
+          {
+            "q": "Can I change text that is already in the PDF?",
+            "a": "Yes, with the “Edit text” tool: click a line and type the new text. The old line is covered and the new one is written on top."
+          },
+          {
+            "q": "What if I close the tab by accident?",
+            "a": "The editor keeps a draft in your browser and offers to continue where you left off next time. Drafts are not kept for password-protected files."
+          }
+        ]
+      },
+      "editText": {
+        "howTo": "How to change text in a PDF",
+        "steps": [
+          "Open a PDF file.",
+          "Click the line you want to fix and type the new text.",
+          "Click “Download PDF”."
+        ],
+        "faq": [
+          {
+            "q": "Is the original text removed from the file?",
+            "a": "By default the old line is only covered and stays inside the file. To remove it completely, turn on “Rasterize pages with text edits” when downloading — those pages become images."
+          },
+          {
+            "q": "Why can't I select text in a scan?",
+            "a": "In a scan, text is part of an image. Cover it with the “Whiteout” tool and type new text on top."
+          }
+        ]
+      },
+      "sign": {
+        "howTo": "How to sign a PDF",
+        "steps": [
+          "Open a PDF — the signature window appears right away.",
+          "Draw your signature with a mouse or finger, type your name in a handwriting font, or upload a photo of your signature.",
+          "Drag the signature into place, resize it if needed and download the file."
+        ],
+        "faq": [
+          {
+            "q": "Is this a legally binding electronic signature?",
+            "a": "No, it's an image of your signature — like signing a printout and scanning it. The site does not create certificate-based digital signatures."
+          },
+          {
+            "q": "Can I save my signature for next time?",
+            "a": "Yes, check “Remember this signature on this device”. It is stored only in your browser."
+          }
+        ]
+      },
+      "forms": {
+        "howTo": "How to fill in a PDF form",
+        "steps": [
+          "Open a PDF with fillable fields.",
+          "Click a field and type, tick checkboxes, pick options from lists.",
+          "Click “Download PDF”."
+        ],
+        "faq": [
+          {
+            "q": "What if the file has no fields?",
+            "a": "Then the form is just text with lines. Pick the “Text” tool and type right on the lines."
+          },
+          {
+            "q": "Can I stop the fields from being changed later?",
+            "a": "Yes: in the download options, turn on “Make form fields read-only” — the values become part of the page."
+          }
+        ]
+      },
+      "redact": {
+        "howTo": "How to permanently redact a PDF",
+        "steps": [
+          "Open a PDF — the “Redact” tool is turned on right away.",
+          "Draw boxes over everything to hide: document numbers, amounts, signatures, names.",
+          "Click “Download PDF” — those pages become images and the covered content is removed from the file."
+        ],
+        "faq": [
+          {
+            "q": "How is this different from a black box?",
+            "a": "A regular box only hides text: it can still be selected and copied from under it. Here a page with redactions becomes an image, and everything that was on it — text, links, comments, form fields — is removed from the file. File properties (author, title) are removed too."
+          },
+          {
+            "q": "What should I check before sending?",
+            "a": "Bookmarks (outline) and attached files stay as they were — if the hidden content appears there, remove it separately. And don't forget other pages with the same data."
+          }
+        ]
+      },
+      "merge": {
+        "howTo": "How to merge PDFs",
+        "steps": [
+          "Choose or drop several PDF files.",
+          "Put them in order by dragging, or click “By name”.",
+          "Click “Merge” to download a single file."
+        ],
+        "faq": [
+          {
+            "q": "How many files can I merge?",
+            "a": "As many as you like — the only limit is your device's memory."
+          },
+          {
+            "q": "Can I merge only some of the pages?",
+            "a": "Yes, with the “Pages” tool: add several PDFs, delete the pages you don't need and arrange the rest."
+          }
+        ]
+      },
+      "split": {
+        "howTo": "How to split a PDF",
+        "steps": [
+          "Choose a PDF file.",
+          "Enter page ranges (e.g. 1-3, 5, 8-), split every N pages, or into single pages.",
+          "Click “Split”. Several files are downloaded as one ZIP archive."
+        ],
+        "faq": [
+          {
+            "q": "How do I extract several pages into one file?",
+            "a": "Enter them as ranges and turn on “Save all selected pages as a single file”."
+          },
+          {
+            "q": "Does quality get worse?",
+            "a": "No. Pages are copied as they are, without recompression."
+          }
+        ]
+      },
+      "organize": {
+        "howTo": "How to rotate, delete or reorder pages",
+        "steps": [
+          "Open a PDF to see thumbnails of all pages.",
+          "Drag pages around, rotate or delete them, add blank pages or pages from other PDFs.",
+          "Click “Save PDF”."
+        ],
+        "faq": [
+          {
+            "q": "Can I select several pages at once?",
+            "a": "Yes: Shift- or Ctrl-click, or use “Select all”. Rotation and deletion apply to every selected page."
+          },
+          {
+            "q": "Does page quality change?",
+            "a": "No. Pages are copied without recompression, and rotation doesn't affect quality."
+          }
+        ]
+      },
+      "pageNumbers": {
+        "howTo": "How to add page numbers to a PDF",
+        "steps": [
+          "Choose a PDF file.",
+          "Pick where the number goes, how it looks and which pages to number.",
+          "Click “Add page numbers” and download the file."
+        ],
+        "faq": [
+          {
+            "q": "How do I skip the title page?",
+            "a": "Choose “All but the first”: numbering starts on the second page, which gets “2”. You can change the starting number."
+          },
+          {
+            "q": "Can I use “Page 1 of 10”?",
+            "a": "Yes, it's one of the formats. The total number of pages is filled in automatically."
+          }
+        ]
+      },
+      "imagesToPdf": {
+        "howTo": "How to make a PDF from images",
+        "steps": [
+          "Choose images: JPG, PNG, WebP, GIF or BMP.",
+          "Put them in order and pick the page size, orientation and margins.",
+          "Click “Create PDF”."
+        ],
+        "faq": [
+          {
+            "q": "How do I turn phone photos of a document into a PDF?",
+            "a": "Take photos of the pages, open this site on your phone and select the photos — you'll get a single PDF."
+          },
+          {
+            "q": "Do images lose quality?",
+            "a": "JPG and PNG are embedded as they are, without recompression. WebP, GIF, BMP and rotated JPGs are re-encoded at high quality."
+          }
+        ]
+      },
+      "pdfToImages": {
+        "howTo": "How to save a PDF as JPG or PNG",
+        "steps": [
+          "Choose a PDF file.",
+          "Pick the format, quality and pages.",
+          "Click “Convert”. Several pages are downloaded as a ZIP archive."
+        ],
+        "faq": [
+          {
+            "q": "Which quality should I choose?",
+            "a": "72 DPI is for viewing on screen, 150 is a good all-rounder, 300 is for printing. Higher DPI means larger files."
+          },
+          {
+            "q": "PNG or JPG?",
+            "a": "PNG is lossless and better for text and diagrams. JPG is much smaller — good for photos and scans."
+          }
+        ]
+      },
+      "metadata": {
+        "howTo": "How to edit or remove PDF metadata",
+        "steps": [
+          "Choose a PDF file to see its properties: title, author, app, dates.",
+          "Edit the fields you need or click “Clear all”.",
+          "Click “Save PDF” and download the file."
+        ],
+        "faq": [
+          {
+            "q": "Why remove metadata?",
+            "a": "File properties often keep the author's name, company, app and dates. It's a good idea to remove them before sending a document to others."
+          },
+          {
+            "q": "Does the document content change?",
+            "a": "No, the pages stay the same — only the file properties change."
+          }
+        ]
+      },
+      "ocr": {
+        "howTo": "How to recognize text in a PDF",
+        "steps": [
+          "Choose a scanned PDF.",
+          "Select the text languages: Russian, English, Ukrainian, German, French or Spanish.",
+          "Click “Recognize” and download a searchable PDF or a plain .txt."
+        ],
+        "faq": [
+          {
+            "q": "What changes in the PDF after recognition?",
+            "a": "Nothing visible: invisible text is added on top of the pages, so search and copying start working."
+          },
+          {
+            "q": "Why does the first run take longer?",
+            "a": "Your browser downloads the recognition models from this site once (about 10 MB for English and Russian) and caches them."
+          }
+        ]
+      },
+      "pdfToWord": {
+        "howTo": "How to convert a PDF to Word",
+        "steps": [
+          "Choose a PDF file.",
+          "Pick the format: Word (.docx) or text (.txt). For a scan, turn on text recognition.",
+          "Click “Convert” and open the downloaded file in Word, LibreOffice or Google Docs."
+        ],
+        "faq": [
+          {
+            "q": "Is the formatting kept?",
+            "a": "Text, paragraphs, headings, bold and italic — yes. Tables, columns, images and exact layout — no: you get a plain document that's easy to edit."
+          },
+          {
+            "q": "Can I convert a scan?",
+            "a": "Yes. If the file has no text, the site offers to recognize it first — it just takes a bit longer."
+          }
+        ]
+      },
+      "grayscale": {
+        "howTo": "How to make a PDF black and white",
+        "steps": [
+          "Choose a color PDF file.",
+          "Check the preview — pages will turn grayscale.",
+          "Click “Convert to grayscale” and download the file."
+        ],
+        "faq": [
+          {
+            "q": "Will the text stay text?",
+            "a": "Yes. Pages aren't turned into images: text can still be selected and searched, and the file size barely changes."
+          },
+          {
+            "q": "Does everything turn gray?",
+            "a": "All page content does. Comments added on top (highlights, notes) keep their color."
+          }
+        ]
+      },
+      "compress": {
+        "howTo": "How to compress a PDF",
+        "steps": [
+          "Choose a PDF file.",
+          "Pick the compression level: light, recommended or maximum.",
+          "Click “Compress” — you'll see how much smaller the file got and can download it."
+        ],
+        "faq": [
+          {
+            "q": "Why did the file barely shrink?",
+            "a": "Compression mostly works on images inside the PDF. A text-only file is already compact and can't be made smaller without losses."
+          },
+          {
+            "q": "What does maximum compression do?",
+            "a": "Pages are turned into lower-resolution images. The file gets much smaller, but text can no longer be selected or searched."
+          }
+        ]
+      },
+      "protect": {
+        "howTo": "How to password-protect a PDF",
+        "steps": [
+          "Choose a PDF file.",
+          "Enter a password twice. Optionally restrict printing, copying and editing.",
+          "Click “Protect PDF” and download the file."
+        ],
+        "faq": [
+          {
+            "q": "How strong is the protection?",
+            "a": "It uses AES-256 encryption, the same standard as Adobe Acrobat. The strength depends on the password itself, so choose a long, non-obvious one."
+          },
+          {
+            "q": "What if I forget the password?",
+            "a": "The file can't be opened — the password isn't stored anywhere and can't be recovered. Keep it somewhere safe."
+          }
+        ]
+      },
+      "watermark": {
+        "howTo": "How to watermark a PDF",
+        "steps": [
+          "Choose a PDF file.",
+          "Type your text or pick an image (such as a logo), then adjust size, transparency and angle.",
+          "Click “Add watermark” and download the file."
+        ],
+        "faq": [
+          {
+            "q": "Can the watermark be removed later?",
+            "a": "Not in regular PDF viewers, but PDF editors can find and delete it. To make that harder, compress the file with “Maximum” compression afterwards — pages become images."
+          },
+          {
+            "q": "Will the text under the watermark stay readable?",
+            "a": "Yes, at 60–80% transparency. Search and copying in the document keep working."
+          }
+        ]
+      },
+      "unlock": {
+        "howTo": "How to remove a password from a PDF",
+        "steps": [
+          "Choose a protected PDF.",
+          "Enter the password when asked.",
+          "Click “Remove protection” to download a copy without the password."
+        ],
+        "faq": [
+          {
+            "q": "Can I remove a password I don't know?",
+            "a": "No, the site doesn't crack passwords. But if a file only restricts printing or copying and has no password to open it, those restrictions are removed without a password."
+          },
+          {
+            "q": "Does anything change in the document itself?",
+            "a": "No, the content stays the same — only the encryption is removed."
+          }
+        ]
+      }
+    }
   }
 }

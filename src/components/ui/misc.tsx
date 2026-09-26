@@ -124,7 +124,10 @@ export function Tip({
 }) {
   return (
     <TooltipPrimitive.Root>
-      <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
+      {/* Подсказка видна только при наведении — кнопке-иконке нужно и постоянное имя */}
+      <TooltipPrimitive.Trigger asChild aria-label={typeof label === "string" ? label : undefined}>
+        {children}
+      </TooltipPrimitive.Trigger>
       <TooltipPrimitive.Portal>
         <TooltipPrimitive.Content
           side={side}

@@ -13,10 +13,12 @@ interface Props {
   /** Дополнительный поворот (градусы, кратно 90) — применяется через CSS */
   rotation?: number;
   className?: string;
+  /** Что нарисовать поверх самой страницы (не всего квадратного контейнера) */
+  children?: React.ReactNode;
 }
 
 /** Миниатюра страницы. Рисуется, только когда появляется на экране. */
-export function PdfThumb({ doc, pageIndex, width = 160, rotation = 0, className }: Props) {
+export function PdfThumb({ doc, pageIndex, width = 160, rotation = 0, className, children }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
@@ -76,6 +78,7 @@ export function PdfThumb({ doc, pageIndex, width = 160, rotation = 0, className 
         ) : (
           <div className="size-full animate-pulse bg-muted" />
         )}
+        {children}
       </div>
     </div>
   );

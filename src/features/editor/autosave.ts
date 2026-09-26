@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { del, get, set } from "idb-keyval";
+import type { PdfSource } from "@/lib/pdf/load";
 import { useEditor } from "./store";
 import type { Asset, EditorObject, FormValue } from "./types";
 
@@ -43,6 +44,12 @@ export async function clearDraft() {
   }
 }
 
+/**
+ * Черновик возможен, только если файл был без пароля: байты зашифрованного PDF
+ * хранятся уже расшифрованными и остались бы в браузере без защиты.
+ */
+const canSaveDraft = (source: PdfSource | null): source is PdfSource => !!source && !source.wasEncrypted;
+
 /** Подписка: сохраняем с задержкой в 1 секунду после последнего изменения. */
 export function useAutosave() {
   useEffect(() => {
@@ -50,12 +57,13 @@ export function useAutosave() {
     let savedSourceId: string | null = null;
 
     const unsub = useEditor.subscribe((s, prev) => {
-      if (!s.source) return;
+      if (!canSaveDraft(s.source)) return;
       if (s.objects === prev.objects && s.formValues === prev.formValues && s.source === prev.source) return;
       clearTimeout(timer);
       timer = setTimeout(async () => {
         const st = useEditor.getState();
-        if (!st.source) return;
+        // Пока ждали, могли открыть другой файл
+        if (!canSaveDraft(st.source)) return;
         try {
           if (savedSourceId !== st.source.id) {
             await set(BYTES_KEY, st.source.bytes);

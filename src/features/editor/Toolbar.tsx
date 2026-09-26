@@ -7,6 +7,7 @@ import {
   ArrowUpRight,
   Circle,
   Eraser,
+  EyeOff,
   FormInput,
   Highlighter,
   ImagePlus,
@@ -41,6 +42,7 @@ export const TOOL_KEYS: Partial<Record<Tool, string>> = {
   arrow: "A",
   highlight: "H",
   whiteout: "W",
+  redact: "X",
   pen: "P",
   sign: "S",
 };
@@ -57,6 +59,7 @@ const TOOL_ICONS: Array<[Tool, React.ComponentType<{ className?: string }>]> = [
   ["arrow", ArrowUpRight],
   ["highlight", Highlighter],
   ["whiteout", Eraser],
+  ["redact", EyeOff],
   ["pen", PenLine],
 ];
 

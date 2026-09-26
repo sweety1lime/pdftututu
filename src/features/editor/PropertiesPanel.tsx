@@ -46,7 +46,9 @@ export function PropertiesPanel() {
             ? "pen"
             : tool === "highlight"
               ? "highlight"
-              : null;
+              : tool === "redact"
+                ? "redact"
+                : null;
 
   const first = selected[0];
 
@@ -145,17 +147,22 @@ export function PropertiesPanel() {
         />
       )}
 
+      {kind === "redact" && <p className="text-sm text-muted-foreground">{t("redactHint")}</p>}
+
       {selected.length > 0 && (
         <>
-          <RangeField
-            label={t("props.opacity")}
-            min={0.05}
-            max={1}
-            step={0.05}
-            percent
-            value={first.opacity}
-            onChange={(opacity) => patch(() => ({ opacity }))}
-          />
+          {/* Полупрозрачная закраска оставила бы текст видимым на картинке */}
+          {kind !== "redact" && (
+            <RangeField
+              label={t("props.opacity")}
+              min={0.05}
+              max={1}
+              step={0.05}
+              percent
+              value={first.opacity}
+              onChange={(opacity) => patch(() => ({ opacity }))}
+            />
+          )}
           <ObjectActions />
         </>
       )}

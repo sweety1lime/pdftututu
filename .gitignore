@@ -40,8 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# копируется из node_modules скриптом scripts/copy-pdfjs.mjs
+# копируются из node_modules скриптами scripts/copy-*.mjs
 /public/pdfjs
+/public/tesseract
 
 # playwright / тестовые артефакты
 /test-results

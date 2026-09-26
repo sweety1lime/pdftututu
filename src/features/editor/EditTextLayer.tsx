@@ -6,7 +6,7 @@ import { newId } from "@/lib/pdf/load";
 import { baselineOffset } from "@/lib/pdf/textLayout";
 import { withTextSize } from "./factory";
 import { beginGesture, useEditor } from "./store";
-import { getTextLines, sampleColors, type TextLine } from "./textLines";
+import { getTextLines, sampleColors, type TextLine } from "@/lib/pdf/textLines";
 import type { BoxObject, TextObject } from "./types";
 
 /**

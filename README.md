@@ -30,11 +30,21 @@ npm run dev
 
 - `npm run build` собрать проект
 - `npm test` прогнать тесты
+- `npm run e2e` прогнать сценарии в браузере (Playwright, нужен `npm run build`; браузер ставится командой `npx playwright install chromium`)
 - `npm run lint` проверить код
+
+Всё это же запускается на GitHub при каждом пуше в main и в пулреквестах.
 
 ## Деплой
 
 Сайт живёт на Vercel. Подключаешь репозиторий, жмёшь Deploy, больше ничего настраивать не надо. Дальше каждый пуш в main обновляет сайт сам.
+
+Необязательные переменные окружения (Settings → Environment Variables):
+
+- `NEXT_PUBLIC_SITE_URL` — свой домен, например `https://example.ru`. Без него адреса в sitemap и превью строятся от `*.vercel.app`.
+- `GOOGLE_SITE_VERIFICATION`, `YANDEX_VERIFICATION` — коды подтверждения из Google Search Console и Яндекс.Вебмастера (способ «мета-тег»).
+
+Статистика: в панели проекта включить Analytics и Speed Insights.
 
 ## На чём сделано
 
@@ -42,7 +52,13 @@ Next.js, TypeScript, Tailwind. Страницы рисует pdf.js, сами ф
 
 Шрифты PT Sans, PT Serif и PT Mono лежат в `public/fonts`. Без них в PDF нельзя писать по-русски.
 
+Файлы pdf.js и модели распознавания для OCR при `npm install` копируются из npm-пакетов в `public/pdfjs` и `public/tesseract`, так что сайт ничего не грузит с чужих CDN.
+
 ## Что пока не очень
 
 - Правка текста работает так: старая строка закрашивается, а сверху пишется новая. Старый текст при этом остаётся в файле. Если нужно убрать его совсем, при скачивании включи «Растрировать страницы с правками текста».
 - XFA-формы не поддерживаются.
+
+## Лицензия
+
+MIT, см. [LICENSE](LICENSE). Шрифты в `public/fonts` распространяются под своей лицензией (SIL Open Font License).

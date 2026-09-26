@@ -3,6 +3,7 @@
 import { PDFDocument } from "@cantoo/pdf-lib";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { canvasToBytes, closePdfjs, openPdfjs, renderPageToNewCanvas } from "./pdfjs";
+import { removeUnreachableObjects, replacePageWithImage } from "./scrub";
 
 /**
  * Превратить страницы в картинки (JPEG). Текст перестаёт быть текстом —
@@ -29,12 +30,12 @@ export async function rasterizePages(
       canvas.width = canvas.height = 0;
 
       const image = await doc.embedJpg(jpeg);
-      // Новая страница того же видимого размера (поворот уже «запечён» в картинку)
-      const fresh = doc.insertPage(i, [viewport.width, viewport.height]);
-      fresh.drawImage(image, { x: 0, y: 0, width: viewport.width, height: viewport.height });
-      doc.removePage(i + 1);
+      // Тот же видимый размер (поворот уже «запечён» в картинку)
+      replacePageWithImage(doc, i, image, viewport.width, viewport.height);
       onProgress?.(k + 1, targets.length);
     }
+    // Иначе старый контент страниц останется в файле
+    removeUnreachableObjects(doc);
     return await doc.save({ useObjectStreams: true });
   } finally {
     closePdfjs(pdf);

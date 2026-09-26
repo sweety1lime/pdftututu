@@ -26,10 +26,14 @@ export function ToolsMenu() {
           <ChevronDown className="size-3.5 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="max-h-[70vh] w-64 overflow-y-auto">
+      {/* На широком экране — две колонки групп, чтобы весь список помещался без прокрутки */}
+      <DropdownMenuContent
+        align="end"
+        className="max-h-[70vh] w-64 overflow-y-auto sm:grid sm:max-h-none sm:w-[34rem] sm:grid-cols-2 sm:gap-x-1"
+      >
         {TOOL_GROUPS.map((group, gi) => (
           <div key={group}>
-            {gi > 0 && <DropdownMenuSeparator />}
+            {gi > 0 && <DropdownMenuSeparator className="sm:hidden" />}
             <DropdownMenuLabel>{t(`home.groups.${group}`)}</DropdownMenuLabel>
             {TOOLS.filter((tool) => tool.group === group).map((tool) => (
               <DropdownMenuItem key={tool.id} asChild>

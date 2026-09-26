@@ -1,8 +1,16 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BadgeCheck, ShieldCheck, UserX } from "lucide-react";
+import { SiteStructuredData } from "@/components/StructuredData";
 import { Link } from "@/i18n/navigation";
+import { pageMetadata } from "@/lib/metadata";
 import { TOOL_GROUPS, TOOLS } from "@/lib/tools";
 import { cn } from "@/lib/utils";
+
+export async function generateMetadata({ params }: PageProps<"/[locale]">) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return pageMetadata({ locale, path: "", title: t("title"), description: t("description") });
+}
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
@@ -17,6 +25,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   return (
     <main className="flex-1">
+      <SiteStructuredData />
       <section className="relative overflow-hidden border-b bg-gradient-to-b from-primary/10 via-primary/5 to-transparent">
         <div className="mx-auto max-w-4xl px-4 py-14 text-center sm:py-20">
           <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl">{t("home.title")}</h1>
@@ -41,7 +50,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
               {t(`home.groups.${group}`)}
             </h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
               {TOOLS.filter((tool) => tool.group === group).map((tool) => (
                 <Link
                   key={tool.id}
