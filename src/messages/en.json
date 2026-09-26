@@ -67,6 +67,7 @@
     "pageNumbers": { "title": "Page numbers", "description": "Number the pages of a PDF at the top or bottom, in any corner" },
     "imagesToPdf": { "title": "Images to PDF", "description": "Turn JPG, PNG and other images into one PDF" },
     "pdfToImages": { "title": "PDF to images", "description": "Save pages as PNG or JPG" },
+    "pdfToWord": { "title": "PDF to Word", "description": "Convert a PDF to an editable Word document (.docx) or plain text" },
     "ocr": { "title": "Recognize text (OCR)", "description": "Make text in scans selectable and searchable" },
     "grayscale": { "title": "Grayscale PDF", "description": "Convert a color PDF to grayscale for printing" },
     "compress": { "title": "Compress PDF", "description": "Reduce file size with minimal quality loss" },
@@ -176,6 +177,19 @@
     "pages": "Pages",
     "pagesAll": "All",
     "pagesRange": "Choose",
+    "action": "Convert"
+  },
+  "pdfToWord": {
+    "format": "Convert to",
+    "formatDocx": "Word (.docx)",
+    "formatDocxHint": "Paragraphs, headings, bold and italic",
+    "formatTxt": "Text (.txt)",
+    "formatTxtHint": "Text only, paragraphs separated by a blank line",
+    "noText": "This looks like a scan: the file has no text, only page images.",
+    "ocr": "Recognize the text first (OCR, English and Russian)",
+    "recognizing": "Recognizing page {page} of {total}…",
+    "limits": "Text, paragraphs, headings, bold and italic are kept. Tables, columns and images are not.",
+    "nothing": "No text found in the file",
     "action": "Convert"
   },
   "grayscale": {
@@ -635,6 +649,24 @@
           {
             "q": "Why does the first run take longer?",
             "a": "Your browser downloads the recognition models from this site once (about 10 MB for English and Russian) and caches them."
+          }
+        ]
+      },
+      "pdfToWord": {
+        "howTo": "How to convert a PDF to Word",
+        "steps": [
+          "Choose a PDF file.",
+          "Pick the format: Word (.docx) or text (.txt). For a scan, turn on text recognition.",
+          "Click “Convert” and open the downloaded file in Word, LibreOffice or Google Docs."
+        ],
+        "faq": [
+          {
+            "q": "Is the formatting kept?",
+            "a": "Text, paragraphs, headings, bold and italic — yes. Tables, columns, images and exact layout — no: you get a plain document that's easy to edit."
+          },
+          {
+            "q": "Can I convert a scan?",
+            "a": "Yes. If the file has no text, the site offers to recognize it first — it just takes a bit longer."
           }
         ]
       },

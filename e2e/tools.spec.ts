@@ -1,3 +1,4 @@
+import { strFromU8, unzipSync } from "fflate";
 import { PDFDict, PDFDocument, PDFName, rgb, StandardFonts } from "@cantoo/pdf-lib";
 import { extractText, fileContains, makePdf, makePng } from "../tests/helpers";
 import { download, dropPdf, expect, pixelOfThumb, test } from "./fixtures";
@@ -212,4 +213,60 @@ test("скрыть навсегда: закрытое исчезает из фа
   const [text] = await extractText(out.bytes);
   expect(text).toContain("VISIBLE");
   expect(text).not.toContain("SECRET");
+});
+
+test("PDF в Word: заголовок, абзацы и жирный, XML корректный", async ({ page }) => {
+  const doc = await PDFDocument.create();
+  const regular = await doc.embedFont(StandardFonts.Helvetica);
+  const bold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const p = doc.addPage([595, 842]);
+  p.drawText("Annual report", { x: 72, y: 760, size: 26, font: bold });
+  p.drawText("First paragraph of the report.", { x: 72, y: 700, size: 12, font: regular });
+  p.drawText("Important bold statement.", { x: 72, y: 660, size: 12, font: bold });
+
+  await page.goto("/ru/pdf-to-word");
+  await dropPdf(page, { name: "report.pdf", bytes: await doc.save() });
+  const out = await download(page, () => page.getByRole("button", { name: "Конвертировать" }).click());
+  expect(out.name).toBe("report.docx");
+
+  const zip = unzipSync(out.bytes);
+  const xml = strFromU8(zip["word/document.xml"]);
+  expect(xml).toContain('<w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t xml:space="preserve">Annual report</w:t>');
+  expect(xml).toContain("First paragraph of the report.");
+  expect(xml).toContain('<w:rPr><w:b/></w:rPr><w:t xml:space="preserve">Important bold statement.</w:t>');
+  for (const [name, data] of Object.entries(zip)) {
+    const errors = await page.evaluate(
+      (text) => new DOMParser().parseFromString(text, "application/xml").getElementsByTagName("parsererror").length,
+      strFromU8(data),
+    );
+    expect(errors, name).toBe(0);
+  }
+});
+
+test("PDF в Word: скан распознаётся, текст попадает в .txt", async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.goto("/ru/pdf-to-word");
+  // «Скан»: картинка с текстом, нарисованная в браузере
+  const dataUrl = await page.evaluate(() => {
+    const c = document.createElement("canvas");
+    c.width = 1400;
+    c.height = 300;
+    const ctx = c.getContext("2d")!;
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.fillStyle = "#000";
+    ctx.font = "bold 90px Arial";
+    ctx.fillText("SCANNED TEXT 42", 40, 180);
+    return c.toDataURL("image/png");
+  });
+  const doc = await PDFDocument.create();
+  const img = await doc.embedPng(Buffer.from(dataUrl.split(",")[1], "base64"));
+  doc.addPage([595, 842]).drawImage(img, { x: 40, y: 600, width: 515, height: 110 });
+
+  await dropPdf(page, { name: "scan.pdf", bytes: await doc.save() });
+  await expect(page.getByText("Похоже, это скан")).toBeVisible();
+  await expect(page.getByLabel(/Сначала распознать текст/)).toBeChecked();
+  await page.getByRole("radio", { name: /Текст \(\.txt\)/ }).click();
+  const out = await download(page, () => page.getByRole("button", { name: "Конвертировать" }).click());
+  expect(Buffer.from(out.bytes).toString("utf8")).toContain("SCANNED TEXT 42");
 });

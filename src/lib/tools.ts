@@ -4,6 +4,7 @@ import {
   EyeOff,
   FileCog,
   FilePenLine,
+  FileType,
   FormInput,
   ImageDown,
   ImagePlus,
@@ -32,6 +33,7 @@ export type ToolId =
   | "pageNumbers"
   | "imagesToPdf"
   | "pdfToImages"
+  | "pdfToWord"
   | "ocr"
   | "grayscale"
   | "compress"
@@ -63,11 +65,12 @@ export const TOOLS: Tool[] = [
   { id: "pageNumbers", href: "/page-numbers", icon: ListOrdered, group: "pages", accent: "text-cyan-600 bg-cyan-500/10 dark:text-cyan-400" },
   { id: "imagesToPdf", href: "/images-to-pdf", icon: ImagePlus, group: "convert", accent: "text-amber-600 bg-amber-500/10 dark:text-amber-400" },
   { id: "pdfToImages", href: "/pdf-to-images", icon: ImageDown, group: "convert", accent: "text-orange-600 bg-orange-500/10 dark:text-orange-400" },
+  { id: "pdfToWord", href: "/pdf-to-word", icon: FileType, group: "convert", accent: "text-blue-600 bg-blue-500/10 dark:text-blue-400" },
   { id: "ocr", href: "/ocr", icon: ScanText, group: "convert", accent: "text-yellow-600 bg-yellow-500/10 dark:text-yellow-400" },
   { id: "grayscale", href: "/grayscale", icon: Contrast, group: "convert", accent: "text-zinc-600 bg-zinc-500/10 dark:text-zinc-400" },
   { id: "compress", href: "/compress", icon: Minimize2, group: "secure", accent: "text-rose-600 bg-rose-500/10 dark:text-rose-400" },
   { id: "protect", href: "/protect", icon: Lock, group: "secure", accent: "text-red-600 bg-red-500/10 dark:text-red-400" },
-  { id: "watermark", href: "/watermark", icon: Stamp, group: "secure", accent: "text-blue-600 bg-blue-500/10 dark:text-blue-400" },
+  { id: "watermark", href: "/watermark", icon: Stamp, group: "secure", accent: "text-purple-600 bg-purple-500/10 dark:text-purple-400" },
   { id: "unlock", href: "/unlock", icon: LockOpen, group: "secure", accent: "text-pink-600 bg-pink-500/10 dark:text-pink-400" },
   { id: "metadata", href: "/metadata", icon: FileCog, group: "secure", accent: "text-slate-600 bg-slate-500/10 dark:text-slate-400" },
 ];
