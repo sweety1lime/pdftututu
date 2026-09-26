@@ -1,29 +1,48 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ShieldCheck } from "lucide-react";
+import { ToolGuide } from "@/components/ToolGuide";
 import { pageMetadata } from "@/lib/metadata";
 import { getTool, type ToolId } from "@/lib/tools";
 import { cn } from "@/lib/utils";
 
-/** Общая «шапка» страницы инструмента: иконка, название, описание. */
+/** Страница инструмента: шапка, сам инструмент, подвал с инструкцией и вопросами. */
 export async function ToolPage({ id, children }: { id: ToolId; children: React.ReactNode }) {
-  const t = await getTranslations();
-  const tool = getTool(id);
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:py-12">
-      <div className="mb-8 flex flex-col items-center gap-3 text-center">
-        <span className={cn("flex size-14 items-center justify-center rounded-2xl", tool.accent)}>
-          <tool.icon className="size-7" />
-        </span>
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{t(`tools.${id}.title`)}</h1>
-        <p className="max-w-xl text-muted-foreground">{t(`tools.${id}.description`)}</p>
-      </div>
+      <ToolHeader id={id} />
       {children}
+      <ToolFooter id={id} />
+    </main>
+  );
+}
+
+/** Иконка, название, описание. */
+export async function ToolHeader({ id }: { id: ToolId }) {
+  const t = await getTranslations("tools");
+  const tool = getTool(id);
+  return (
+    <div className="mb-8 flex flex-col items-center gap-3 text-center">
+      <span className={cn("flex size-14 items-center justify-center rounded-2xl", tool.accent)}>
+        <tool.icon className="size-7" />
+      </span>
+      <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{t(`${id}.title`)}</h1>
+      <p className="max-w-xl text-muted-foreground">{t(`${id}.description`)}</p>
+    </div>
+  );
+}
+
+/** «Файлы остаются у вас» + как пользоваться и частые вопросы. */
+export async function ToolFooter({ id }: { id: ToolId }) {
+  const t = await getTranslations("common");
+  return (
+    <>
       <p className="mt-10 flex items-center justify-center gap-2 text-center text-xs text-muted-foreground">
         <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
-        {t("common.filesStayLocal")}
+        {t("filesStayLocal")}
       </p>
-    </main>
+      <ToolGuide id={id} />
+    </>
   );
 }
 

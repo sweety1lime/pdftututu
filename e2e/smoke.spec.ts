@@ -43,7 +43,7 @@ test("заголовки безопасности и CSP", async ({ request }) =
 test("старые адреса /editor?tool=… ведут на отдельные страницы", async ({ page }) => {
   await page.goto("/ru/editor?tool=sign");
   await expect(page).toHaveURL(/\/ru\/sign(\?|$)/);
-  await expect(page.getByRole("heading", { name: "Подписать PDF" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Подписать PDF", exact: true })).toBeVisible();
   await page.goto("/en/editor?tool=forms");
   await expect(page).toHaveURL(/\/en\/fill-form(\?|$)/);
 });

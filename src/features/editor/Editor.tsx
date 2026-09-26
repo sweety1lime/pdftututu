@@ -25,8 +25,14 @@ import { useEditor } from "./store";
 import { Toolbar, useImagePicker } from "./Toolbar";
 import type { Asset, EditorEntry, ImageObject } from "./types";
 
-/** @param entry — с какой страницы открыт редактор: от неё зависят заголовок и стартовый инструмент */
-export default function Editor({ entry = "editor" }: { entry?: EditorEntry }) {
+interface Props {
+  /** С какой страницы открыт редактор — от неё зависит стартовый инструмент */
+  entry?: EditorEntry;
+  /** Открыт ли документ (страница прячет заголовок и инструкцию) */
+  onOpenChange?: (open: boolean) => void;
+}
+
+export default function Editor({ entry = "editor", onOpenChange }: Props) {
   const t = useTranslations("editor");
   const tRoot = useTranslations();
   const source = useEditor((s) => s.source);
@@ -36,6 +42,8 @@ export default function Editor({ entry = "editor" }: { entry?: EditorEntry }) {
   const [signOpen, setSignOpen] = useState(false);
 
   useAutosave();
+
+  useEffect(() => onOpenChange?.(!!source), [source, onOpenChange]);
 
   useEffect(() => {
     if (!useEditor.getState().source) loadDraft().then(setDraft);
@@ -86,12 +94,10 @@ export default function Editor({ entry = "editor" }: { entry?: EditorEntry }) {
 
   if (!source) {
     return (
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
-        <h1 className="mb-2 text-center text-3xl font-bold tracking-tight">{tRoot(`tools.${entry}.title`)}</h1>
-        <p className="mb-8 text-center text-muted-foreground">{tRoot(`tools.${entry}.description`)}</p>
+      <div className="mx-auto w-full max-w-3xl">
         {draft && <DraftBanner draft={draft} onRestore={() => open({ id: draft.sourceId, name: draft.name, bytes: draft.bytes, wasEncrypted: false }, draft)} onDiscard={() => clearDraft().then(() => setDraft(null))} />}
         <FileDropzone onFiles={openFile} disabled={loading} />
-      </main>
+      </div>
     );
   }
 

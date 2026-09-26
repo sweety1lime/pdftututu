@@ -303,5 +303,262 @@
     "title": "Something broke",
     "description": "An error occurred on this page. Your files were not sent anywhere — please try again.",
     "retry": "Try again"
+  },
+  "guide": {
+    "faqTitle": "FAQ",
+    "common": [
+      {
+        "q": "Is it really free?",
+        "a": "Yes. No sign-up, no subscription, no watermarks and no limit on the number of files."
+      },
+      {
+        "q": "Are my files uploaded anywhere?",
+        "a": "No. Files are processed right in your browser and never leave your device — the site doesn't even have a server to upload them to."
+      },
+      {
+        "q": "Is there a file size limit?",
+        "a": "There is no hard limit; it depends on your device's memory. Files of tens of megabytes work fine, while very large ones (150 MB and up) may run out of browser memory."
+      },
+      {
+        "q": "Does it work on a phone?",
+        "a": "Yes, in any modern browser, with nothing to install. The editor is more comfortable on a computer, where a bigger screen makes precise placement easier."
+      }
+    ],
+    "tools": {
+      "editor": {
+        "howTo": "How to edit a PDF",
+        "steps": [
+          "Open a PDF: drop the file on the page or click “Choose file”.",
+          "Pick a tool in the toolbar: text, image, shapes, highlighter, pen or whiteout.",
+          "Click “Download PDF” to save your changes to a new file."
+        ],
+        "faq": [
+          {
+            "q": "Can I change text that is already in the PDF?",
+            "a": "Yes, with the “Edit text” tool: click a line and type the new text. The old line is covered and the new one is written on top."
+          },
+          {
+            "q": "What if I close the tab by accident?",
+            "a": "The editor keeps a draft in your browser and offers to continue where you left off next time. Drafts are not kept for password-protected files."
+          }
+        ]
+      },
+      "editText": {
+        "howTo": "How to change text in a PDF",
+        "steps": [
+          "Open a PDF file.",
+          "Click the line you want to fix and type the new text.",
+          "Click “Download PDF”."
+        ],
+        "faq": [
+          {
+            "q": "Is the original text removed from the file?",
+            "a": "By default the old line is only covered and stays inside the file. To remove it completely, turn on “Rasterize pages with text edits” when downloading — those pages become images."
+          },
+          {
+            "q": "Why can't I select text in a scan?",
+            "a": "In a scan, text is part of an image. Cover it with the “Whiteout” tool and type new text on top."
+          }
+        ]
+      },
+      "sign": {
+        "howTo": "How to sign a PDF",
+        "steps": [
+          "Open a PDF — the signature window appears right away.",
+          "Draw your signature with a mouse or finger, type your name in a handwriting font, or upload a photo of your signature.",
+          "Drag the signature into place, resize it if needed and download the file."
+        ],
+        "faq": [
+          {
+            "q": "Is this a legally binding electronic signature?",
+            "a": "No, it's an image of your signature — like signing a printout and scanning it. The site does not create certificate-based digital signatures."
+          },
+          {
+            "q": "Can I save my signature for next time?",
+            "a": "Yes, check “Remember this signature on this device”. It is stored only in your browser."
+          }
+        ]
+      },
+      "forms": {
+        "howTo": "How to fill in a PDF form",
+        "steps": [
+          "Open a PDF with fillable fields.",
+          "Click a field and type, tick checkboxes, pick options from lists.",
+          "Click “Download PDF”."
+        ],
+        "faq": [
+          {
+            "q": "What if the file has no fields?",
+            "a": "Then the form is just text with lines. Pick the “Text” tool and type right on the lines."
+          },
+          {
+            "q": "Can I stop the fields from being changed later?",
+            "a": "Yes: in the download options, turn on “Make form fields read-only” — the values become part of the page."
+          }
+        ]
+      },
+      "merge": {
+        "howTo": "How to merge PDFs",
+        "steps": [
+          "Choose or drop several PDF files.",
+          "Put them in order by dragging, or click “By name”.",
+          "Click “Merge” to download a single file."
+        ],
+        "faq": [
+          {
+            "q": "How many files can I merge?",
+            "a": "As many as you like — the only limit is your device's memory."
+          },
+          {
+            "q": "Can I merge only some of the pages?",
+            "a": "Yes, with the “Pages” tool: add several PDFs, delete the pages you don't need and arrange the rest."
+          }
+        ]
+      },
+      "split": {
+        "howTo": "How to split a PDF",
+        "steps": [
+          "Choose a PDF file.",
+          "Enter page ranges (e.g. 1-3, 5, 8-), split every N pages, or into single pages.",
+          "Click “Split”. Several files are downloaded as one ZIP archive."
+        ],
+        "faq": [
+          {
+            "q": "How do I extract several pages into one file?",
+            "a": "Enter them as ranges and turn on “Save all selected pages as a single file”."
+          },
+          {
+            "q": "Does quality get worse?",
+            "a": "No. Pages are copied as they are, without recompression."
+          }
+        ]
+      },
+      "organize": {
+        "howTo": "How to rotate, delete or reorder pages",
+        "steps": [
+          "Open a PDF to see thumbnails of all pages.",
+          "Drag pages around, rotate or delete them, add blank pages or pages from other PDFs.",
+          "Click “Save PDF”."
+        ],
+        "faq": [
+          {
+            "q": "Can I select several pages at once?",
+            "a": "Yes: Shift- or Ctrl-click, or use “Select all”. Rotation and deletion apply to every selected page."
+          },
+          {
+            "q": "Does page quality change?",
+            "a": "No. Pages are copied without recompression, and rotation doesn't affect quality."
+          }
+        ]
+      },
+      "imagesToPdf": {
+        "howTo": "How to make a PDF from images",
+        "steps": [
+          "Choose images: JPG, PNG, WebP, GIF or BMP.",
+          "Put them in order and pick the page size, orientation and margins.",
+          "Click “Create PDF”."
+        ],
+        "faq": [
+          {
+            "q": "How do I turn phone photos of a document into a PDF?",
+            "a": "Take photos of the pages, open this site on your phone and select the photos — you'll get a single PDF."
+          },
+          {
+            "q": "Do images lose quality?",
+            "a": "JPG and PNG are embedded as they are, without recompression. WebP, GIF, BMP and rotated JPGs are re-encoded at high quality."
+          }
+        ]
+      },
+      "pdfToImages": {
+        "howTo": "How to save a PDF as JPG or PNG",
+        "steps": [
+          "Choose a PDF file.",
+          "Pick the format, quality and pages.",
+          "Click “Convert”. Several pages are downloaded as a ZIP archive."
+        ],
+        "faq": [
+          {
+            "q": "Which quality should I choose?",
+            "a": "72 DPI is for viewing on screen, 150 is a good all-rounder, 300 is for printing. Higher DPI means larger files."
+          },
+          {
+            "q": "PNG or JPG?",
+            "a": "PNG is lossless and better for text and diagrams. JPG is much smaller — good for photos and scans."
+          }
+        ]
+      },
+      "ocr": {
+        "howTo": "How to recognize text in a PDF",
+        "steps": [
+          "Choose a scanned PDF.",
+          "Select the text languages: Russian, English, Ukrainian, German, French or Spanish.",
+          "Click “Recognize” and download a searchable PDF or a plain .txt."
+        ],
+        "faq": [
+          {
+            "q": "What changes in the PDF after recognition?",
+            "a": "Nothing visible: invisible text is added on top of the pages, so search and copying start working."
+          },
+          {
+            "q": "Why does the first run take longer?",
+            "a": "Your browser downloads the recognition models from this site once (about 10 MB for English and Russian) and caches them."
+          }
+        ]
+      },
+      "compress": {
+        "howTo": "How to compress a PDF",
+        "steps": [
+          "Choose a PDF file.",
+          "Pick the compression level: light, recommended or maximum.",
+          "Click “Compress” — you'll see how much smaller the file got and can download it."
+        ],
+        "faq": [
+          {
+            "q": "Why did the file barely shrink?",
+            "a": "Compression mostly works on images inside the PDF. A text-only file is already compact and can't be made smaller without losses."
+          },
+          {
+            "q": "What does maximum compression do?",
+            "a": "Pages are turned into lower-resolution images. The file gets much smaller, but text can no longer be selected or searched."
+          }
+        ]
+      },
+      "protect": {
+        "howTo": "How to password-protect a PDF",
+        "steps": [
+          "Choose a PDF file.",
+          "Enter a password twice. Optionally restrict printing, copying and editing.",
+          "Click “Protect PDF” and download the file."
+        ],
+        "faq": [
+          {
+            "q": "How strong is the protection?",
+            "a": "It uses AES-256 encryption, the same standard as Adobe Acrobat. The strength depends on the password itself, so choose a long, non-obvious one."
+          },
+          {
+            "q": "What if I forget the password?",
+            "a": "The file can't be opened — the password isn't stored anywhere and can't be recovered. Keep it somewhere safe."
+          }
+        ]
+      },
+      "unlock": {
+        "howTo": "How to remove a password from a PDF",
+        "steps": [
+          "Choose a protected PDF.",
+          "Enter the password when asked.",
+          "Click “Remove protection” to download a copy without the password."
+        ],
+        "faq": [
+          {
+            "q": "Can I remove a password I don't know?",
+            "a": "No, the site doesn't crack passwords. But if a file only restricts printing or copying and has no password to open it, those restrictions are removed without a password."
+          },
+          {
+            "q": "Does anything change in the document itself?",
+            "a": "No, the content stays the same — only the encryption is removed."
+          }
+        ]
+      }
+    }
   }
 }
