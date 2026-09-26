@@ -42,7 +42,10 @@ export async function extractText(bytes: Uint8Array): Promise<string[]> {
  */
 export async function fileContains(bytes: Uint8Array, text: string): Promise<boolean> {
   const hex = Buffer.from(text, "latin1").toString("hex");
-  const found = (s: string) => s.includes(text) || s.toLowerCase().includes(hex);
+  // Не-латинские строки PDF хранит в UTF-16BE (обычно как hex-строку)
+  const utf16 = Buffer.from(text, "utf16le").swap16();
+  const found = (s: string) =>
+    s.includes(text) || s.toLowerCase().includes(hex) || s.toLowerCase().includes(utf16.toString("hex")) || s.includes(utf16.toString("latin1"));
   if (found(Buffer.from(bytes).toString("latin1"))) return true;
   const doc = await PDFDocument.load(bytes, { updateMetadata: false });
   for (const [, obj] of doc.context.enumerateIndirectObjects()) {

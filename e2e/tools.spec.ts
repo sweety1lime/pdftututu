@@ -147,3 +147,17 @@ test("водяной знак: надпись плиткой на всех ст�
   const text = await extractText(out.bytes);
   expect(text.every((t) => t.includes("ЧЕРНОВИК"))).toBe(true);
 });
+
+test("метаданные: видно автора, «Очистить всё» убирает его из файла", async ({ page }) => {
+  const doc = await PDFDocument.load(await makePdf(1));
+  doc.setAuthor("Иван Петров");
+  doc.setTitle("Договор");
+  await page.goto("/ru/metadata");
+  await dropPdf(page, { name: "doc.pdf", bytes: await doc.save() });
+  await expect(page.getByLabel("Автор")).toHaveValue("Иван Петров");
+  await page.getByRole("button", { name: "Очистить всё" }).click();
+  const out = await download(page, () => page.getByRole("button", { name: "Сохранить PDF" }).click());
+  const clean = await PDFDocument.load(out.bytes);
+  expect(clean.getAuthor()).toBeUndefined();
+  expect(clean.getTitle()).toBeUndefined();
+});

@@ -1,5 +1,6 @@
 import {
   Combine,
+  FileCog,
   FilePenLine,
   FormInput,
   ImageDown,
@@ -32,7 +33,8 @@ export type ToolId =
   | "compress"
   | "protect"
   | "unlock"
-  | "watermark";
+  | "watermark"
+  | "metadata";
 
 export type ToolGroup = "edit" | "pages" | "convert" | "secure";
 
@@ -61,6 +63,7 @@ export const TOOLS: Tool[] = [
   { id: "protect", href: "/protect", icon: Lock, group: "secure", accent: "text-red-600 bg-red-500/10 dark:text-red-400" },
   { id: "watermark", href: "/watermark", icon: Stamp, group: "secure", accent: "text-blue-600 bg-blue-500/10 dark:text-blue-400" },
   { id: "unlock", href: "/unlock", icon: LockOpen, group: "secure", accent: "text-pink-600 bg-pink-500/10 dark:text-pink-400" },
+  { id: "metadata", href: "/metadata", icon: FileCog, group: "secure", accent: "text-slate-600 bg-slate-500/10 dark:text-slate-400" },
 ];
 
 export const TOOL_GROUPS: ToolGroup[] = ["edit", "pages", "convert", "secure"];

@@ -70,7 +70,8 @@
     "compress": { "title": "Compress PDF", "description": "Reduce file size with minimal quality loss" },
     "protect": { "title": "Add password", "description": "Protect a PDF with a password and restrict permissions (AES-256)" },
     "watermark": { "title": "Watermark", "description": "Add text or a logo on top of PDF pages" },
-    "unlock": { "title": "Remove password", "description": "Remove the password from a PDF if you know it" }
+    "unlock": { "title": "Remove password", "description": "Remove the password from a PDF if you know it" },
+    "metadata": { "title": "PDF metadata", "description": "View, edit or remove the author, title and other hidden file properties" }
   },
   "errors": {
     "notPdf": "“{name}” doesn't look like a PDF",
@@ -232,6 +233,23 @@
     "notEncrypted": "This file is not password-protected",
     "action": "Remove protection",
     "unlocked": "Protection removed"
+  },
+  "metadata": {
+    "fields": {
+      "title": "Title",
+      "author": "Author",
+      "subject": "Subject",
+      "keywords": "Keywords",
+      "creator": "Created with",
+      "producer": "PDF made with"
+    },
+    "created": "Created",
+    "modified": "Modified",
+    "hiddenData": "The file contains hidden service data (XMP or data from the app it was made in). It will be removed when you save.",
+    "clearAll": "Clear all",
+    "clearAllHint": "Remove all properties, dates and hidden data",
+    "clearAllReady": "All properties, dates and hidden data will be removed when you save",
+    "action": "Save PDF"
   },
   "ocr": {
     "languages": "Text language",
@@ -552,6 +570,24 @@
           {
             "q": "PNG or JPG?",
             "a": "PNG is lossless and better for text and diagrams. JPG is much smaller — good for photos and scans."
+          }
+        ]
+      },
+      "metadata": {
+        "howTo": "How to edit or remove PDF metadata",
+        "steps": [
+          "Choose a PDF file to see its properties: title, author, app, dates.",
+          "Edit the fields you need or click “Clear all”.",
+          "Click “Save PDF” and download the file."
+        ],
+        "faq": [
+          {
+            "q": "Why remove metadata?",
+            "a": "File properties often keep the author's name, company, app and dates. It's a good idea to remove them before sending a document to others."
+          },
+          {
+            "q": "Does the document content change?",
+            "a": "No, the pages stay the same — only the file properties change."
           }
         ]
       },
