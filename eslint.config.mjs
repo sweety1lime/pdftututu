@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Копия pdf.js из node_modules (scripts/copy-pdfjs.mjs)
+    "public/pdfjs/**",
   ]),
 ]);
 
