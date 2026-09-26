@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { degrees, PDFDocument, StandardFonts } from "@cantoo/pdf-lib";
+import { deflateSync } from "node:zlib";
+import { decodePDFRawStream, degrees, PDFDocument, PDFRawStream, StandardFonts } from "@cantoo/pdf-lib";
 import { setFontLoader } from "@/lib/pdf/fonts";
 
 /** В Node шрифты читаем с диска, а не через fetch. */
@@ -32,4 +33,61 @@ export async function extractText(bytes: Uint8Array): Promise<string[]> {
   }
   await doc.loadingTask.destroy();
   return out;
+}
+
+/**
+ * Встречается ли строка где-нибудь в файле — в распакованных потоках или строковых
+ * объектах, обычных или hex. Так её нашёл бы любой, кто полезет внутрь PDF.
+ */
+export async function fileContains(bytes: Uint8Array, text: string): Promise<boolean> {
+  const hex = Buffer.from(text, "latin1").toString("hex");
+  const found = (s: string) => s.includes(text) || s.toLowerCase().includes(hex);
+  if (found(Buffer.from(bytes).toString("latin1"))) return true;
+  const doc = await PDFDocument.load(bytes, { updateMetadata: false });
+  for (const [, obj] of doc.context.enumerateIndirectObjects()) {
+    let s = obj.toString();
+    if (obj instanceof PDFRawStream) {
+      try {
+        s = Buffer.from(decodePDFRawStream(obj).decode()).toString("latin1");
+      } catch {
+        s = Buffer.from(obj.contents).toString("latin1");
+      }
+    }
+    if (found(s)) return true;
+  }
+  return false;
+}
+
+/** Серая картинка PNG w×h. */
+export function makePng(width = 2, height = 2): Uint8Array {
+  const crc32 = (buf: Uint8Array) => {
+    let c = ~0;
+    for (const b of buf) {
+      c ^= b;
+      for (let k = 0; k < 8; k++) c = (c >>> 1) ^ (0xedb88320 & -(c & 1));
+    }
+    return ~c >>> 0;
+  };
+  const chunk = (type: string, data: Buffer) => {
+    const body = Buffer.concat([Buffer.from(type, "latin1"), data]);
+    const out = Buffer.alloc(body.length + 8);
+    out.writeUInt32BE(data.length, 0);
+    body.copy(out, 4);
+    out.writeUInt32BE(crc32(body), body.length + 4);
+    return out;
+  };
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = 8; // бит на канал
+  ihdr[9] = 2; // RGB
+  // Каждая строка: байт фильтра (0) + пиксели
+  const row = Buffer.concat([Buffer.from([0]), Buffer.alloc(width * 3, 0x80)]);
+  const raw = Buffer.concat(Array.from({ length: height }, () => row));
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk("IHDR", ihdr),
+    chunk("IDAT", deflateSync(raw)),
+    chunk("IEND", Buffer.alloc(0)),
+  ]);
 }
