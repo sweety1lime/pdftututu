@@ -179,3 +179,37 @@ test("чёрно-белый: красное становится серым пр
   expect(Math.abs(after.g - after.b)).toBeLessThan(10);
   expect(after.r).toBeLessThan(200); // серый, а не белый — прямоугольник на месте
 });
+
+test("скрыть навсегда: закрытое исчезает из файла, остальное ищется через OCR", async ({ page }) => {
+  test.setTimeout(120_000);
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const p = doc.addPage([595, 842]);
+  p.drawText("SECRET 1234", { x: 60, y: 760, size: 28, font });
+  p.drawText("VISIBLE 5678", { x: 60, y: 500, size: 28, font });
+  doc.setAuthor("Ivan Petrov");
+  const src = await doc.save();
+
+  await page.goto("/ru/redact");
+  await dropPdf(page, { name: "passport.pdf", bytes: src });
+  await expect(page.getByRole("button", { name: "Скрыть навсегда (X)" })).toHaveAttribute("aria-pressed", "true");
+
+  // Обводим верхнюю строку: в координатах страницы это примерно x 50–300, y 40–100 (сверху)
+  const box = (await page.locator('[data-page-index="0"]').boundingBox())!;
+  const k = box.width / 595;
+  await page.mouse.move(box.x + 50 * k, box.y + 40 * k);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 300 * k, box.y + 100 * k, { steps: 5 });
+  await page.mouse.up();
+
+  await page.getByRole("button", { name: "Параметры сохранения" }).click();
+  await page.getByLabel(/Вернуть поиск по тексту/).check();
+  await page.keyboard.press("Escape");
+  const out = await download(page, () => page.getByRole("button", { name: "Скачать PDF" }).click());
+
+  expect(await fileContains(out.bytes, "SECRET")).toBe(false);
+  expect(await fileContains(out.bytes, "Ivan Petrov")).toBe(false);
+  const [text] = await extractText(out.bytes);
+  expect(text).toContain("VISIBLE");
+  expect(text).not.toContain("SECRET");
+});

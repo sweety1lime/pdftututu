@@ -11,7 +11,7 @@ import { makeBox, makeStroke, makeText, ONE_SHOT_TOOLS, scaleObject } from "./fa
 import { beginGesture, endGesture, useEditor } from "./store";
 import type { EditorObject, StrokeObject, TextObject } from "./types";
 
-const DRAW_TOOLS = new Set(["rect", "ellipse", "highlight", "whiteout", "line", "arrow", "pen"]);
+const DRAW_TOOLS = new Set(["rect", "ellipse", "highlight", "whiteout", "redact", "line", "arrow", "pen"]);
 const CORNERS = ["top-left", "top-right", "bottom-left", "bottom-right"];
 const ALL_ANCHORS = [...CORNERS, "top-center", "bottom-center", "middle-left", "middle-right"];
 
@@ -143,7 +143,7 @@ export function ObjectsLayer({ pageIndex, width, height, zoom, fontsVersion }: P
       if (cur.kind === "box" && obj.w < 3 && obj.h < 3) {
         // Просто клик — объект стандартного размера
         const size =
-          obj.type === "highlight" ? { w: 140, h: 16 } : obj.type === "whiteout" ? { w: 120, h: 24 } : { w: 120, h: 80 };
+          obj.type === "highlight" ? { w: 140, h: 16 } : obj.type === "whiteout" || obj.type === "redact" ? { w: 120, h: 24 } : { w: 120, h: 80 };
         obj = { ...obj, x: cur.start.x - size.w / 2, y: cur.start.y - size.h / 2, ...size };
       }
       if (obj.type === "line" || obj.type === "arrow") {
@@ -266,6 +266,11 @@ export function ObjectsLayer({ pageIndex, width, height, zoom, fontsVersion }: P
 
 const ObjectShape = memo(function ObjectShape({ o }: { o: EditorObject }) {
   switch (o.type) {
+    case "redact":
+      // Красная пунктирная рамка — только в редакторе, чтобы отличать от обычного прямоугольника
+      return (
+        <Rect width={o.w} height={o.h} fill="#000000" stroke="#ef4444" strokeWidth={1.5} dash={[6, 4]} strokeScaleEnabled={false} />
+      );
     case "rect":
     case "whiteout":
     case "highlight":

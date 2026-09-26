@@ -67,7 +67,7 @@ export default function Editor({ entry = "editor", onOpenChange }: Props) {
         const s = useEditor.getState();
         if (entry === "sign") setSignOpen(true);
         else if (entry === "forms" && !doc.widgets.length) toast.info(t("formsNone"));
-        else if (entry === "forms" || entry === "editText") s.setTool(entry);
+        else if (entry === "forms" || entry === "editText" || entry === "redact") s.setTool(entry);
         setDraft(null);
       } catch (e) {
         showError(e);

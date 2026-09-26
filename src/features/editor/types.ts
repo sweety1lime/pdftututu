@@ -37,7 +37,8 @@ export interface ImageObject extends BaseObject {
 }
 
 export interface BoxObject extends BaseObject {
-  type: "rect" | "ellipse" | "highlight" | "whiteout";
+  /** redact — «скрыть навсегда»: всегда чёрный и непрозрачный, страница при сохранении растрируется */
+  type: "rect" | "ellipse" | "highlight" | "whiteout" | "redact";
   fill: string | null;
   stroke: string | null;
   strokeWidth: number;
@@ -77,12 +78,13 @@ export type Tool =
   | "arrow"
   | "highlight"
   | "whiteout"
+  | "redact"
   | "pen"
   | "sign"
   | "forms";
 
 /** Страницы сайта, которые открывают редактор (у каждой свой адрес в поиске) */
-export type EditorEntry = "editor" | "editText" | "sign" | "forms";
+export type EditorEntry = "editor" | "editText" | "sign" | "forms" | "redact";
 
 export interface PageInfo extends PageGeometry {
   /** Размер в координатах вида (с учётом поворота) */

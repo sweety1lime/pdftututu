@@ -75,6 +75,10 @@ async function drawObject(
   const opacity = obj.opacity;
 
   switch (obj.type) {
+    case "redact":
+      // Всегда чёрный и непрозрачный — страницу потом растрируют, и под закраской не должно быть видно ничего
+      page.drawRectangle({ x: 0, y: 0, width: obj.w, height: obj.h, color: hexToRgb("#000000") });
+      break;
     case "rect":
     case "whiteout":
     case "highlight": {

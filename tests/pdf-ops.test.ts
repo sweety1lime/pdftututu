@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { PDFDocument } from "@cantoo/pdf-lib";
+import { decodePDFRawStream, PDFArray, PDFDict, PDFDocument, PDFName, PDFRawStream } from "@cantoo/pdf-lib";
 import { buildFromItems, mergePdfs, splitPdf } from "@/lib/pdf/pages";
 import { protectPdf } from "@/lib/pdf/security";
 import { decryptWithPassword } from "@/lib/pdf/load";
@@ -211,3 +211,33 @@ describe("OCR-слой", () => {
     expect(text[0]).toContain("слово");
   });
 });
+
+describe("скрыть навсегда", () => {
+  it("закраска всегда чёрная и непрозрачная, даже если у объекта задана прозрачность", async () => {
+    const out = await exportEditedPdf({
+      bytes: await makePdf(1),
+      pages: [A4],
+      objects: [
+        { id: "x", type: "redact", page: 0, x: 40, y: 40, w: 200, h: 40, rotation: 0, opacity: 0.2, fill: "#ff0000", stroke: null, strokeWidth: 0 },
+      ],
+      formValues: {},
+      assets: {},
+    });
+    const res = (await PDFDocument.load(out)).getPage(0).node.Resources()!;
+    // Прозрачность рисуется через ExtGState с ca/CA — таких быть не должно (пустой словарь pdf-lib создаёт сам)
+    const gs = res.lookupMaybe(PDFName.of("ExtGState"), PDFDict);
+    const alphas = (gs?.keys() ?? []).flatMap((k) => ["ca", "CA"].map((a) => gs!.lookup(k, PDFDict).get(PDFName.of(a))));
+    expect(alphas.filter(Boolean)).toEqual([]);
+    expect(await contentText(out)).toMatch(/0 0 0 rg/);
+  });
+});
+
+async function contentText(bytes: Uint8Array) {
+  const doc = await PDFDocument.load(bytes);
+  const contents = doc.getPage(0).node.Contents();
+  const refs = contents instanceof PDFArray ? contents.asArray() : [];
+  return refs
+    .map((r) => doc.context.lookup(r))
+    .map((s) => (s instanceof PDFRawStream ? Buffer.from(decodePDFRawStream(s).decode()).toString("latin1") : ""))
+    .join("\n");
+}

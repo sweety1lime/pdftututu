@@ -60,6 +60,7 @@
     "editText": { "title": "Edit text", "description": "Fix a typo or replace words in an existing PDF" },
     "sign": { "title": "Sign PDF", "description": "Draw your signature, type it or upload an image" },
     "forms": { "title": "Fill form", "description": "Fill in form fields, tick checkboxes and save" },
+    "redact": { "title": "Redact PDF", "description": "Black out passport numbers, amounts or names so they can't be recovered" },
     "merge": { "title": "Merge PDF", "description": "Combine several files into one, in any order" },
     "split": { "title": "Split PDF", "description": "Extract pages or split a document into parts" },
     "organize": { "title": "Organize pages", "description": "Rotate, delete, reorder and insert pages" },
@@ -282,6 +283,7 @@
       "arrow": "Arrow",
       "highlight": "Highlight",
       "whiteout": "Whiteout",
+      "redact": "Redact",
       "pen": "Pen",
       "sign": "Signature",
       "forms": "Form"
@@ -326,7 +328,9 @@
       "options": "Save options",
       "rasterize": "Rasterize pages with text edits",
       "rasterizeHint": "Covered text is removed from the file completely (it can't be copied), but those pages become images.",
-      "flattenForms": "Make form fields read-only"
+      "flattenForms": "Make form fields read-only",
+      "redactNote": "Pages with redactions become images: the covered content is removed from the file completely. File properties (author, title) are removed too.",
+      "redactOcr": "Keep text searchable on these pages (recognition, English and Russian)"
     },
     "draft": {
       "title": "Unsaved draft found",
@@ -336,6 +340,7 @@
     },
     "newText": "Text",
     "editTextHint": "Click a line of text in the document to edit it",
+    "redactHint": "Cover what needs to be hidden. On download these pages become images, so the covered content is removed from the file completely rather than just hidden under a black box.",
     "editTextNone": "No text found on this page (it may be a scan — try OCR)",
     "formsHint": "Form fields are highlighted — just fill them in",
     "formsNone": "This document has no form fields",
@@ -468,6 +473,24 @@
           {
             "q": "Can I stop the fields from being changed later?",
             "a": "Yes: in the download options, turn on “Make form fields read-only” — the values become part of the page."
+          }
+        ]
+      },
+      "redact": {
+        "howTo": "How to permanently redact a PDF",
+        "steps": [
+          "Open a PDF — the “Redact” tool is turned on right away.",
+          "Draw boxes over everything to hide: document numbers, amounts, signatures, names.",
+          "Click “Download PDF” — those pages become images and the covered content is removed from the file."
+        ],
+        "faq": [
+          {
+            "q": "How is this different from a black box?",
+            "a": "A regular box only hides text: it can still be selected and copied from under it. Here a page with redactions becomes an image, and everything that was on it — text, links, comments, form fields — is removed from the file. File properties (author, title) are removed too."
+          },
+          {
+            "q": "What should I check before sending?",
+            "a": "Bookmarks (outline) and attached files stay as they were — if the hidden content appears there, remove it separately. And don't forget other pages with the same data."
           }
         ]
       },

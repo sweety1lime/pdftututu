@@ -9,6 +9,7 @@ import { Checkbox, Label } from "@/components/ui/misc";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/menu";
 import { baseName, downloadBlob } from "@/lib/download";
 import { rasterizePages } from "@/lib/pdf/rasterize";
+import { applyRedactions } from "@/lib/pdf/redact";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { exportEditedPdf } from "./exportPdf";
 import { useEditor } from "./store";
@@ -20,8 +21,10 @@ export function ExportButton() {
   const [busy, setBusy] = useState(false);
   const [rasterize, setRasterize] = useState(false);
   const [flatten, setFlatten] = useState(false);
+  const [redactOcr, setRedactOcr] = useState(false);
   const hasTextEdits = useEditor((s) => s.objects.some((o) => o.type === "whiteout" && o.coversText));
   const hasForms = useEditor((s) => s.widgets.length > 0);
+  const hasRedactions = useEditor((s) => s.objects.some((o) => o.type === "redact"));
 
   const run = async () => {
     const s = useEditor.getState();
@@ -39,11 +42,18 @@ export function ExportButton() {
         assets: st.assets,
         flattenForms: flatten,
       });
-      if (rasterize && hasTextEdits) {
-        const pages = new Set(st.objects.filter((o) => o.type === "whiteout" && o.coversText).map((o) => o.page));
-        out = await rasterizePages(out, { dpi: 200, quality: 0.85, only: pages });
+      const pagesWith = (test: (o: (typeof st.objects)[number]) => boolean) =>
+        new Set(st.objects.filter(test).map((o) => o.page));
+      const redacted = pagesWith((o) => o.type === "redact");
+      const textEdited = rasterize && hasTextEdits ? pagesWith((o) => o.type === "whiteout" && !!o.coversText) : new Set<number>();
+      if (redacted.size) {
+        out = await applyRedactions(out, new Set([...redacted, ...textEdited]), {
+          ocrLanguages: redactOcr ? ["rus", "eng"] : undefined,
+        });
+      } else if (textEdited.size) {
+        out = await rasterizePages(out, { dpi: 200, quality: 0.85, only: textEdited });
       }
-      downloadBlob(out, `${baseName(st.source!.name)}_edited.pdf`);
+      downloadBlob(out, `${baseName(st.source!.name)}_${redacted.size ? "redacted" : "edited"}.pdf`);
       toast.success(tc("done"));
     } catch (e) {
       showError(e);
@@ -52,7 +62,7 @@ export function ExportButton() {
     }
   };
 
-  const hasOptions = hasTextEdits || hasForms;
+  const hasOptions = hasTextEdits || hasForms || hasRedactions;
 
   return (
     <div className="flex">
@@ -69,6 +79,15 @@ export function ExportButton() {
           </PopoverTrigger>
           <PopoverContent align="end" className="w-80 space-y-4">
             <p className="text-sm font-medium">{t("options")}</p>
+            {hasRedactions && (
+              <div className="space-y-1.5">
+                <p className="text-xs text-muted-foreground">{t("redactNote")}</p>
+                <Label className="font-normal">
+                  <Checkbox checked={redactOcr} onCheckedChange={(v) => setRedactOcr(v === true)} />
+                  {t("redactOcr")}
+                </Label>
+              </div>
+            )}
             {hasTextEdits && (
               <div className="space-y-1.5">
                 <Label className="font-normal">
