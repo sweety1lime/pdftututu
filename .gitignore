@@ -48,3 +48,6 @@ next-env.d.ts
 /test-results
 /playwright-report
 /tests/fixtures/out
+
+# личный план, в репозиторий не кладём
+/ROADMAP.md
