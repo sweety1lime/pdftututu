@@ -47,3 +47,15 @@ test("старые адреса /editor?tool=… ведут на отдельн�
   await page.goto("/en/editor?tool=forms");
   await expect(page).toHaveURL(/\/en\/fill-form(\?|$)/);
 });
+
+test("разметка schema.org совпадает с вопросами на странице", async ({ page }) => {
+  await page.goto("/ru/merge");
+  const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
+  const graph = blocks.flatMap((b) => JSON.parse(b)["@graph"] ?? []);
+  const types = graph.map((n: { "@type": string }) => n["@type"]);
+  expect(types).toEqual(expect.arrayContaining(["WebApplication", "FAQPage", "BreadcrumbList"]));
+
+  const faq = graph.find((n: { "@type": string }) => n["@type"] === "FAQPage");
+  const questions = faq.mainEntity.map((q: { name: string }) => q.name);
+  await expect(page.locator("details summary")).toHaveText(questions);
+});

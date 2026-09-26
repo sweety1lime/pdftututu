@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ShieldCheck } from "lucide-react";
+import { RelatedTools } from "@/components/RelatedTools";
+import { ToolStructuredData } from "@/components/StructuredData";
 import { ToolGuide } from "@/components/ToolGuide";
 import { pageMetadata } from "@/lib/metadata";
 import { getTool, type ToolId } from "@/lib/tools";
@@ -32,7 +34,7 @@ export async function ToolHeader({ id }: { id: ToolId }) {
   );
 }
 
-/** «Файлы остаются у вас» + как пользоваться и частые вопросы. */
+/** «Файлы остаются у вас», как пользоваться, частые вопросы, другие инструменты. */
 export async function ToolFooter({ id }: { id: ToolId }) {
   const t = await getTranslations("common");
   return (
@@ -42,6 +44,8 @@ export async function ToolFooter({ id }: { id: ToolId }) {
         {t("filesStayLocal")}
       </p>
       <ToolGuide id={id} />
+      <RelatedTools id={id} />
+      <ToolStructuredData id={id} />
     </>
   );
 }

@@ -64,3 +64,11 @@ export function getTool(id: ToolId): Tool {
   if (!tool) throw new Error(`Unknown tool: ${id}`);
   return tool;
 }
+
+/** Что ещё показать на странице инструмента: сначала из той же группы, потом популярные. */
+export function relatedTools(id: ToolId, count = 4): Tool[] {
+  const tool = getTool(id);
+  const popular: ToolId[] = ["editor", "merge", "compress", "sign", "split"];
+  const candidates = [...TOOLS.filter((t) => t.group === tool.group), ...popular.map(getTool)];
+  return [...new Set(candidates)].filter((t) => t.id !== id).slice(0, count);
+}

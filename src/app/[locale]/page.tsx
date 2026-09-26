@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BadgeCheck, ShieldCheck, UserX } from "lucide-react";
+import { SiteStructuredData } from "@/components/StructuredData";
 import { Link } from "@/i18n/navigation";
 import { pageMetadata } from "@/lib/metadata";
 import { TOOL_GROUPS, TOOLS } from "@/lib/tools";
@@ -24,6 +25,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   return (
     <main className="flex-1">
+      <SiteStructuredData />
       <section className="relative overflow-hidden border-b bg-gradient-to-b from-primary/10 via-primary/5 to-transparent">
         <div className="mx-auto max-w-4xl px-4 py-14 text-center sm:py-20">
           <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl">{t("home.title")}</h1>
