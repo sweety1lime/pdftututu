@@ -39,6 +39,13 @@ npm run dev
 
 Сайт живёт на Vercel. Подключаешь репозиторий, жмёшь Deploy, больше ничего настраивать не надо. Дальше каждый пуш в main обновляет сайт сам.
 
+Необязательные переменные окружения (Settings → Environment Variables):
+
+- `NEXT_PUBLIC_SITE_URL` — свой домен, например `https://example.ru`. Без него адреса в sitemap и превью строятся от `*.vercel.app`.
+- `GOOGLE_SITE_VERIFICATION`, `YANDEX_VERIFICATION` — коды подтверждения из Google Search Console и Яндекс.Вебмастера (способ «мета-тег»).
+
+Статистика: в панели проекта включить Analytics и Speed Insights.
+
 ## На чём сделано
 
 Next.js, TypeScript, Tailwind. Страницы рисует pdf.js, сами файлы меняет pdf-lib (форк @cantoo/pdf-lib, в нём есть шифрование). Редактор на Konva, OCR через tesseract.js.

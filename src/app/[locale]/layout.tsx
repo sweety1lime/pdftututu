@@ -26,6 +26,11 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     title: { default: t("title"), template: `%s · ${t("siteName")}` },
     description: t("description"),
     applicationName: t("siteName"),
+    // Подтверждение прав в Google Search Console и Яндекс.Вебмастере: коды из их панелей
+    verification: {
+      google: process.env.GOOGLE_SITE_VERIFICATION,
+      yandex: process.env.YANDEX_VERIFICATION,
+    },
   };
 }
 
