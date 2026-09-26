@@ -1,6 +1,6 @@
-import { PDFDict, PDFDocument, PDFName, StandardFonts } from "@cantoo/pdf-lib";
+import { PDFDict, PDFDocument, PDFName, rgb, StandardFonts } from "@cantoo/pdf-lib";
 import { extractText, fileContains, makePdf, makePng } from "../tests/helpers";
-import { download, dropPdf, expect, test } from "./fixtures";
+import { download, dropPdf, expect, pixelOfThumb, test } from "./fixtures";
 
 test("объединение двух файлов", async ({ page }) => {
   await page.goto("/ru/merge");
@@ -160,4 +160,22 @@ test("метаданные: видно автора, «Очистить всё»
   const clean = await PDFDocument.load(out.bytes);
   expect(clean.getAuthor()).toBeUndefined();
   expect(clean.getTitle()).toBeUndefined();
+});
+
+test("чёрно-белый: красное становится серым при отрисовке", async ({ page }) => {
+  const doc = await PDFDocument.create();
+  doc.addPage([595, 842]).drawRectangle({ x: 50, y: 50, width: 200, height: 100, color: rgb(1, 0, 0) });
+  const src = await doc.save();
+  // Точка внутри прямоугольника: x ≈ 25% ширины, y ≈ 88% высоты (сверху)
+  const before = await pixelOfThumb(page, src, 0.25, 0.88);
+  expect(before.r).toBeGreaterThan(200);
+  expect(before.g).toBeLessThan(80);
+
+  await page.goto("/ru/grayscale");
+  await dropPdf(page, { name: "color.pdf", bytes: src });
+  const out = await download(page, () => page.getByRole("button", { name: "Сделать чёрно-белым" }).click());
+  const after = await pixelOfThumb(page, out.bytes, 0.25, 0.88);
+  expect(Math.abs(after.r - after.g)).toBeLessThan(10);
+  expect(Math.abs(after.g - after.b)).toBeLessThan(10);
+  expect(after.r).toBeLessThan(200); // серый, а не белый — прямоугольник на месте
 });

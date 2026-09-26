@@ -33,3 +33,26 @@ export async function download(page: Page, click: () => Promise<void>) {
   const [file] = await Promise.all([page.waitForEvent("download"), click()]);
   return { name: file.suggestedFilename(), bytes: new Uint8Array(await readFile(await file.path())) };
 }
+
+/**
+ * Цвет миниатюры страницы (её рисует pdf.js) в точке (fx, fy) — доли ширины и высоты.
+ * Миниатюры есть, например, на странице «Разделить PDF».
+ */
+export async function pixelOfThumb(page: Page, pdf: Uint8Array, fx: number, fy: number) {
+  await page.goto("/ru/split");
+  await dropPdf(page, { name: "check.pdf", bytes: pdf });
+  const img = page.locator('img[src^="blob:"]').last();
+  await expect(img).toBeVisible();
+  return img.evaluate(
+    (el: HTMLImageElement, [x, y]) => {
+      const c = document.createElement("canvas");
+      c.width = el.naturalWidth;
+      c.height = el.naturalHeight;
+      const ctx = c.getContext("2d")!;
+      ctx.drawImage(el, 0, 0);
+      const [r, g, b] = ctx.getImageData(Math.round(x * c.width), Math.round(y * c.height), 1, 1).data;
+      return { r, g, b };
+    },
+    [fx, fy],
+  );
+}

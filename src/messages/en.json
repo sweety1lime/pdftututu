@@ -67,6 +67,7 @@
     "imagesToPdf": { "title": "Images to PDF", "description": "Turn JPG, PNG and other images into one PDF" },
     "pdfToImages": { "title": "PDF to images", "description": "Save pages as PNG or JPG" },
     "ocr": { "title": "Recognize text (OCR)", "description": "Make text in scans selectable and searchable" },
+    "grayscale": { "title": "Grayscale PDF", "description": "Convert a color PDF to grayscale for printing" },
     "compress": { "title": "Compress PDF", "description": "Reduce file size with minimal quality loss" },
     "protect": { "title": "Add password", "description": "Protect a PDF with a password and restrict permissions (AES-256)" },
     "watermark": { "title": "Watermark", "description": "Add text or a logo on top of PDF pages" },
@@ -175,6 +176,11 @@
     "pagesAll": "All",
     "pagesRange": "Choose",
     "action": "Convert"
+  },
+  "grayscale": {
+    "before": "Before",
+    "after": "After",
+    "action": "Convert to grayscale"
   },
   "compress": {
     "level": "Compression level",
@@ -606,6 +612,24 @@
           {
             "q": "Why does the first run take longer?",
             "a": "Your browser downloads the recognition models from this site once (about 10 MB for English and Russian) and caches them."
+          }
+        ]
+      },
+      "grayscale": {
+        "howTo": "How to make a PDF black and white",
+        "steps": [
+          "Choose a color PDF file.",
+          "Check the preview — pages will turn grayscale.",
+          "Click “Convert to grayscale” and download the file."
+        ],
+        "faq": [
+          {
+            "q": "Will the text stay text?",
+            "a": "Yes. Pages aren't turned into images: text can still be selected and searched, and the file size barely changes."
+          },
+          {
+            "q": "Does everything turn gray?",
+            "a": "All page content does. Comments added on top (highlights, notes) keep their color."
           }
         ]
       },

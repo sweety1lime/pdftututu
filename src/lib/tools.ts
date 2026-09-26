@@ -1,5 +1,6 @@
 import {
   Combine,
+  Contrast,
   FileCog,
   FilePenLine,
   FormInput,
@@ -30,6 +31,7 @@ export type ToolId =
   | "imagesToPdf"
   | "pdfToImages"
   | "ocr"
+  | "grayscale"
   | "compress"
   | "protect"
   | "unlock"
@@ -59,6 +61,7 @@ export const TOOLS: Tool[] = [
   { id: "imagesToPdf", href: "/images-to-pdf", icon: ImagePlus, group: "convert", accent: "text-amber-600 bg-amber-500/10 dark:text-amber-400" },
   { id: "pdfToImages", href: "/pdf-to-images", icon: ImageDown, group: "convert", accent: "text-orange-600 bg-orange-500/10 dark:text-orange-400" },
   { id: "ocr", href: "/ocr", icon: ScanText, group: "convert", accent: "text-yellow-600 bg-yellow-500/10 dark:text-yellow-400" },
+  { id: "grayscale", href: "/grayscale", icon: Contrast, group: "convert", accent: "text-zinc-600 bg-zinc-500/10 dark:text-zinc-400" },
   { id: "compress", href: "/compress", icon: Minimize2, group: "secure", accent: "text-rose-600 bg-rose-500/10 dark:text-rose-400" },
   { id: "protect", href: "/protect", icon: Lock, group: "secure", accent: "text-red-600 bg-red-500/10 dark:text-red-400" },
   { id: "watermark", href: "/watermark", icon: Stamp, group: "secure", accent: "text-blue-600 bg-blue-500/10 dark:text-blue-400" },
