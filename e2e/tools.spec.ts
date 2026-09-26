@@ -33,13 +33,27 @@ test("пароль: поставить и снять", async ({ page }) => {
   expect(doc.getPageCount()).toBe(1);
 });
 
-test("максимальное сжатие не оставляет в файле исходный текст", async ({ page }) => {
-  // «Скан»: несжимаемая картинка на всю страницу и текст поверх
+/** «Скан»: несжимаемая картинка на всю страницу и текст поверх. */
+async function makeScan() {
   const doc = await PDFDocument.create();
   const p = doc.addPage([595, 842]);
   p.drawImage(await doc.embedPng(makePng(1200, 1200, { noise: true })), { x: 0, y: 0, width: 595, height: 842 });
   p.drawText("SECRET TEXT", { x: 50, y: 780, size: 24, font: await doc.embedFont(StandardFonts.Helvetica) });
-  const src = await doc.save();
+  return doc.save();
+}
+
+test("обычное сжатие (в воркере) уменьшает файл и сохраняет текст", async ({ page }) => {
+  const src = await makeScan();
+  await page.goto("/ru/compress");
+  await dropPdf(page, { name: "scan.pdf", bytes: src });
+  await page.getByRole("button", { name: "Сжать", exact: true }).click();
+  const out = await download(page, () => page.getByRole("button", { name: "Скачать", exact: true }).click());
+  expect(out.bytes.length).toBeLessThan(src.length / 2);
+  expect((await extractText(out.bytes))[0]).toContain("SECRET TEXT");
+});
+
+test("максимальное сжатие не оставляет в файле исходный текст", async ({ page }) => {
+  const src = await makeScan();
   expect(await fileContains(src, "SECRET TEXT")).toBe(true);
 
   await page.goto("/ru/compress");

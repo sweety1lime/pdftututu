@@ -1,15 +1,18 @@
 import { readFile } from "node:fs/promises";
 import { expect, test as base, type Page } from "@playwright/test";
 
-/** Упавший на странице JS — всегда ошибка теста. */
-export const test = base.extend<{ pageErrors: Error[] }>({
+/** Упавший на странице JS или заблокированное CSP — всегда ошибка теста. */
+export const test = base.extend<{ pageErrors: string[] }>({
   pageErrors: [
     // Параметр не называем use: линтер примет его за хук React
     async ({ page }, provide) => {
-      const errors: Error[] = [];
-      page.on("pageerror", (e) => errors.push(e));
+      const errors: string[] = [];
+      page.on("pageerror", (e) => errors.push(e.message));
+      page.on("console", (msg) => {
+        if (msg.type() === "error" && msg.text().includes("Content Security Policy")) errors.push(msg.text());
+      });
       await provide(errors);
-      expect(errors, "ошибки JS на странице").toEqual([]);
+      expect(errors, "ошибки JS и нарушения CSP на странице").toEqual([]);
     },
     { auto: true },
   ],

@@ -31,3 +31,11 @@ test("неизвестный адрес — 404 с шапкой сайта и п
   await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
   await expect(page.getByRole("banner")).toBeVisible();
 });
+
+test("заголовки безопасности и CSP", async ({ request }) => {
+  const res = await request.get("/ru");
+  const headers = res.headers();
+  expect(headers["content-security-policy"]).toContain("connect-src 'self'");
+  expect(headers["x-content-type-options"]).toBe("nosniff");
+  expect(headers["x-frame-options"]).toBe("DENY");
+});
