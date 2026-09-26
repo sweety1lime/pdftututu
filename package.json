@@ -2,6 +2,7 @@
   "name": "pdftutut",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "postinstall": "node scripts/copy-pdfjs.mjs && node scripts/copy-tesseract.mjs",
     "dev": "next dev",
