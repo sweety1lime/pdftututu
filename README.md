@@ -30,7 +30,10 @@ npm run dev
 
 - `npm run build` собрать проект
 - `npm test` прогнать тесты
+- `npm run e2e` прогнать сценарии в браузере (Playwright, нужен `npm run build`; браузер ставится командой `npx playwright install chromium`)
 - `npm run lint` проверить код
+
+Всё это же запускается на GitHub при каждом пуше в main и в пулреквестах.
 
 ## Деплой
 

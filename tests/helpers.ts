@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { randomBytes } from "node:crypto";
 import { deflateSync } from "node:zlib";
 import { decodePDFRawStream, degrees, PDFDocument, PDFRawStream, StandardFonts } from "@cantoo/pdf-lib";
 import { setFontLoader } from "@/lib/pdf/fonts";
@@ -58,8 +59,8 @@ export async function fileContains(bytes: Uint8Array, text: string): Promise<boo
   return false;
 }
 
-/** Серая картинка PNG w×h. */
-export function makePng(width = 2, height = 2): Uint8Array {
+/** Картинка PNG w×h: серая или из шума (шум почти не сжимается — «тяжёлый» файл). */
+export function makePng(width = 2, height = 2, { noise = false } = {}): Uint8Array {
   const crc32 = (buf: Uint8Array) => {
     let c = ~0;
     for (const b of buf) {
@@ -82,8 +83,8 @@ export function makePng(width = 2, height = 2): Uint8Array {
   ihdr[8] = 8; // бит на канал
   ihdr[9] = 2; // RGB
   // Каждая строка: байт фильтра (0) + пиксели
-  const row = Buffer.concat([Buffer.from([0]), Buffer.alloc(width * 3, 0x80)]);
-  const raw = Buffer.concat(Array.from({ length: height }, () => row));
+  const row = () => Buffer.concat([Buffer.from([0]), noise ? randomBytes(width * 3) : Buffer.alloc(width * 3, 0x80)]);
+  const raw = Buffer.concat(Array.from({ length: height }, row));
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     chunk("IHDR", ihdr),
