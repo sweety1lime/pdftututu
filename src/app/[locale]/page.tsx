@@ -50,7 +50,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
               {t(`home.groups.${group}`)}
             </h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
               {TOOLS.filter((tool) => tool.group === group).map((tool) => (
                 <Link
                   key={tool.id}
