@@ -32,7 +32,8 @@ export function getTextLines(pdf: PDFDocumentProxy, pageIndex: number): Promise<
   return p;
 }
 
-interface Piece {
+/** Кусок текста из pdf.js: слово или фрагмент строки (координаты вида). */
+export interface Piece {
   x: number;
   right: number;
   baseline: number;
@@ -83,31 +84,8 @@ async function extract(pdf: PDFDocumentProxy, pageIndex: number): Promise<TextLi
     });
   }
 
-  pieces.sort((a, b) => a.baseline - b.baseline || a.x - b.x);
-
-  const lines: Piece[][] = [];
-  for (const p of pieces) {
-    const line = lines.find((l) => {
-      const last = l[l.length - 1];
-      const sameBaseline = Math.abs(last.baseline - p.baseline) < last.fontSize * 0.3;
-      const similarSize = Math.max(last.fontSize, p.fontSize) / Math.min(last.fontSize, p.fontSize) < 1.35;
-      const gap = p.x - last.right;
-      return sameBaseline && similarSize && gap > -last.fontSize * 0.5 && gap < last.fontSize * 1.5;
-    });
-    if (line) line.push(p);
-    else lines.push([p]);
-  }
-
-  return lines.map((parts, i) => {
-    let text = "";
-    for (let k = 0; k < parts.length; k++) {
-      const p = parts[k];
-      if (k > 0) {
-        const gap = p.x - parts[k - 1].right;
-        if (gap > p.fontSize * 0.2 && !text.endsWith(" ") && !p.text.startsWith(" ")) text += " ";
-      }
-      text += p.text;
-    }
+  return groupPieces(pieces).map((parts, i) => {
+    const text = joinPieces(parts);
     const x = Math.min(...parts.map((p) => p.x));
     const right = Math.max(...parts.map((p) => p.right));
     const top = Math.min(...parts.map((p) => p.top));
@@ -126,6 +104,45 @@ async function extract(pdf: PDFDocumentProxy, pageIndex: number): Promise<TextLi
       variant: guessFamily(main.fontName),
     };
   });
+}
+
+/**
+ * Собрать куски в строки. Базовые линии слов на одной строке могут чуть
+ * отличаться (особенно у распознанного OCR текста), поэтому сначала находим
+ * строку с допуском по высоте, а порядок слов внутри неё — по x.
+ */
+export function groupPieces(pieces: Piece[]): Piece[][] {
+  const lines: Piece[][] = [];
+  for (const p of [...pieces].sort((a, b) => a.baseline - b.baseline || a.x - b.x)) {
+    const line = lines.find((l) => {
+      const ref = l[0];
+      const sameBaseline = Math.abs(ref.baseline - p.baseline) < ref.fontSize * 0.3;
+      const similarSize = Math.max(ref.fontSize, p.fontSize) / Math.min(ref.fontSize, p.fontSize) < 1.35;
+      // Расстояние до строки слева или справа (отрицательное — перекрываются)
+      const left = Math.min(...l.map((q) => q.x));
+      const right = Math.max(...l.map((q) => q.right));
+      const gap = p.x >= right ? p.x - right : p.right <= left ? left - p.right : -Math.min(p.right - left, right - p.x);
+      return sameBaseline && similarSize && gap > -ref.fontSize * 0.5 && gap < ref.fontSize * 1.5;
+    });
+    if (line) line.push(p);
+    else lines.push([p]);
+  }
+  for (const line of lines) line.sort((a, b) => a.x - b.x);
+  return lines;
+}
+
+/** Текст строки: пробел там, где между кусками есть заметный промежуток. */
+export function joinPieces(parts: Piece[]): string {
+  let text = "";
+  for (let k = 0; k < parts.length; k++) {
+    const p = parts[k];
+    if (k > 0) {
+      const gap = p.x - parts[k - 1].right;
+      if (gap > p.fontSize * 0.2 && !text.endsWith(" ") && !p.text.startsWith(" ")) text += " ";
+    }
+    text += p.text;
+  }
+  return text;
 }
 
 /**
