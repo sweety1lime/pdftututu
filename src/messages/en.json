@@ -298,5 +298,10 @@
   "notFound": {
     "title": "Page not found",
     "back": "Go home"
+  },
+  "errorPage": {
+    "title": "Something broke",
+    "description": "An error occurred on this page. Your files were not sent anywhere — please try again.",
+    "retry": "Try again"
   }
 }

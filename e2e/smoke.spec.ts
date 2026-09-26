@@ -24,3 +24,10 @@ test.describe("английский браузер", () => {
     await expect(page).toHaveURL(/\/en$/);
   });
 });
+
+test("неизвестный адрес — 404 с шапкой сайта и переводом", async ({ page }) => {
+  const res = await page.goto("/en/no-such-page");
+  expect(res?.status()).toBe(404);
+  await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+  await expect(page.getByRole("banner")).toBeVisible();
+});
