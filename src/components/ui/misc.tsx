@@ -140,3 +140,16 @@ export function Tip({
     </TooltipPrimitive.Root>
   );
 }
+
+/** Клавиша или сочетание клавиш: «Ctrl K», «Esc», «1». */
+export function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {
+  return (
+    <kbd
+      className={cn(
+        "inline-block rounded-[5px] border border-input px-[7px] py-[3px] font-mono text-xs leading-none text-secondary-foreground",
+        className,
+      )}
+      {...props}
+    />
+  );
+}

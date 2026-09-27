@@ -87,6 +87,18 @@ export function getTool(id: ToolId): Tool {
   return tool;
 }
 
+/** Для поиска регистр и «ё» не важны. */
+const normalize = (s: string) => s.toLocaleLowerCase().replaceAll("ё", "е");
+
+/** Инструменты, в тексте которых (название и описание) есть все слова запроса. */
+export function searchTools(query: string, textOf: (tool: Tool) => string): Tool[] {
+  const words = normalize(query).split(/\s+/).filter(Boolean);
+  return TOOLS.filter((tool) => {
+    const text = normalize(textOf(tool));
+    return words.every((w) => text.includes(w));
+  });
+}
+
 /** Что ещё показать на странице инструмента: сначала из той же группы, потом популярные. */
 export function relatedTools(id: ToolId, count = 4): Tool[] {
   const tool = getTool(id);
