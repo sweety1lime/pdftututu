@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { ChevronDown, LayoutGrid } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { TOOL_GROUPS, TOOLS } from "@/lib/tools";
+import { TOOL_GROUPS, TOOL_ICON_CLASS, TOOLS } from "@/lib/tools";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +38,7 @@ export function ToolsMenu() {
             {TOOLS.filter((tool) => tool.group === group).map((tool) => (
               <DropdownMenuItem key={tool.id} asChild>
                 <Link href={tool.href}>
-                  <span className={cn("flex size-6 items-center justify-center rounded-md", tool.accent)}>
+                  <span className={cn("flex size-6 items-center justify-center rounded-md", TOOL_ICON_CLASS)}>
                     <tool.icon className="size-3.5" />
                   </span>
                   {t(`tools.${tool.id}.title`)}

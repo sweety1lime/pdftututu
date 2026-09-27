@@ -3,7 +3,7 @@ import { BadgeCheck, ShieldCheck, UserX } from "lucide-react";
 import { SiteStructuredData } from "@/components/StructuredData";
 import { Link } from "@/i18n/navigation";
 import { pageMetadata } from "@/lib/metadata";
-import { TOOL_GROUPS, TOOLS } from "@/lib/tools";
+import { TOOL_GROUPS, TOOL_ICON_CLASS, TOOLS } from "@/lib/tools";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">) {
@@ -60,7 +60,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
                   <span
                     className={cn(
                       "flex size-11 items-center justify-center rounded-xl transition-transform group-hover:scale-110",
-                      tool.accent,
+                      TOOL_ICON_CLASS,
                     )}
                   >
                     <tool.icon className="size-5.5" />
