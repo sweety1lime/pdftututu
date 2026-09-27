@@ -11,12 +11,12 @@ import { Button } from "@/components/ui/button";
 import { prepareImage } from "@/lib/images";
 import { newId } from "@/lib/id";
 import { preloadPdfLib, readPdfFile, type PdfSource } from "@/lib/pdf/read";
-import { CSS_FAMILY } from "@/lib/pdf/fonts";
 import { takeDraftRestore, usePendingFiles } from "@/lib/pendingFiles";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { cn } from "@/lib/utils";
 import { assetFromImage, fitSize } from "./assets";
 import { clearDraft, loadDraft, useAutosave, useDraftStatus, type Draft } from "./autosave";
+import { useCanvasFonts } from "./canvasFonts";
 import { ExportButton } from "./ExportButton";
 import { useEditorHotkeys } from "./hotkeys";
 import { openDocument } from "./openDocument";
@@ -181,20 +181,9 @@ function Workspace({ signOpen, setSignOpen }: { signOpen: boolean; setSignOpen: 
   const hasForms = useEditor((s) => s.widgets.length > 0);
   const currentPage = useEditor((s) => s.currentPage);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [fontsVersion, setFontsVersion] = useState(0);
+  const fontsVersion = useCanvasFonts();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const noTextWarned = useRef(false);
-
-  // Шрифты для текста на холсте: когда загрузятся — перерисовать
-  useEffect(() => {
-    const faces = Object.values(CSS_FAMILY).flatMap((f) => [
-      `400 16px "${f}"`,
-      `700 16px "${f}"`,
-      `italic 400 16px "${f}"`,
-      `italic 700 16px "${f}"`,
-    ]);
-    Promise.all(faces.map((f) => document.fonts.load(f).catch(() => null))).then(() => setFontsVersion((v) => v + 1));
-  }, []);
 
   // Начальный масштаб — по ширине окна
   useEffect(() => {

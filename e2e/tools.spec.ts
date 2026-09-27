@@ -149,6 +149,20 @@ test("редактор: добавить текст с кириллицей и �
   expect(text).toContain("Привет, мир");
 });
 
+test("редактор: грузит только нужные шрифты", async ({ page }) => {
+  const fonts = new Set<string>();
+  page.on("request", (r) => {
+    const m = /^\/fonts\/(.+)$/.exec(new URL(r.url()).pathname);
+    if (m) fonts.add(m[1]);
+  });
+  await page.goto("/ru/editor");
+  await dropPdf(page, { name: "doc.pdf", bytes: await makePdf(1) });
+  await expect(page.locator('[data-page-index="0"]')).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  // Шрифт текста по умолчанию, а не все девять начертаний (3,3 МБ)
+  expect([...fonts]).toEqual(["PT_Sans-Web-Regular.ttf"]);
+});
+
 test("редактор: страницы далеко от экрана не держат память", async ({ page }) => {
   await page.goto("/ru/editor");
   await dropPdf(page, { name: "long.pdf", bytes: await makePdf(30) });
