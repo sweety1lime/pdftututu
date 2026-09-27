@@ -232,7 +232,7 @@
     "tooShort": "Enter a password",
     "advanced": "Restrictions (owner password)",
     "ownerPassword": "Owner password",
-    "ownerHint": "Needed to change restrictions. If empty, same as the open password.",
+    "ownerHint": "Needed to change the restrictions later. Optional: the restrictions apply either way.",
     "allowPrint": "Allow printing",
     "allowCopy": "Allow copying text",
     "allowModify": "Allow modifying",

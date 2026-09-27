@@ -7,7 +7,7 @@ import { embedFont } from "@/lib/pdf/fonts";
 import { addInvisibleText } from "@/lib/pdf/textLayer";
 import { exportEditedPdf } from "@/features/editor/exportPdf";
 import type { EditorObject } from "@/features/editor/types";
-import { extractText, makePdf, useDiskFonts } from "./helpers";
+import { extractText, isOwnerPassword, makePdf, useDiskFonts } from "./helpers";
 
 beforeAll(() => useDiskFonts());
 
@@ -195,6 +195,18 @@ describe("пароль", () => {
     const again = await protectPdf(once, { userPassword: "2", allowPrint: true, allowCopy: true, allowModify: true, allowAnnotate: true });
     const plain = await decryptWithPassword(again, "2");
     expect((await PDFDocument.load(plain)).isEncrypted).toBe(false);
+  });
+
+  it("с ограничениями пароль на открытие не даёт прав владельца", async () => {
+    const opts = { userPassword: "1", allowPrint: false, allowCopy: true, allowModify: true, allowAnnotate: true };
+    const locked = await protectPdf(await makePdf(1), opts);
+    expect(await isOwnerPassword(locked, "1")).toBe(false);
+    // Снять защиту целиком по-прежнему можно паролем на открытие
+    expect((await PDFDocument.load(await decryptWithPassword(locked, "1"))).isEncrypted).toBe(false);
+
+    const withOwner = await protectPdf(await makePdf(1), { ...opts, ownerPassword: "boss" });
+    expect(await isOwnerPassword(withOwner, "boss")).toBe(true);
+    expect(await isOwnerPassword(withOwner, "1")).toBe(false);
   });
 });
 
