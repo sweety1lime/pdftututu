@@ -4,7 +4,10 @@ import type { PDFDocumentProxy, PDFPageProxy } from "pdfjs-dist";
 import type { TextItem } from "pdfjs-dist/types/src/display/api";
 import { guessFamily, type FontVariant } from "@/lib/pdf/fonts";
 import { getPdfjs } from "@/lib/pdf/pdfjs";
-import { toHex } from "@/lib/pdf/color";
+
+/** Цвет как «#rrggbb». Не из color.ts: тот тянет pdf-lib, а строки текста нужны и без него. */
+const toHex = (r: number, g: number, b: number) =>
+  `#${[r, g, b].map((v) => Math.round(Math.min(255, Math.max(0, v))).toString(16).padStart(2, "0")).join("")}`;
 
 /** Строка существующего текста на странице (координаты вида, PDF-точки). */
 export interface TextLine {
