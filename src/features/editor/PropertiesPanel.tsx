@@ -276,7 +276,7 @@ function ToggleIcon({
         aria-pressed={active}
         disabled={disabled}
         onClick={onClick}
-        className={cn(active && "border-primary bg-primary/10 text-primary")}
+        className={cn(active && "border-primary bg-primary/10 text-primary-ink")}
       >
         {children}
       </Button>

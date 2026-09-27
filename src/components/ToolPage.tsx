@@ -40,7 +40,7 @@ export async function ToolFooter({ id }: { id: ToolId }) {
   return (
     <>
       <p className="mt-10 flex items-center justify-center gap-2 text-center text-xs text-muted-foreground">
-        <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
+        <ShieldCheck className="size-4 text-success" />
         {t("filesStayLocal")}
       </p>
       <ToolGuide id={id} />

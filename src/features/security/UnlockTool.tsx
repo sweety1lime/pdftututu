@@ -43,7 +43,7 @@ export function UnlockTool() {
       <FileCard file={file} onClose={clear} />
       {file.wasEncrypted ? (
         <div className="flex flex-col items-center gap-4 rounded-xl border bg-card p-6 text-center">
-          <CircleCheck className="size-10 text-emerald-600 dark:text-emerald-400" />
+          <CircleCheck className="size-10 text-success" />
           <p className="font-medium">{t("unlock.unlocked")}</p>
           <Button size="lg" onClick={save}>
             <Download />

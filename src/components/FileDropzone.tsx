@@ -55,7 +55,7 @@ export function FileDropzone({ kind = "pdf", multiple = false, onFiles, compact,
       })}
     >
       <input {...getInputProps()} />
-      <span className="flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-105">
+      <span className="flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary-ink transition-transform group-hover:scale-105">
         <Icon className="size-8" />
       </span>
       <div className="space-y-1">

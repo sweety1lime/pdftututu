@@ -76,7 +76,7 @@ export function ProtectTool() {
         <button
           type="button"
           onClick={() => setAdvanced((a) => !a)}
-          className="flex items-center gap-1 text-sm font-medium text-primary"
+          className="flex items-center gap-1 text-sm font-medium text-primary-ink"
         >
           <ChevronDown className={cn("size-4 transition-transform", advanced && "rotate-180")} />
           {t("protect.advanced")}

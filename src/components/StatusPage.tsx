@@ -12,7 +12,7 @@ export function StatusPage({
 }) {
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-4 px-4 py-16 text-center">
-      <span className="flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary [&_svg]:size-8">
+      <span className="flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary-ink [&_svg]:size-8">
         {icon}
       </span>
       <h1 className="text-3xl font-bold tracking-tight">{title}</h1>

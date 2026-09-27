@@ -36,7 +36,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
                 key={text}
                 className="flex items-center gap-2 rounded-full border bg-background/70 px-4 py-1.5 text-sm font-medium shadow-xs"
               >
-                <Icon className="size-4 text-primary" />
+                <Icon className="size-4 text-primary-ink" />
                 {text}
               </li>
             ))}

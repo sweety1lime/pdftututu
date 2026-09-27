@@ -110,7 +110,7 @@ export function Toolbar({ onPickImage, onSign, onShortcuts, onClose, hasForms, e
             size="icon-sm"
             aria-pressed={tool === id}
             onClick={() => choose(id)}
-            className={cn(tool === id && "bg-primary/15 text-primary hover:bg-primary/20 hover:text-primary")}
+            className={cn(tool === id && "bg-primary/15 text-primary-ink hover:bg-primary/20 hover:text-primary-ink")}
           >
             <Icon />
           </Button>

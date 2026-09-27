@@ -104,7 +104,7 @@ export function CompressTool() {
           <div className="flex items-center gap-3 text-2xl font-semibold">
             <span className="text-muted-foreground">{formatBytes(before, locale)}</span>
             <ArrowRight className="size-5 text-muted-foreground" />
-            <span className={gained ? "text-emerald-600 dark:text-emerald-400" : undefined}>
+            <span className={gained ? "text-success" : undefined}>
               {formatBytes(after, locale)}
             </span>
           </div>

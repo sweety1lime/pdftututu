@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Onest } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -11,7 +11,20 @@ import { Providers } from "@/components/Providers";
 import { SiteHeader } from "@/components/SiteHeader";
 import "../globals.css";
 
-const ui = Onest({ subsets: ["latin", "cyrillic"], variable: "--font-ui", display: "swap" });
+// Шрифты интерфейса. next/font скачивает их при сборке и отдаёт с нашего домена
+const ui = IBM_Plex_Sans({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-ui",
+  display: "swap",
+});
+// Цифры, размеры файлов, подписи групп, клавиши
+const uiMono = IBM_Plex_Mono({
+  weight: ["400", "500"],
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-ui-mono",
+  display: "swap",
+});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -40,7 +53,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className={ui.variable} suppressHydrationWarning>
+    <html lang={locale} className={`${ui.variable} ${uiMono.variable}`} suppressHydrationWarning>
       <body className="flex min-h-dvh flex-col">
         <NextIntlClientProvider>
           <Providers>
