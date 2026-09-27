@@ -7,6 +7,7 @@ import { ArrowRight, Download, RefreshCw, TriangleAlert } from "lucide-react";
 import { FileDropzone } from "@/components/FileDropzone";
 import { FileCard } from "@/components/FileCard";
 import {
+  DownloadsAs,
   MainAction,
   SecondaryAction,
   Summary,
@@ -128,11 +129,7 @@ export function CompressTool() {
               {t(`compress.${result?.level ?? level}`)}
             </SummaryRow>
           </SummaryList>
-          <div className="h-px bg-border" />
-          <div className="flex flex-col gap-1.5 text-[13px]">
-            <p className="text-muted-foreground">{t("summary.downloadsAs")}</p>
-            <p className="font-mono break-all text-secondary-foreground">{outName}</p>
-          </div>
+          <DownloadsAs name={outName} />
         </Summary>
       }
     >

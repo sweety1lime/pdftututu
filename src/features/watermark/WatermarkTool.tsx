@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { ImagePlus } from "lucide-react";
 import { FileDropzone } from "@/components/FileDropzone";
 import { FileCard } from "@/components/FileCard";
-import { ActionBar } from "@/components/ActionBar";
+import { DownloadsAs, MainAction, Summary, ToolWorkspace } from "@/components/ToolWorkspace";
 import { PdfThumb } from "@/components/PdfThumb";
 import { Button } from "@/components/ui/button";
 import { Choice } from "@/components/ui/choice";
@@ -72,6 +72,8 @@ export function WatermarkTool() {
     }
   };
 
+  const outName = file ? `${baseName(file.name)}_watermark.pdf` : "";
+
   const run = async () => {
     if (!file || !ready) return;
     setBusy(true);
@@ -83,7 +85,7 @@ export function WatermarkTool() {
         layout,
         pages: pages.list,
       });
-      downloadBlob(out, `${baseName(file.name)}_watermark.pdf`);
+      downloadBlob(out, outName);
       toast.success(t("common.done"));
     } catch (e) {
       showError(e);
@@ -92,155 +94,174 @@ export function WatermarkTool() {
     }
   };
 
-  if (!file) return <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />;
+  if (!file) {
+    return (
+      <ToolWorkspace>
+        <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />
+      </ToolWorkspace>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <FileCard file={file} onClose={clear} />
+    <ToolWorkspace
+      summary={
+        <Summary
+          actions={
+            <MainAction onClick={run} busy={busy} disabled={!ready}>
+              {t("watermark.action")}
+            </MainAction>
+          }
+        >
+          <DownloadsAs name={outName} />
+        </Summary>
+      }
+    >
+      <div className="flex flex-col gap-6">
+        <FileCard file={file} onClose={clear} />
 
-      <div className="grid gap-8 md:grid-cols-[1fr_auto]">
-        <div className="space-y-6">
-          <Tabs value={kind} onValueChange={(v) => setKind(v as Kind)} className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="text">{t("watermark.text")}</TabsTrigger>
-              <TabsTrigger value="image">{t("watermark.image")}</TabsTrigger>
-            </TabsList>
-            <TabsContent value="text" className="space-y-4">
-              <div className="max-w-md space-y-2">
-                <Label htmlFor="wm-text">{t("watermark.textLabel")}</Label>
-                <Input id="wm-text" value={text} onChange={(e) => setText(e.target.value)} maxLength={80} />
-              </div>
-              <div className="space-y-2">
-                <Label>{t("watermark.color")}</Label>
-                <div role="radiogroup" aria-label={t("watermark.color")} className="flex items-center gap-2">
-                  {COLORS.map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      role="radio"
-                      aria-checked={color === c}
-                      aria-label={c}
-                      onClick={() => setColor(c)}
-                      className={cn(
-                        "size-7 rounded-full border border-black/15",
-                        color === c && "ring-2 ring-primary ring-offset-2 ring-offset-background",
-                      )}
-                      style={{ background: c }}
-                    />
-                  ))}
-                  <label
-                    className={cn(
-                      "relative size-7 cursor-pointer overflow-hidden rounded-full border",
-                      !COLORS.includes(color) && "ring-2 ring-primary ring-offset-2 ring-offset-background",
-                    )}
-                    style={{ background: "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)" }}
-                  >
-                    <input
-                      type="color"
-                      aria-label={t("watermark.customColor")}
-                      className="absolute inset-0 cursor-pointer opacity-0"
-                      value={color}
-                      onChange={(e) => setColor(e.target.value)}
-                    />
-                  </label>
+        <div className="grid gap-8 md:grid-cols-[1fr_auto]">
+          <div className="space-y-6">
+            <Tabs value={kind} onValueChange={(v) => setKind(v as Kind)} className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="text">{t("watermark.text")}</TabsTrigger>
+                <TabsTrigger value="image">{t("watermark.image")}</TabsTrigger>
+              </TabsList>
+              <TabsContent value="text" className="space-y-4">
+                <div className="max-w-md space-y-2">
+                  <Label htmlFor="wm-text">{t("watermark.textLabel")}</Label>
+                  <Input id="wm-text" value={text} onChange={(e) => setText(e.target.value)} maxLength={80} />
                 </div>
-              </div>
-              <SliderField label={t("watermark.size")} value={fontSize} min={16} max={140} onChange={setFontSize} unit=" pt" />
-            </TabsContent>
-            <TabsContent value="image" className="space-y-4">
-              <input
-                ref={picker}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif,image/bmp"
-                hidden
-                onChange={(e) => {
-                  pickImage(e.target.files?.[0]);
-                  e.target.value = "";
-                }}
-              />
-              <Button variant="outline" onClick={() => picker.current?.click()}>
-                <ImagePlus />
-                {image ? t("watermark.changeImage") : t("watermark.chooseImage")}
-              </Button>
-              <SliderField label={t("watermark.size")} value={imageScale} min={10} max={100} onChange={setImageScale} unit="%" />
-            </TabsContent>
-          </Tabs>
-
-          <SliderField label={t("watermark.transparency")} value={transparency} min={0} max={95} onChange={setTransparency} unit="%" />
-
-          <div className="space-y-2">
-            <Label>{t("watermark.angle")}</Label>
-            <Choice
-              value={rotation}
-              onChange={setRotation}
-              options={[
-                { value: -45, label: t("watermark.angleDiagonal") },
-                { value: 0, label: t("watermark.angleNone") },
-                { value: -90, label: t("watermark.angleVertical") },
-              ]}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("watermark.layout")}</Label>
-            <Choice
-              value={layout}
-              onChange={setLayout}
-              options={[
-                { value: "center", label: t("watermark.layoutCenter") },
-                { value: "tile", label: t("watermark.layoutTile") },
-              ]}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("watermark.pages")}</Label>
-            <Choice
-              value={pagesMode}
-              onChange={setPagesMode}
-              options={[
-                { value: "all", label: t("watermark.pagesAll") },
-                { value: "custom", label: t("watermark.pagesCustom") },
-              ]}
-            />
-            {pagesMode === "custom" && (
-              <div className="max-w-md space-y-1.5 pt-1">
-                <Input
-                  value={ranges}
-                  onChange={(e) => setRanges(e.target.value)}
-                  placeholder={t("split.rangesPlaceholder")}
-                  aria-label={t("watermark.pagesCustom")}
-                  aria-invalid={Boolean(ranges && pages.error)}
-                  autoFocus
+                <div className="space-y-2">
+                  <Label>{t("watermark.color")}</Label>
+                  <div role="radiogroup" aria-label={t("watermark.color")} className="flex items-center gap-2">
+                    {COLORS.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        role="radio"
+                        aria-checked={color === c}
+                        aria-label={c}
+                        onClick={() => setColor(c)}
+                        className={cn(
+                          "size-7 rounded-full border border-black/15",
+                          color === c && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                        )}
+                        style={{ background: c }}
+                      />
+                    ))}
+                    <label
+                      className={cn(
+                        "relative size-7 cursor-pointer overflow-hidden rounded-full border",
+                        !COLORS.includes(color) && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                      )}
+                      style={{ background: "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)" }}
+                    >
+                      <input
+                        type="color"
+                        aria-label={t("watermark.customColor")}
+                        className="absolute inset-0 cursor-pointer opacity-0"
+                        value={color}
+                        onChange={(e) => setColor(e.target.value)}
+                      />
+                    </label>
+                  </div>
+                </div>
+                <SliderField label={t("watermark.size")} value={fontSize} min={16} max={140} onChange={setFontSize} unit=" pt" />
+              </TabsContent>
+              <TabsContent value="image" className="space-y-4">
+                <input
+                  ref={picker}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif,image/bmp"
+                  hidden
+                  onChange={(e) => {
+                    pickImage(e.target.files?.[0]);
+                    e.target.value = "";
+                  }}
                 />
-                <p className={cn("text-sm", ranges && pages.error ? "text-destructive" : "text-muted-foreground")}>
-                  {ranges && pages.error ? pages.error : t("split.rangesHelp")}
-                </p>
-              </div>
-            )}
+                <Button variant="outline" onClick={() => picker.current?.click()}>
+                  <ImagePlus />
+                  {image ? t("watermark.changeImage") : t("watermark.chooseImage")}
+                </Button>
+                <SliderField label={t("watermark.size")} value={imageScale} min={10} max={100} onChange={setImageScale} unit="%" />
+              </TabsContent>
+            </Tabs>
+
+            <SliderField label={t("watermark.transparency")} value={transparency} min={0} max={95} onChange={setTransparency} unit="%" />
+
+            <div className="space-y-2">
+              <Label>{t("watermark.angle")}</Label>
+              <Choice
+                value={rotation}
+                onChange={setRotation}
+                options={[
+                  { value: -45, label: t("watermark.angleDiagonal") },
+                  { value: 0, label: t("watermark.angleNone") },
+                  { value: -90, label: t("watermark.angleVertical") },
+                ]}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t("watermark.layout")}</Label>
+              <Choice
+                value={layout}
+                onChange={setLayout}
+                options={[
+                  { value: "center", label: t("watermark.layoutCenter") },
+                  { value: "tile", label: t("watermark.layoutTile") },
+                ]}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t("watermark.pages")}</Label>
+              <Choice
+                value={pagesMode}
+                onChange={setPagesMode}
+                options={[
+                  { value: "all", label: t("watermark.pagesAll") },
+                  { value: "custom", label: t("watermark.pagesCustom") },
+                ]}
+              />
+              {pagesMode === "custom" && (
+                <div className="max-w-md space-y-1.5 pt-1">
+                  <Input
+                    value={ranges}
+                    onChange={(e) => setRanges(e.target.value)}
+                    placeholder={t("split.rangesPlaceholder")}
+                    aria-label={t("watermark.pagesCustom")}
+                    aria-invalid={Boolean(ranges && pages.error)}
+                    autoFocus
+                  />
+                  <p className={cn("text-sm", ranges && pages.error ? "text-destructive" : "text-muted-foreground")}>
+                    {ranges && pages.error ? pages.error : t("split.rangesHelp")}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t("watermark.preview")}</Label>
+            <Preview
+              file={file}
+              pageIndex={pages.list?.[0] ?? 0}
+              kind={kind}
+              text={text.trim()}
+              color={color}
+              fontSize={fontSize}
+              image={image}
+              imageScale={imageScale / 100}
+              opacity={1 - transparency / 100}
+              rotation={rotation}
+              layout={layout}
+            />
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label>{t("watermark.preview")}</Label>
-          <Preview
-            file={file}
-            pageIndex={pages.list?.[0] ?? 0}
-            kind={kind}
-            text={text.trim()}
-            color={color}
-            fontSize={fontSize}
-            image={image}
-            imageScale={imageScale / 100}
-            opacity={1 - transparency / 100}
-            rotation={rotation}
-            layout={layout}
-          />
-        </div>
       </div>
-
-      <ActionBar action={t("watermark.action")} onAction={run} busy={busy} disabled={!ready} />
-    </div>
+    </ToolWorkspace>
   );
 }
 

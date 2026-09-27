@@ -7,7 +7,7 @@ import { Info, ScanText } from "lucide-react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { FileDropzone } from "@/components/FileDropzone";
 import { FileCard } from "@/components/FileCard";
-import { ActionBar } from "@/components/ActionBar";
+import { DownloadsAs, MainAction, Summary, ToolWorkspace } from "@/components/ToolWorkspace";
 import { Choice } from "@/components/ui/choice";
 import { Checkbox, Label, Progress } from "@/components/ui/misc";
 import { baseName, downloadBlob } from "@/lib/download";
@@ -107,50 +107,70 @@ export function PdfToWordTool() {
     clear();
   };
 
-  if (!file) return <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />;
+  if (!file) {
+    return (
+      <ToolWorkspace>
+        <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />
+      </ToolWorkspace>
+    );
+  }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <FileCard file={file} onClose={reset} />
+    <ToolWorkspace
+      summary={
+        <Summary
+          status={
+            progress && (
+              <div className="space-y-1.5">
+                <p>{progress.label}</p>
+                <Progress value={progress.value} />
+              </div>
+            )
+          }
+          actions={
+            <MainAction onClick={run} busy={progress !== null} disabled={hasText === null}>
+              {t("pdfToWord.action")}
+            </MainAction>
+          }
+        >
+          <DownloadsAs name={`${baseName(file.name)}.${format}`} />
+        </Summary>
+      }
+    >
+      <div className="flex max-w-2xl flex-col gap-6">
+        <FileCard file={file} onClose={reset} />
 
-      <div className="space-y-2">
-        <Label>{t("pdfToWord.format")}</Label>
-        <Choice
-          value={format}
-          onChange={setFormat}
-          options={[
-            { value: "docx", label: t("pdfToWord.formatDocx"), hint: t("pdfToWord.formatDocxHint") },
-            { value: "txt", label: t("pdfToWord.formatTxt"), hint: t("pdfToWord.formatTxtHint") },
-          ]}
-        />
-      </div>
-
-      {hasText === false && (
-        <div className="space-y-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
-          <p className="flex gap-2 text-sm">
-            <ScanText className="size-4 shrink-0 translate-y-0.5 text-amber-600 dark:text-amber-400" />
-            {t("pdfToWord.noText")}
-          </p>
-          <Label className="font-normal">
-            <Checkbox checked={ocr} onCheckedChange={(v) => setOcr(v === true)} />
-            {t("pdfToWord.ocr")}
-          </Label>
+        <div className="space-y-2">
+          <Label>{t("pdfToWord.format")}</Label>
+          <Choice
+            value={format}
+            onChange={setFormat}
+            options={[
+              { value: "docx", label: t("pdfToWord.formatDocx"), hint: t("pdfToWord.formatDocxHint") },
+              { value: "txt", label: t("pdfToWord.formatTxt"), hint: t("pdfToWord.formatTxtHint") },
+            ]}
+          />
         </div>
-      )}
 
-      <p className="flex gap-2 text-sm text-muted-foreground">
-        <Info className="size-4 shrink-0 translate-y-0.5" />
-        {t("pdfToWord.limits")}
-      </p>
-
-      <ActionBar action={t("pdfToWord.action")} onAction={run} busy={progress !== null} disabled={hasText === null}>
-        {progress && (
-          <div className="space-y-1">
-            <span>{progress.label}</span>
-            <Progress value={progress.value} className="max-w-xs" />
+        {hasText === false && (
+          <div className="space-y-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
+            <p className="flex gap-2 text-sm">
+              <ScanText className="size-4 shrink-0 translate-y-0.5 text-amber-600 dark:text-amber-400" />
+              {t("pdfToWord.noText")}
+            </p>
+            <Label className="font-normal">
+              <Checkbox checked={ocr} onCheckedChange={(v) => setOcr(v === true)} />
+              {t("pdfToWord.ocr")}
+            </Label>
           </div>
         )}
-      </ActionBar>
-    </div>
+
+        <p className="flex gap-2 text-sm text-muted-foreground">
+          <Info className="size-4 shrink-0 translate-y-0.5" />
+          {t("pdfToWord.limits")}
+        </p>
+
+      </div>
+    </ToolWorkspace>
   );
 }

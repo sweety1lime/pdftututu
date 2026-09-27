@@ -7,7 +7,7 @@ import { CheckSquare, FilePlus2, RotateCcw, RotateCw, Square, SquareDashed, Tras
 import { FileDropzone } from "@/components/FileDropzone";
 import { PdfThumb } from "@/components/PdfThumb";
 import { SortableGrid } from "@/components/SortableGrid";
-import { ActionBar } from "@/components/ActionBar";
+import { MainAction, SecondaryAction, Summary, SummaryList, SummaryRow, ToolWorkspace } from "@/components/ToolWorkspace";
 import { Button } from "@/components/ui/button";
 import { Tip } from "@/components/ui/misc";
 import { baseName, downloadBlob } from "@/lib/download";
@@ -131,114 +131,136 @@ export function OrganizeTool() {
     history.current = [];
   };
 
-  if (!files.length) return <FileDropzone multiple onFiles={addFiles} disabled={loading} />;
+if (!files.length) {
+    return (
+      <ToolWorkspace>
+        <FileDropzone multiple onFiles={addFiles} disabled={loading} />
+      </ToolWorkspace>
+    );
+  }
 
   const hasSel = selected.size > 0;
 
   return (
-    <div>
-      <div className="sticky top-16 z-20 mb-4 flex flex-wrap items-center gap-1.5 rounded-xl border bg-background/90 p-2 shadow-sm backdrop-blur">
-        <Tip label={t("organize.rotateLeft")}>
-          <Button variant="ghost" size="icon" disabled={!hasSel} onClick={() => rotate(-90)}>
-            <RotateCcw />
+    <ToolWorkspace
+      summary={
+        <Summary
+          status={<span className="lg:hidden">{t("common.pages", { count: items.length })}</span>}
+          actions={
+            <>
+              <MainAction onClick={save} busy={busy} disabled={!items.length}>
+                {t("organize.action")}
+              </MainAction>
+              <SecondaryAction onClick={startOver}>{t("common.startOver")}</SecondaryAction>
+            </>
+          }
+        >
+          <SummaryList>
+            <SummaryRow label={t("summary.files")}>{files.length}</SummaryRow>
+            <SummaryRow label={t("summary.pages")}>{items.length}</SummaryRow>
+          </SummaryList>
+        </Summary>
+      }
+    >
+      <div>
+        <div className="sticky top-16 z-20 mb-4 flex flex-wrap items-center gap-1.5 rounded-xl border bg-background/90 p-2 shadow-sm backdrop-blur">
+          <Tip label={t("organize.rotateLeft")}>
+            <Button variant="ghost" size="icon" disabled={!hasSel} onClick={() => rotate(-90)}>
+              <RotateCcw />
+            </Button>
+          </Tip>
+          <Tip label={t("organize.rotateRight")}>
+            <Button variant="ghost" size="icon" disabled={!hasSel} onClick={() => rotate(90)}>
+              <RotateCw />
+            </Button>
+          </Tip>
+          <Tip label={t("organize.delete")}>
+            <Button variant="ghost" size="icon" disabled={!hasSel} onClick={() => remove()}>
+              <Trash2 />
+            </Button>
+          </Tip>
+          <Tip label={t("editor.actions.undo")}>
+            <Button variant="ghost" size="icon" onClick={undo}>
+              <Undo2 />
+            </Button>
+          </Tip>
+          <div className="mx-1 h-6 w-px bg-border" />
+          <Button variant="ghost" size="sm" onClick={insertBlank}>
+            <SquareDashed />
+            {t("organize.insertBlank")}
           </Button>
-        </Tip>
-        <Tip label={t("organize.rotateRight")}>
-          <Button variant="ghost" size="icon" disabled={!hasSel} onClick={() => rotate(90)}>
-            <RotateCw />
-          </Button>
-        </Tip>
-        <Tip label={t("organize.delete")}>
-          <Button variant="ghost" size="icon" disabled={!hasSel} onClick={() => remove()}>
-            <Trash2 />
-          </Button>
-        </Tip>
-        <Tip label={t("editor.actions.undo")}>
-          <Button variant="ghost" size="icon" onClick={undo}>
-            <Undo2 />
-          </Button>
-        </Tip>
-        <div className="mx-1 h-6 w-px bg-border" />
-        <Button variant="ghost" size="sm" onClick={insertBlank}>
-          <SquareDashed />
-          {t("organize.insertBlank")}
-        </Button>
-        <FileAddButton onFiles={addFiles} label={t("organize.addPdf")} disabled={loading} />
-        <div className="mx-1 h-6 w-px bg-border" />
-        {hasSel ? (
-          <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
-            <Square />
-            {t("organize.deselect")}
-          </Button>
+          <FileAddButton onFiles={addFiles} label={t("organize.addPdf")} disabled={loading} />
+          <div className="mx-1 h-6 w-px bg-border" />
+          {hasSel ? (
+            <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
+              <Square />
+              {t("organize.deselect")}
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" onClick={() => setSelected(new Set(items.map((i) => i.id)))}>
+              <CheckSquare />
+              {t("organize.selectAll")}
+            </Button>
+          )}
+          <span className="ml-auto px-2 text-sm text-muted-foreground">
+            {hasSel ? t("organize.selected", { count: selected.size }) : t("common.pages", { count: items.length })}
+          </span>
+        </div>
+        <p className="mb-4 text-sm text-muted-foreground">{t("organize.hint")}</p>
+
+        {items.length === 0 ? (
+          <p className="py-16 text-center text-muted-foreground">{t("organize.empty")}</p>
         ) : (
-          <Button variant="ghost" size="sm" onClick={() => setSelected(new Set(items.map((i) => i.id)))}>
-            <CheckSquare />
-            {t("organize.selectAll")}
-          </Button>
-        )}
-        <span className="ml-auto px-2 text-sm text-muted-foreground">
-          {hasSel ? t("organize.selected", { count: selected.size }) : t("common.pages", { count: items.length })}
-        </span>
-      </div>
-      <p className="mb-4 text-sm text-muted-foreground">{t("organize.hint")}</p>
-
-      {items.length === 0 ? (
-        <p className="py-16 text-center text-muted-foreground">{t("organize.empty")}</p>
-      ) : (
-        <SortableGrid
-          items={items}
-          onReorder={setItems}
-          className="md:grid-cols-5 lg:grid-cols-6"
-          renderItem={(it, i) => {
-            const isSel = selected.has(it.id);
-            return (
-              <div
-                onClick={(e) => onItemClick(e, it.id)}
-                className={cn(
-                  "group relative cursor-pointer rounded-xl border-2 bg-card p-2 transition-colors select-none",
-                  isSel ? "border-primary bg-primary/5" : "border-transparent hover:border-border",
-                )}
-              >
-                {it.kind === "page" ? (
-                  <PdfThumb doc={sources[it.sourceId]?.doc ?? null} pageIndex={it.pageIndex} width={150} rotation={it.rotation} className="mx-auto" />
-                ) : (
-                  <div className="mx-auto flex aspect-square max-w-[150px] items-center justify-center">
-                    <div
-                      className="flex h-full items-center justify-center rounded-sm bg-white text-xs text-neutral-400 shadow-sm ring-1 ring-black/10 transition-transform"
-                      style={{ aspectRatio: `${it.width / it.height}`, transform: `rotate(${it.rotation}deg)` }}
-                    >
-                      {t("organize.blank")}
-                    </div>
-                  </div>
-                )}
-                <p className="mt-1 text-center text-xs text-muted-foreground">{i + 1}</p>
+          <SortableGrid
+            items={items}
+            onReorder={setItems}
+            className="md:grid-cols-5 lg:grid-cols-6"
+            renderItem={(it, i) => {
+              const isSel = selected.has(it.id);
+              return (
                 <div
-                  className="absolute top-1.5 right-1.5 flex gap-0.5 rounded-lg bg-background/95 p-0.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => onItemClick(e, it.id)}
+                  className={cn(
+                    "group relative cursor-pointer rounded-xl border-2 bg-card p-2 transition-colors select-none",
+                    isSel ? "border-primary bg-primary/5" : "border-transparent hover:border-border",
+                  )}
                 >
-                  <MiniButton label={t("organize.rotateLeft")} onClick={() => rotate(-90, it.id)}>
-                    <RotateCcw />
-                  </MiniButton>
-                  <MiniButton label={t("organize.rotateRight")} onClick={() => rotate(90, it.id)}>
-                    <RotateCw />
-                  </MiniButton>
-                  <MiniButton label={t("organize.delete")} onClick={() => remove(it.id)} danger>
-                    <Trash2 />
-                  </MiniButton>
+                  {it.kind === "page" ? (
+                    <PdfThumb doc={sources[it.sourceId]?.doc ?? null} pageIndex={it.pageIndex} width={150} rotation={it.rotation} className="mx-auto" />
+                  ) : (
+                    <div className="mx-auto flex aspect-square max-w-[150px] items-center justify-center">
+                      <div
+                        className="flex h-full items-center justify-center rounded-sm bg-white text-xs text-neutral-400 shadow-sm ring-1 ring-black/10 transition-transform"
+                        style={{ aspectRatio: `${it.width / it.height}`, transform: `rotate(${it.rotation}deg)` }}
+                      >
+                        {t("organize.blank")}
+                      </div>
+                    </div>
+                  )}
+                  <p className="mt-1 text-center text-xs text-muted-foreground">{i + 1}</p>
+                  <div
+                    className="absolute top-1.5 right-1.5 flex gap-0.5 rounded-lg bg-background/95 p-0.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MiniButton label={t("organize.rotateLeft")} onClick={() => rotate(-90, it.id)}>
+                      <RotateCcw />
+                    </MiniButton>
+                    <MiniButton label={t("organize.rotateRight")} onClick={() => rotate(90, it.id)}>
+                      <RotateCw />
+                    </MiniButton>
+                    <MiniButton label={t("organize.delete")} onClick={() => remove(it.id)} danger>
+                      <Trash2 />
+                    </MiniButton>
+                  </div>
                 </div>
-              </div>
-            );
-          }}
-        />
-      )}
+              );
+            }}
+          />
+        )}
 
-      <ActionBar action={t("organize.action")} onAction={save} busy={busy} disabled={!items.length}>
-        <button type="button" onClick={startOver} className="underline-offset-4 hover:underline">
-          {t("common.startOver")}
-        </button>
-      </ActionBar>
-    </div>
+      </div>
+    </ToolWorkspace>
   );
 }
 

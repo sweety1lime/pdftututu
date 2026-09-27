@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { FileDropzone } from "@/components/FileDropzone";
 import { FileCard } from "@/components/FileCard";
-import { ActionBar } from "@/components/ActionBar";
+import { MainAction, Summary, SummaryList, SummaryRow, ToolWorkspace } from "@/components/ToolWorkspace";
 import { Input } from "@/components/ui/input";
 import { Label, Progress } from "@/components/ui/misc";
 import { Choice } from "@/components/ui/choice";
@@ -61,62 +61,90 @@ export function PdfToImagesTool() {
     }
   };
 
-  if (!file) return <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />;
+  if (!file) {
+    return (
+      <ToolWorkspace>
+        <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />
+      </ToolWorkspace>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <FileCard file={file} onClose={clear} />
-      <div className="grid gap-6 rounded-xl border bg-card p-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label>{t("pdfToImages.format")}</Label>
-          <Choice
-            value={format}
-            onChange={setFormat}
-            options={[
-              { value: "png", label: "PNG" },
-              { value: "jpg", label: "JPG" },
-            ]}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>{t("pdfToImages.dpi")}</Label>
-          <Choice
-            value={dpi}
-            onChange={setDpi}
-            options={[
-              { value: 72, label: t("pdfToImages.dpiLow") },
-              { value: 150, label: t("pdfToImages.dpiMid") },
-              { value: 300, label: t("pdfToImages.dpiHigh") },
-            ]}
-          />
-        </div>
-        <div className="space-y-2 sm:col-span-2">
-          <Label>{t("pdfToImages.pages")}</Label>
-          <div className="flex flex-wrap items-center gap-3">
+    <ToolWorkspace
+      summary={
+        <Summary
+          status={
+            progress !== null ? (
+              <Progress value={progress} />
+            ) : (
+              <span className="lg:hidden">{t("common.pages", { count: pages.length })}</span>
+            )
+          }
+          actions={
+            <MainAction onClick={run} busy={progress !== null} disabled={!pages.length}>
+              {t("pdfToImages.action")}
+            </MainAction>
+          }
+        >
+          <SummaryList>
+            <SummaryRow label={t("summary.pages")}>{pages.length}</SummaryRow>
+            <SummaryRow label={t("pdfToImages.format")}>{format.toUpperCase()}</SummaryRow>
+            <SummaryRow label="DPI">{dpi}</SummaryRow>
+          </SummaryList>
+        </Summary>
+      }
+    >
+      <div className="flex flex-col gap-6">
+        <FileCard file={file} onClose={clear} />
+        <div className="grid gap-6 rounded-xl border bg-card p-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label>{t("pdfToImages.format")}</Label>
             <Choice
-              value={pagesMode}
-              onChange={setPagesMode}
+              value={format}
+              onChange={setFormat}
               options={[
-                { value: "all", label: t("pdfToImages.pagesAll") },
-                { value: "range", label: t("pdfToImages.pagesRange") },
+                { value: "png", label: "PNG" },
+                { value: "jpg", label: "JPG" },
               ]}
             />
-            {pagesMode === "range" && (
-              <Input
-                className="max-w-60"
-                value={range}
-                onChange={(e) => setRange(e.target.value)}
-                placeholder={t("split.rangesPlaceholder")}
-                autoFocus
+          </div>
+          <div className="space-y-2">
+            <Label>{t("pdfToImages.dpi")}</Label>
+            <Choice
+              value={dpi}
+              onChange={setDpi}
+              options={[
+                { value: 72, label: t("pdfToImages.dpiLow") },
+                { value: 150, label: t("pdfToImages.dpiMid") },
+                { value: 300, label: t("pdfToImages.dpiHigh") },
+              ]}
+            />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label>{t("pdfToImages.pages")}</Label>
+            <div className="flex flex-wrap items-center gap-3">
+              <Choice
+                value={pagesMode}
+                onChange={setPagesMode}
+                options={[
+                  { value: "all", label: t("pdfToImages.pagesAll") },
+                  { value: "range", label: t("pdfToImages.pagesRange") },
+                ]}
               />
-            )}
+              {pagesMode === "range" && (
+                <Input
+                  className="max-w-60"
+                  value={range}
+                  onChange={(e) => setRange(e.target.value)}
+                  placeholder={t("split.rangesPlaceholder")}
+                  autoFocus
+                />
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <ActionBar action={t("pdfToImages.action")} onAction={run} busy={progress !== null} disabled={!pages.length}>
-        {progress !== null ? <Progress value={progress} className="max-w-xs" /> : t("common.pages", { count: pages.length })}
-      </ActionBar>
-    </div>
+      </div>
+    </ToolWorkspace>
   );
 }

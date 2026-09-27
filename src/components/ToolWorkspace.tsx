@@ -84,6 +84,17 @@ export function SummaryRow({
   );
 }
 
+/** «Скачается как <имя файла>»; после строк итога — с разделителем. */
+export function DownloadsAs({ name }: { name: string }) {
+  const t = useTranslations("summary");
+  return (
+    <div className="flex flex-col gap-1.5 text-[13px] not-first:border-t not-first:pt-5.5">
+      <p className="text-muted-foreground">{t("downloadsAs")}</p>
+      <p className="font-mono break-all text-secondary-foreground">{name}</p>
+    </div>
+  );
+}
+
 /** Главная кнопка инструмента: во всю ширину панели. */
 export function MainAction({
   busy,

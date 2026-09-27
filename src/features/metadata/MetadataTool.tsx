@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Eraser, EyeOff } from "lucide-react";
 import { FileDropzone } from "@/components/FileDropzone";
 import { FileCard } from "@/components/FileCard";
-import { ActionBar } from "@/components/ActionBar";
+import { DownloadsAs, MainAction, Summary, ToolWorkspace } from "@/components/ToolWorkspace";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/misc";
@@ -56,12 +56,14 @@ export function MetadataTool() {
     setClearAll(true);
   };
 
+  const outName = file ? `${baseName(file.name)}${clearAll ? "_clean" : ""}.pdf` : "";
+
   const run = async () => {
     if (!file || !fields) return;
     setBusy(true);
     try {
       const out = await writeMetadata(file.bytes, fields, { clearAll });
-      downloadBlob(out, `${baseName(file.name)}${clearAll ? "_clean" : ""}.pdf`);
+      downloadBlob(out, outName);
       toast.success(t("common.done"));
     } catch (e) {
       showError(e);
@@ -70,60 +72,79 @@ export function MetadataTool() {
     }
   };
 
-  if (!file) return <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />;
+  if (!file) {
+    return (
+      <ToolWorkspace>
+        <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />
+      </ToolWorkspace>
+    );
+  }
 
   const date = (d?: Date) =>
     d && !clearAll ? d.toLocaleString(locale, { dateStyle: "long", timeStyle: "short" }) : "—";
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <FileCard file={file} onClose={reset} />
+    <ToolWorkspace
+      summary={
+        <Summary
+          actions={
+            <MainAction onClick={run} busy={busy} disabled={!fields}>
+              {t("metadata.action")}
+            </MainAction>
+          }
+        >
+          <DownloadsAs name={outName} />
+        </Summary>
+      }
+    >
+      <div className="flex max-w-2xl flex-col gap-6">
+        <FileCard file={file} onClose={reset} />
 
-      {meta && fields && (
-        <>
-          <div className="space-y-4 rounded-xl border bg-card p-5">
-            {METADATA_FIELDS.map((f) => (
-              <div key={f} className="grid gap-1.5 sm:grid-cols-[10rem_1fr] sm:items-center">
-                <Label htmlFor={`meta-${f}`}>{t(`metadata.fields.${f}`)}</Label>
-                <Input
-                  id={`meta-${f}`}
-                  value={fields[f]}
-                  placeholder="—"
-                  onChange={(e) => {
-                    setFields({ ...fields, [f]: e.target.value });
-                    setClearAll(false);
-                  }}
-                />
-              </div>
-            ))}
-            <dl className="grid gap-x-4 gap-y-1.5 pt-1 text-sm sm:grid-cols-[10rem_1fr]">
-              <dt className="font-medium">{t("metadata.created")}</dt>
-              <dd className="text-muted-foreground">{date(meta.created)}</dd>
-              <dt className="font-medium">{t("metadata.modified")}</dt>
-              <dd className="text-muted-foreground">{date(meta.modified)}</dd>
-            </dl>
-          </div>
+        {meta && fields && (
+          <>
+            <div className="space-y-4 rounded-xl border bg-card p-5">
+              {METADATA_FIELDS.map((f) => (
+                <div key={f} className="grid gap-1.5 sm:grid-cols-[10rem_1fr] sm:items-center">
+                  <Label htmlFor={`meta-${f}`}>{t(`metadata.fields.${f}`)}</Label>
+                  <Input
+                    id={`meta-${f}`}
+                    value={fields[f]}
+                    placeholder="—"
+                    onChange={(e) => {
+                      setFields({ ...fields, [f]: e.target.value });
+                      setClearAll(false);
+                    }}
+                  />
+                </div>
+              ))}
+              <dl className="grid gap-x-4 gap-y-1.5 pt-1 text-sm sm:grid-cols-[10rem_1fr]">
+                <dt className="font-medium">{t("metadata.created")}</dt>
+                <dd className="text-muted-foreground">{date(meta.created)}</dd>
+                <dt className="font-medium">{t("metadata.modified")}</dt>
+                <dd className="text-muted-foreground">{date(meta.modified)}</dd>
+              </dl>
+            </div>
 
-          {meta.hasHiddenData && !clearAll && (
-            <p className="flex gap-2 text-sm text-muted-foreground">
-              <EyeOff className="size-4 shrink-0 translate-y-0.5" />
-              {t("metadata.hiddenData")}
-            </p>
-          )}
+            {meta.hasHiddenData && !clearAll && (
+              <p className="flex gap-2 text-sm text-muted-foreground">
+                <EyeOff className="size-4 shrink-0 translate-y-0.5" />
+                {t("metadata.hiddenData")}
+              </p>
+            )}
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Button variant="outline" onClick={eraseAll} disabled={clearAll}>
-              <Eraser />
-              {t("metadata.clearAll")}
-            </Button>
-            <p className="text-sm text-muted-foreground">
-              {clearAll ? t("metadata.clearAllReady") : t("metadata.clearAllHint")}
-            </p>
-          </div>
-        </>
-      )}
+            <div className="flex flex-wrap items-center gap-3">
+              <Button variant="outline" onClick={eraseAll} disabled={clearAll}>
+                <Eraser />
+                {t("metadata.clearAll")}
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                {clearAll ? t("metadata.clearAllReady") : t("metadata.clearAllHint")}
+              </p>
+            </div>
+          </>
+        )}
 
-      <ActionBar action={t("metadata.action")} onAction={run} busy={busy} disabled={!fields} />
-    </div>
+      </div>
+    </ToolWorkspace>
   );
 }
