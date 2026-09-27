@@ -9,7 +9,6 @@ import { FileCard } from "@/components/FileCard";
 import { DownloadsAs, MainAction, Summary, SummaryList, SummaryRow, ToolWorkspace } from "@/components/ToolWorkspace";
 import { PdfThumb } from "@/components/PdfThumb";
 import { baseName, downloadBlob } from "@/lib/download";
-import { toGrayscale } from "@/lib/pdf/grayscale";
 import { useLoadedPdfs } from "@/lib/pdf/useLoadedPdfs";
 import { useErrorToast } from "@/lib/useErrorToast";
 
@@ -26,6 +25,7 @@ export function GrayscaleTool() {
     if (!file) return;
     setBusy(true);
     try {
+      const { toGrayscale } = await import("@/lib/pdf/grayscale");
       downloadBlob(await toGrayscale(file.bytes), outName);
       toast.success(t("common.done"));
     } catch (e) {

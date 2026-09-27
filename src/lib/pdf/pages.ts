@@ -1,5 +1,5 @@
 import { degrees, PDFDocument } from "@cantoo/pdf-lib";
-import { normalizeRotation } from "./coords";
+import { normalizeRotation, PAGE_SIZES } from "./coords";
 
 const load = (bytes: Uint8Array) => PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
 
@@ -84,11 +84,6 @@ export async function buildFromItems(items: PageItem[], sources: Record<string, 
   }
   return out.save();
 }
-
-export const PAGE_SIZES = {
-  a4: [595.28, 841.89] as const,
-  letter: [612, 792] as const,
-};
 
 export interface PreparedImage {
   bytes: Uint8Array;

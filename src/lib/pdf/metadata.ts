@@ -8,10 +8,8 @@
  */
 import { PDFDict, PDFName, type PDFDocument } from "@cantoo/pdf-lib";
 import { loadForEdit } from "./load";
+import { METADATA_FIELDS, type MetadataField } from "./metadataFields";
 import { removeUnreachableObjects } from "./scrub";
-
-export const METADATA_FIELDS = ["title", "author", "subject", "keywords", "creator", "producer"] as const;
-export type MetadataField = (typeof METADATA_FIELDS)[number];
 
 export interface PdfMetadata extends Record<MetadataField, string> {
   created?: Date;

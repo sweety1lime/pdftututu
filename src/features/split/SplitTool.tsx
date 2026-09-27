@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Checkbox, Label } from "@/components/ui/misc";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/menu";
 import { baseName, downloadFiles } from "@/lib/download";
-import { splitPdf } from "@/lib/pdf/pages";
 import { chunkPages, formatGroup, parsePageRanges } from "@/lib/pdf/ranges";
 import { useLoadedPdfs } from "@/lib/pdf/useLoadedPdfs";
 import { useErrorToast } from "@/lib/useErrorToast";
@@ -54,6 +53,7 @@ export function SplitTool() {
     if (!file || !plan.groups.length) return;
     setBusy(true);
     try {
+      const { splitPdf } = await import("@/lib/pdf/pages");
       const parts = await splitPdf(file.bytes, plan.groups);
       const base = baseName(file.name);
       downloadFiles(

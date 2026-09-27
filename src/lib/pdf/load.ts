@@ -3,43 +3,7 @@
 import { PDFDict, PDFDocument, PDFName, PDFRawStream } from "@cantoo/pdf-lib";
 import { askPassword } from "@/lib/passwordPrompt";
 import { PdfError } from "./errors";
-
-export interface PdfSource {
-  id: string;
-  name: string;
-  /** Байты PDF. Если файл был зашифрован — уже расшифрованные. */
-  bytes: Uint8Array;
-  wasEncrypted: boolean;
-  /** Пароль, которым открыли файл (нужен инструменту «Снять пароль»). */
-  password?: string;
-}
-
-let counter = 0;
-export const newId = (prefix = "id") => `${prefix}-${Date.now().toString(36)}-${(counter++).toString(36)}`;
-
-function indexOfBytes(haystack: Uint8Array, needle: number[], from = 0, to = haystack.length): number {
-  const first = needle[0];
-  const end = Math.min(to, haystack.length) - needle.length;
-  outer: for (let i = from; i <= end; i++) {
-    if (haystack[i] !== first) continue;
-    for (let j = 1; j < needle.length; j++) if (haystack[i + j] !== needle[j]) continue outer;
-    return i;
-  }
-  return -1;
-}
-
-const ascii = (s: string) => Array.from(s, (c) => c.charCodeAt(0));
-const PDF_HEADER = ascii("%PDF-");
-const ENCRYPT_KEY = ascii("/Encrypt");
-
-export function looksLikePdf(bytes: Uint8Array): boolean {
-  return indexOfBytes(bytes, PDF_HEADER, 0, 1024) !== -1;
-}
-
-/** Быстрая проверка: есть ли в файле словарь шифрования (/Encrypt в trailer). */
-export function hasEncryptMarker(bytes: Uint8Array): boolean {
-  return indexOfBytes(bytes, ENCRYPT_KEY) !== -1;
-}
+import type { PdfSource } from "./read";
 
 /**
  * Расшифровать PDF паролем и вернуть файл БЕЗ шифрования.
@@ -64,8 +28,11 @@ export async function decryptWithPassword(bytes: Uint8Array, password: string): 
   return doc.save();
 }
 
-/** Открыть pdf-lib документом, спрашивая пароль при необходимости. */
-async function decrypt(bytes: Uint8Array, name: string): Promise<{ bytes: Uint8Array; password: string } | null> {
+/**
+ * Расшифровать файл, спрашивая пароль при необходимости. null — файл на самом деле не зашифрован.
+ * Вызывается из readPdfFile (read.ts), только когда в файле есть /Encrypt.
+ */
+export async function decrypt(bytes: Uint8Array, name: string): Promise<{ bytes: Uint8Array; password: string } | null> {
   // Проверяем по-честному: /Encrypt мог встретиться случайно
   const probe = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
   if (!probe.isEncrypted) return null;
@@ -89,27 +56,6 @@ async function decrypt(bytes: Uint8Array, name: string): Promise<{ bytes: Uint8A
 function isPasswordError(e: unknown): boolean {
   const msg = e instanceof Error ? `${e.name} ${e.message}` : String(e);
   return /password|decrypt|encrypt/i.test(msg);
-}
-
-/** Прочитать PDF-файл: проверка формата + расшифровка, если нужно. */
-export async function readPdfFile(file: File | { name: string; bytes: Uint8Array }): Promise<PdfSource> {
-  const name = file.name;
-  const bytes = file instanceof File ? new Uint8Array(await file.arrayBuffer()) : file.bytes;
-  if (!looksLikePdf(bytes)) throw new PdfError("notPdf", name);
-
-  if (hasEncryptMarker(bytes)) {
-    let result: Awaited<ReturnType<typeof decrypt>>;
-    try {
-      result = await decrypt(bytes, name);
-    } catch (e) {
-      if (e instanceof PdfError) throw e;
-      throw new PdfError("corrupted", name, e);
-    }
-    if (result) {
-      return { id: newId("pdf"), name, bytes: result.bytes, wasEncrypted: true, password: result.password };
-    }
-  }
-  return { id: newId("pdf"), name, bytes, wasEncrypted: false };
 }
 
 /** Загрузить уже расшифрованный PDF в pdf-lib для изменений. */

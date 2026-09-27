@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/misc";
 import { baseName, downloadBlob } from "@/lib/download";
 import { parsePageRanges } from "@/lib/pdf/ranges";
-import { addPageNumbers, POSITIONS, type Position } from "@/lib/pdf/stamp";
+import { POSITIONS, type Position } from "@/lib/pdf/placement";
 import { useLoadedPdfs } from "@/lib/pdf/useLoadedPdfs";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { cn } from "@/lib/utils";
@@ -70,6 +70,7 @@ export function PageNumbersTool() {
     if (!file || !pages.list.length) return;
     setBusy(true);
     try {
+      const { addPageNumbers } = await import("@/lib/pdf/stamp");
       const out = await addPageNumbers(file.bytes, { position, format, start, pages: pages.list, fontSize: size });
       downloadBlob(out, outName);
       toast.success(t("common.done"));

@@ -9,7 +9,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dest = join(root, "public", "tesseract");
 const require = createRequire(join(root, "package.json"));
 
-// Должны совпадать с OCR_LANGUAGES в src/lib/ocr.ts (модели — из пакетов @tesseract.js-data/*)
+// Должны совпадать с OCR_LANGUAGES в src/lib/ocrLanguages.ts (модели — из пакетов @tesseract.js-data/*)
 const LANGS = ["rus", "eng", "ukr", "deu", "fra", "spa"];
 // OCR работает только в режиме LSTM; вариант ядра воркер выбирает по поддержке SIMD в браузере
 const CORES = ["tesseract-core-relaxedsimd-lstm.wasm.js", "tesseract-core-simd-lstm.wasm.js", "tesseract-core-lstm.wasm.js"];

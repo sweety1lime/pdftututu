@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { newId } from "@/lib/pdf/load";
+import { newId } from "@/lib/id";
 import type { PreparedImage } from "@/lib/pdf/pages";
 import type { Asset } from "./types";
 

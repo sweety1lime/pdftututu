@@ -3,9 +3,9 @@
 import { create } from "zustand";
 import { temporal } from "zundo";
 import type { PDFDocumentProxy } from "pdfjs-dist";
-import type { PdfSource } from "@/lib/pdf/load";
+import type { PdfSource } from "@/lib/pdf/read";
 import { closePdfjs } from "@/lib/pdf/pdfjs";
-import { newId } from "@/lib/pdf/load";
+import { newId } from "@/lib/id";
 import type { Asset, EditorObject, FormValue, FormWidget, PageInfo, StyleDefaults, Tool } from "./types";
 
 export const MIN_ZOOM = 0.25;

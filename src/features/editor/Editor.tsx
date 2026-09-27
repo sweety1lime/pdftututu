@@ -9,7 +9,8 @@ import { PdfThumb } from "@/components/PdfThumb";
 import { PrivacyNote } from "@/components/ToolWorkspace";
 import { Button } from "@/components/ui/button";
 import { prepareImage } from "@/lib/images";
-import { newId, readPdfFile, type PdfSource } from "@/lib/pdf/load";
+import { newId } from "@/lib/id";
+import { preloadPdfLib, readPdfFile, type PdfSource } from "@/lib/pdf/read";
 import { CSS_FAMILY } from "@/lib/pdf/fonts";
 import { takeDraftRestore, usePendingFiles } from "@/lib/pendingFiles";
 import { useErrorToast } from "@/lib/useErrorToast";
@@ -65,6 +66,8 @@ export default function Editor({ entry = "editor", onOpenChange }: Props) {
           formValues: restore?.formValues,
           assets: restore?.assets,
         });
+        // pdf-lib понадобится при сохранении — пусть грузится, пока человек редактирует
+        preloadPdfLib();
         const s = useEditor.getState();
         if (entry === "sign") setSignOpen(true);
         else if (entry === "forms" && !doc.widgets.length) toast.info(t("formsNone"));

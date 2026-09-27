@@ -10,7 +10,6 @@ import { SortableGrid } from "@/components/SortableGrid";
 import { MainAction, Summary, SummaryList, SummaryRow, ToolWorkspace } from "@/components/ToolWorkspace";
 import { Button } from "@/components/ui/button";
 import { downloadBlob, formatBytes } from "@/lib/download";
-import { mergePdfs } from "@/lib/pdf/pages";
 import { useLoadedPdfs, type LoadedPdf } from "@/lib/pdf/useLoadedPdfs";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { cn } from "@/lib/utils";
@@ -28,6 +27,7 @@ export function MergeTool() {
   const merge = async () => {
     setBusy(true);
     try {
+      const { mergePdfs } = await import("@/lib/pdf/pages");
       const out = await mergePdfs(files.map((f) => f.bytes));
       downloadBlob(out, "merged.pdf");
       toast.success(t("common.done"));

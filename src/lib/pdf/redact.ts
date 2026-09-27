@@ -1,6 +1,7 @@
 "use client";
 
-import { METADATA_FIELDS, writeMetadata } from "./metadata";
+import { writeMetadata } from "./metadata";
+import { METADATA_FIELDS } from "./metadataFields";
 import { closePdfjs, openPdfjs } from "./pdfjs";
 import { rasterizePages } from "./rasterize";
 

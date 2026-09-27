@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { PDFDict, PDFDocument, PDFName } from "@cantoo/pdf-lib";
-import { addPageNumbers, addWatermark, watermarkPlacements } from "@/lib/pdf/stamp";
+import { addPageNumbers, addWatermark } from "@/lib/pdf/stamp";
+import { watermarkPlacements } from "@/lib/pdf/placement";
 import { makePdf, makePng, textInView, useDiskFonts } from "./helpers";
 
 beforeAll(() => useDiskFonts());

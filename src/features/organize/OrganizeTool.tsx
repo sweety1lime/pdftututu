@@ -11,8 +11,9 @@ import { MainAction, SecondaryAction, Summary, SummaryList, SummaryRow, ToolWork
 import { Button } from "@/components/ui/button";
 import { Tip } from "@/components/ui/misc";
 import { baseName, downloadBlob } from "@/lib/download";
-import { newId } from "@/lib/pdf/load";
-import { buildFromItems, PAGE_SIZES, type PageItem } from "@/lib/pdf/pages";
+import { newId } from "@/lib/id";
+import { PAGE_SIZES } from "@/lib/pdf/coords";
+import type { PageItem } from "@/lib/pdf/pages";
 import { useLoadedPdfs, type LoadedPdf } from "@/lib/pdf/useLoadedPdfs";
 import { usePendingFiles, type PendingItem } from "@/lib/pendingFiles";
 import { useErrorToast } from "@/lib/useErrorToast";
@@ -115,6 +116,7 @@ export function OrganizeTool() {
   const save = async () => {
     setBusy(true);
     try {
+      const { buildFromItems } = await import("@/lib/pdf/pages");
       const out = await buildFromItems(
         items,
         Object.fromEntries(files.map((f) => [f.id, f.bytes])),

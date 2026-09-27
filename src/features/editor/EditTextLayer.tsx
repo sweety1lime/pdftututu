@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { newId } from "@/lib/pdf/load";
+import { newId } from "@/lib/id";
 import { baselineOffset } from "@/lib/pdf/textLayout";
 import { withTextSize } from "./factory";
 import { beginGesture, useEditor } from "./store";

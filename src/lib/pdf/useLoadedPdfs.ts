@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { formatBytes } from "@/lib/download";
 import { usePendingFiles, type PendingItem, type ReadPdf } from "@/lib/pendingFiles";
-import { readPdfFile, type PdfSource } from "./load";
+import { preloadPdfLib, readPdfFile, type PdfSource } from "./read";
 import { closePdfjs, openPdfjs } from "./pdfjs";
 import { PdfError } from "./errors";
 
@@ -66,6 +66,7 @@ export function useLoadedPdfs({ pickUpPending = true }: { pickUpPending?: boolea
             showError(e);
           }
         }
+        if (added.length) preloadPdfLib();
       } finally {
         setLoading(false);
       }
