@@ -23,8 +23,6 @@ export const fontVariables = `${ui.variable} ${uiMono.variable}`;
  * Тёмная тема там по умолчанию, светлая — если её выбрали на сайте (next-themes хранит выбор
  * в localStorage.theme).
  */
-export const LIGHT_THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t==="light"||(t==="system"&&matchMedia("(prefers-color-scheme: light)").matches))document.documentElement.classList.remove("dark")}catch(e){}`;
-
 export function prefersLight(): boolean {
   try {
     const t = localStorage.getItem("theme");
