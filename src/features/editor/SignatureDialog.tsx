@@ -247,7 +247,7 @@ export function SignatureDialog({
                   key={c}
                   type="button"
                   onClick={() => setInk(c)}
-                  className={cn("size-6 rounded-full", ink === c && "ring-2 ring-primary ring-offset-2 ring-offset-background")}
+                  className={cn("size-6 rounded-full border border-foreground/20", ink === c && "ring-2 ring-primary ring-offset-2 ring-offset-card")}
                   style={{ background: c }}
                   aria-label={c}
                 />

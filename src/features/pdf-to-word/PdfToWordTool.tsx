@@ -145,9 +145,9 @@ export function PdfToWordTool() {
         </div>
 
         {hasText === false && (
-          <div className="space-y-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
+          <div className="space-y-3 rounded-xl border border-input bg-card p-4">
             <p className="flex gap-2 text-sm">
-              <ScanText className="size-4 shrink-0 translate-y-0.5 text-amber-600 dark:text-amber-400" />
+              <ScanText className="size-4 shrink-0 translate-y-0.5 text-primary-ink" />
               {t("pdfToWord.noText")}
             </p>
             <Label className="font-normal">

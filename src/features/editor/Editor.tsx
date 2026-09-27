@@ -154,8 +154,8 @@ function DraftBanner({ draft, onRestore, onDiscard }: { draft: Draft; onRestore:
   const locale = useLocale();
   const date = new Date(draft.savedAt).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" });
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
-      <History className="size-5 shrink-0 text-amber-600 dark:text-amber-400" />
+    <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-input bg-card p-4">
+      <History className="size-5 shrink-0 text-primary-ink" />
       <div className="min-w-0 flex-1">
         <p className="font-medium">{t("title")}</p>
         <p className="truncate text-sm text-muted-foreground">{t("description", { name: draft.name, date })}</p>
