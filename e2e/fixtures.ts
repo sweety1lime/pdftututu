@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { expect, test as base, type Page } from "@playwright/test";
 
-/** Упавший на странице JS или заблокированное CSP — всегда ошибка теста. */
+/** Упавший на странице JS, заблокированное CSP или пропавший перевод — всегда ошибка теста. */
 export const test = base.extend<{ pageErrors: string[] }>({
   pageErrors: [
     // Параметр не называем use: линтер примет его за хук React
@@ -9,10 +9,11 @@ export const test = base.extend<{ pageErrors: string[] }>({
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(e.message));
       page.on("console", (msg) => {
-        if (msg.type() === "error" && msg.text().includes("Content Security Policy")) errors.push(msg.text());
+        // MISSING_MESSAGE — перевод не дошёл до браузера (например, раздел не передан клиенту)
+        if (msg.type() === "error" && /Content Security Policy|MISSING_MESSAGE/.test(msg.text())) errors.push(msg.text());
       });
       await provide(errors);
-      expect(errors, "ошибки JS и нарушения CSP на странице").toEqual([]);
+      expect(errors, "ошибки JS, CSP и переводов на странице").toEqual([]);
     },
     { auto: true },
   ],

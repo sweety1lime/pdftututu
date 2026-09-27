@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { PdfSource } from "@/lib/pdf/load";
+import type { PdfSource } from "@/lib/pdf/read";
 
 /** PDF, уже прочитанный и при необходимости расшифрованный: второй раз пароль не спросят. */
 export type ReadPdf = PdfSource & { size: number };

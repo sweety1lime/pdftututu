@@ -9,10 +9,7 @@ import { cn } from "@/lib/utils";
 import { Checkbox, Label } from "@/components/ui/misc";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/menu";
 import { baseName, downloadBlob } from "@/lib/download";
-import { rasterizePages } from "@/lib/pdf/rasterize";
-import { applyRedactions } from "@/lib/pdf/redact";
 import { useErrorToast } from "@/lib/useErrorToast";
-import { exportEditedPdf } from "./exportPdf";
 import { useEditor } from "./store";
 
 export function ExportButton() {
@@ -35,6 +32,8 @@ export function ExportButton() {
     setBusy(true);
     try {
       const st = useEditor.getState();
+      // pdf-lib и всё для сохранения грузим только сейчас — редактору они не нужны
+      const { exportEditedPdf } = await import("./exportPdf");
       let out = await exportEditedPdf({
         bytes: st.source!.bytes,
         pages: st.pages,
@@ -48,10 +47,12 @@ export function ExportButton() {
       const redacted = pagesWith((o) => o.type === "redact");
       const textEdited = rasterize && hasTextEdits ? pagesWith((o) => o.type === "whiteout" && !!o.coversText) : new Set<number>();
       if (redacted.size) {
+        const { applyRedactions } = await import("@/lib/pdf/redact");
         out = await applyRedactions(out, new Set([...redacted, ...textEdited]), {
           ocrLanguages: redactOcr ? ["rus", "eng"] : undefined,
         });
       } else if (textEdited.size) {
+        const { rasterizePages } = await import("@/lib/pdf/rasterize");
         out = await rasterizePages(out, { dpi: 200, quality: 0.85, only: textEdited });
       }
       downloadBlob(out, `${baseName(st.source!.name)}_${redacted.size ? "redacted" : "edited"}.pdf`);

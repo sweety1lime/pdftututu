@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { FileText } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { clearDraft, loadDraft, type Draft } from "@/features/editor/draftStorage";
+import { clearDraft, loadDraftInfo, type DraftInfo } from "@/features/editor/draftStorage";
 import { requestDraftRestore } from "@/lib/pendingFiles";
 import { Button } from "@/components/ui/button";
 
@@ -12,10 +12,10 @@ import { Button } from "@/components/ui/button";
 export function DraftCard() {
   const t = useTranslations();
   const locale = useLocale();
-  const [draft, setDraft] = useState<Draft | null>(null);
+  const [draft, setDraft] = useState<DraftInfo | null>(null);
 
   useEffect(() => {
-    loadDraft().then(setDraft);
+    loadDraftInfo().then(setDraft);
   }, []);
 
   if (!draft) return null;

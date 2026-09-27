@@ -12,8 +12,9 @@ import { Label } from "@/components/ui/misc";
 import { Choice } from "@/components/ui/choice";
 import { downloadBlob } from "@/lib/download";
 import { prepareImage } from "@/lib/images";
-import { newId } from "@/lib/pdf/load";
-import { imagesToPdf, type ImagesToPdfOptions, type PreparedImage } from "@/lib/pdf/pages";
+import { newId } from "@/lib/id";
+import type { ImagesToPdfOptions, PreparedImage } from "@/lib/pdf/pages";
+import { preloadPdfLib } from "@/lib/pdf/read";
 import { usePendingFiles } from "@/lib/pendingFiles";
 import { useErrorToast } from "@/lib/useErrorToast";
 
@@ -49,6 +50,7 @@ export function ImagesToPdfTool() {
       }
     }
     setLoading(false);
+    preloadPdfLib();
   };
 
   usePendingFiles((items) => add(items.filter((i): i is File => i instanceof File)));
@@ -65,6 +67,7 @@ export function ImagesToPdfTool() {
   const create = async () => {
     setBusy(true);
     try {
+      const { imagesToPdf } = await import("@/lib/pdf/pages");
       const out = await imagesToPdf(items, opts);
       downloadBlob(out, outName);
       toast.success(t("common.done"));

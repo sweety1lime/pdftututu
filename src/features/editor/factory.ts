@@ -1,4 +1,4 @@
-import { newId } from "@/lib/pdf/load";
+import { newId } from "@/lib/id";
 import { lineHeightPt, measureTextBrowser } from "@/lib/pdf/textLayout";
 import type { BoxObject, EditorObject, StrokeObject, StyleDefaults, TextObject } from "./types";
 
@@ -98,3 +98,15 @@ export function scaleObject(o: EditorObject, sx: number, sy: number): Partial<Ed
 
 /** Инструменты, после использования которых возвращаемся к «Выбору». */
 export const ONE_SHOT_TOOLS = new Set(["text", "rect", "ellipse", "line", "arrow"]);
+
+/** Треугольник наконечника стрелки (SVG-путь). Общий для холста редактора и экспорта в PDF. */
+export function arrowHeadPoints(x1: number, y1: number, x2: number, y2: number, strokeWidth: number): number[] {
+  const len = Math.max(8, strokeWidth * 4);
+  const width = len * 0.6;
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const bx = x2 - len * Math.cos(angle);
+  const by = y2 - len * Math.sin(angle);
+  const nx = -Math.sin(angle) * width;
+  const ny = Math.cos(angle) * width;
+  return [x2, y2, bx + nx, by + ny, bx - nx, by - ny];
+}

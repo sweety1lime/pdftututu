@@ -10,7 +10,6 @@ import { DownloadsAs, MainAction, Summary, ToolWorkspace } from "@/components/To
 import { Input } from "@/components/ui/input";
 import { Checkbox, Label } from "@/components/ui/misc";
 import { baseName, downloadBlob } from "@/lib/download";
-import { protectPdf } from "@/lib/pdf/security";
 import { useLoadedPdfs } from "@/lib/pdf/useLoadedPdfs";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { cn } from "@/lib/utils";
@@ -36,6 +35,7 @@ export function ProtectTool() {
     if (!file || !valid) return;
     setBusy(true);
     try {
+      const { protectPdf } = await import("@/lib/pdf/security");
       const out = await protectPdf(file.bytes, { userPassword: password, ownerPassword: owner || undefined, ...perms });
       downloadBlob(out, outName);
       toast.success(t("common.done"));

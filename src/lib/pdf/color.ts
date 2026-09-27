@@ -13,7 +13,3 @@ export function hexToRgb(hex: string): RGB {
   const [r, g, b] = parseHex(hex);
   return rgb(r / 255, g / 255, b / 255);
 }
-
-export function toHex(r: number, g: number, b: number): string {
-  return `#${[r, g, b].map((v) => Math.round(Math.min(255, Math.max(0, v))).toString(16).padStart(2, "0")).join("")}`;
-}

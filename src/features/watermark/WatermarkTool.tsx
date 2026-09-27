@@ -17,7 +17,8 @@ import { baseName, downloadBlob } from "@/lib/download";
 import { prepareImage } from "@/lib/images";
 import { CSS_FAMILY } from "@/lib/pdf/fonts";
 import { parsePageRanges } from "@/lib/pdf/ranges";
-import { addWatermark, watermarkPlacements, type WatermarkImage, type WatermarkLayout } from "@/lib/pdf/stamp";
+import { watermarkPlacements, type WatermarkLayout } from "@/lib/pdf/placement";
+import type { WatermarkImage } from "@/lib/pdf/stamp";
 import { useLoadedPdfs } from "@/lib/pdf/useLoadedPdfs";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { cn } from "@/lib/utils";
@@ -78,6 +79,7 @@ export function WatermarkTool() {
     if (!file || !ready) return;
     setBusy(true);
     try {
+      const { addWatermark } = await import("@/lib/pdf/stamp");
       const out = await addWatermark(file.bytes, {
         ...(kind === "text" ? { text, color, fontSize } : { image: image!, imageScale: imageScale / 100 }),
         opacity: 1 - transparency / 100,

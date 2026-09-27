@@ -9,7 +9,8 @@ import { FileCard } from "@/components/FileCard";
 import { MainAction, SecondaryAction, Summary, SummaryList, SummaryRow, ToolWorkspace } from "@/components/ToolWorkspace";
 import { Checkbox, Label, Progress } from "@/components/ui/misc";
 import { baseName, downloadBlob } from "@/lib/download";
-import { OCR_LANGUAGES, runOcr, type OcrProgress, type OcrResult } from "@/lib/ocr";
+import type { OcrProgress, OcrResult } from "@/lib/ocr";
+import { OCR_LANGUAGES } from "@/lib/ocrLanguages";
 import { useLoadedPdfs } from "@/lib/pdf/useLoadedPdfs";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,7 @@ export function OcrTool() {
     setResult(null);
     abort.current = new AbortController();
     try {
+      const { runOcr } = await import("@/lib/ocr");
       const r = await runOcr(
         file.bytes,
         file.doc,

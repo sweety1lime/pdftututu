@@ -6,16 +6,6 @@ import { loadForEdit } from "./pdf/load";
 import { renderPageToNewCanvas } from "./pdf/pdfjs";
 import { addInvisibleText, type OcrWord } from "./pdf/textLayer";
 
-// Модели для этих языков копирует scripts/copy-tesseract.mjs — списки должны совпадать
-export const OCR_LANGUAGES = [
-  { code: "rus", label: "Русский" },
-  { code: "eng", label: "English" },
-  { code: "ukr", label: "Українська" },
-  { code: "deu", label: "Deutsch" },
-  { code: "fra", label: "Français" },
-  { code: "spa", label: "Español" },
-] as const;
-
 export interface OcrProgress {
   stage: "loading" | "recognizing" | "saving";
   page: number;

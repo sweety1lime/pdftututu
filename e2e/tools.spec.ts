@@ -12,6 +12,25 @@ test("объединение двух файлов", async ({ page }) => {
   expect((await PDFDocument.load(out.bytes)).getPageCount()).toBe(5);
 });
 
+test("pdf-lib грузится, только когда файл уже выбран", async ({ page }) => {
+  const scripts: Promise<string>[] = [];
+  page.on("response", (r) => {
+    if (r.url().endsWith(".js")) scripts.push(r.text().catch(() => ""));
+  });
+  // «objectsPerTick» — параметр сохранения pdf-lib: по этой строке его код узнаётся в сборке
+  const pdfLibLoaded = async () => (await Promise.all(scripts)).some((js) => js.includes("objectsPerTick"));
+
+  for (const path of ["/ru", "/ru/merge", "/ru/watermark", "/ru/editor"]) {
+    await page.goto(path);
+    await page.waitForLoadState("networkidle");
+  }
+  expect(await pdfLibLoaded()).toBe(false);
+
+  // Файл открыт — pdf-lib подгружается заранее, чтобы главная кнопка сработала без задержки
+  await dropPdf(page, { name: "doc.pdf", bytes: await makePdf(1) });
+  await expect.poll(pdfLibLoaded).toBe(true);
+});
+
 test("пароль: поставить и снять", async ({ page }) => {
   await page.goto("/ru/protect");
   await dropPdf(page, { name: "doc.pdf", bytes: await makePdf(1) });
@@ -128,6 +147,20 @@ test("редактор: добавить текст с кириллицей и �
   const [text] = await extractText(out.bytes);
   expect(text).toContain("Page 1");
   expect(text).toContain("Привет, мир");
+});
+
+test("редактор: грузит только нужные шрифты", async ({ page }) => {
+  const fonts = new Set<string>();
+  page.on("request", (r) => {
+    const m = /^\/fonts\/(.+)$/.exec(new URL(r.url()).pathname);
+    if (m) fonts.add(m[1]);
+  });
+  await page.goto("/ru/editor");
+  await dropPdf(page, { name: "doc.pdf", bytes: await makePdf(1) });
+  await expect(page.locator('[data-page-index="0"]')).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  // Шрифт текста по умолчанию, а не все девять начертаний (3,3 МБ)
+  expect([...fonts]).toEqual(["PT_Sans-Web-Regular.ttf"]);
 });
 
 test("редактор: страницы далеко от экрана не держат память", async ({ page }) => {

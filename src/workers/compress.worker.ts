@@ -1,9 +1,14 @@
 import * as Comlink from "comlink";
-import { compressPdfImages, type CompressOptions } from "@/lib/pdf/compress";
+import { COMPRESS_PRESETS, compressPdfImages } from "@/lib/pdf/compress";
+
+export type CompressLevel = keyof typeof COMPRESS_PRESETS;
 
 const api = {
-  compress: (bytes: Uint8Array, opts: CompressOptions, onProgress?: (done: number, total: number) => void) =>
-    compressPdfImages(bytes, opts, onProgress).then((r) => Comlink.transfer(r, [r.bytes.buffer as ArrayBuffer])),
+  // Настройки по степени сжатия берёт сам воркер — интерфейсу не нужен модуль сжатия с pdf-lib
+  compress: (bytes: Uint8Array, level: CompressLevel, onProgress?: (done: number, total: number) => void) =>
+    compressPdfImages(bytes, COMPRESS_PRESETS[level], onProgress).then((r) =>
+      Comlink.transfer(r, [r.bytes.buffer as ArrayBuffer]),
+    ),
 };
 
 export type CompressWorkerApi = typeof api;

@@ -1,5 +1,4 @@
 import type { PDFDocument, PDFFont } from "@cantoo/pdf-lib";
-import fontkit from "@cantoo/fontkit";
 
 /**
  * Шрифты с кириллицей. Стандартные 14 шрифтов PDF (Helvetica и т.п.) кириллицу
@@ -59,18 +58,25 @@ export function loadFontBytes(file: string): Promise<Uint8Array> {
 
 const docFonts = new WeakMap<PDFDocument, Map<string, Promise<PDFFont>>>();
 
+// fontkit (~370 КБ) нужен только для встраивания шрифта — грузим его в этот момент,
+// а не вместе со страницей, которой хватает имён шрифтов и их файлов
+let fontkitPromise: Promise<typeof import("@cantoo/fontkit").default> | null = null;
+const getFontkit = () => (fontkitPromise ??= import("@cantoo/fontkit").then((m) => m.default));
+
 /** Встроить шрифт в документ (один раз на документ, подмножество глифов). */
 export function embedFont(doc: PDFDocument, variant: FontVariant): Promise<PDFFont> {
   let map = docFonts.get(doc);
   if (!map) {
     map = new Map();
     docFonts.set(doc, map);
-    doc.registerFontkit(fontkit);
   }
   const file = fontFile(variant);
   let p = map.get(file);
   if (!p) {
-    p = loadFontBytes(file).then((bytes) => doc.embedFont(bytes, { subset: true }));
+    p = Promise.all([getFontkit(), loadFontBytes(file)]).then(([fontkit, bytes]) => {
+      doc.registerFontkit(fontkit);
+      return doc.embedFont(bytes, { subset: true });
+    });
     map.set(file, p);
   }
   return p;

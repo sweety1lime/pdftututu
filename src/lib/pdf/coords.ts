@@ -116,3 +116,9 @@ export function pdfRectToView(
     h: Math.abs(by - ay),
   };
 }
+
+/** Размеры бумаги в PDF-точках (ширина, высота). */
+export const PAGE_SIZES = {
+  a4: [595.28, 841.89] as const,
+  letter: [612, 792] as const,
+};

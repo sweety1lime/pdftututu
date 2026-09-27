@@ -19,6 +19,7 @@ import { objectMatrix, type PageGeometry } from "@/lib/pdf/coords";
 import { hexToRgb } from "@/lib/pdf/color";
 import { embedFont } from "@/lib/pdf/fonts";
 import { alignOffset, baselineOffset, lineHeightPt, splitLines } from "@/lib/pdf/textLayout";
+import { arrowHeadPoints } from "./factory";
 import type { Asset, EditorObject, FormValue, StrokeObject } from "./types";
 
 export interface ExportInput {
@@ -186,18 +187,6 @@ function drawStroke(page: PDFPage, obj: StrokeObject) {
     const head = arrowHead(x1, y1, x2, y2, obj.strokeWidth);
     page.drawSvgPath(head, { x: 0, y: obj.h, color: hexToRgb(obj.stroke), opacity: obj.opacity });
   }
-}
-
-/** Треугольник наконечника стрелки (SVG-путь). Используется и в редакторе. */
-export function arrowHeadPoints(x1: number, y1: number, x2: number, y2: number, strokeWidth: number): number[] {
-  const len = Math.max(8, strokeWidth * 4);
-  const width = len * 0.6;
-  const angle = Math.atan2(y2 - y1, x2 - x1);
-  const bx = x2 - len * Math.cos(angle);
-  const by = y2 - len * Math.sin(angle);
-  const nx = -Math.sin(angle) * width;
-  const ny = Math.cos(angle) * width;
-  return [x2, y2, bx + nx, by + ny, bx - nx, by - ny];
 }
 
 function arrowHead(x1: number, y1: number, x2: number, y2: number, strokeWidth: number): string {

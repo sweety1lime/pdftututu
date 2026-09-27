@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/misc";
 import { baseName, downloadBlob } from "@/lib/download";
-import { METADATA_FIELDS, readMetadata, writeMetadata, type MetadataField, type PdfMetadata } from "@/lib/pdf/metadata";
+import type { PdfMetadata } from "@/lib/pdf/metadata";
+import { METADATA_FIELDS, type MetadataField } from "@/lib/pdf/metadataFields";
 import { useLoadedPdfs } from "@/lib/pdf/useLoadedPdfs";
 import { useErrorToast } from "@/lib/useErrorToast";
 
@@ -31,15 +32,17 @@ export function MetadataTool() {
   useEffect(() => {
     if (!file) return;
     let alive = true;
-    readMetadata(file.bytes).then(
-      (m) => {
-        if (!alive) return;
-        setMeta(m);
-        setFields(Object.fromEntries(METADATA_FIELDS.map((f) => [f, m[f]])) as Fields);
-        setClearAll(false);
-      },
-      (e) => showError(e),
-    );
+    import("@/lib/pdf/metadata")
+      .then(({ readMetadata }) => readMetadata(file.bytes))
+      .then(
+        (m) => {
+          if (!alive) return;
+          setMeta(m);
+          setFields(Object.fromEntries(METADATA_FIELDS.map((f) => [f, m[f]])) as Fields);
+          setClearAll(false);
+        },
+        (e) => showError(e),
+      );
     return () => {
       alive = false;
     };
@@ -62,6 +65,7 @@ export function MetadataTool() {
     if (!file || !fields) return;
     setBusy(true);
     try {
+      const { writeMetadata } = await import("@/lib/pdf/metadata");
       const out = await writeMetadata(file.bytes, fields, { clearAll });
       downloadBlob(out, outName);
       toast.success(t("common.done"));

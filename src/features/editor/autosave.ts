@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { set } from "idb-keyval";
 import { create } from "zustand";
-import type { PdfSource } from "@/lib/pdf/load";
+import type { PdfSource } from "@/lib/pdf/read";
 import { useEditor } from "./store";
 import { BYTES_KEY, STATE_KEY, type DraftState } from "./draftStorage";
 

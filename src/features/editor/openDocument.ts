@@ -3,7 +3,7 @@
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { pdfRectToView, viewSize, type Box } from "@/lib/pdf/coords";
 import { PdfError } from "@/lib/pdf/errors";
-import type { PdfSource } from "@/lib/pdf/load";
+import type { PdfSource } from "@/lib/pdf/read";
 import { openPdfjs } from "@/lib/pdf/pdfjs";
 import type { FormValue, FormWidget, PageInfo } from "./types";
 

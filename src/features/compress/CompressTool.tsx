@@ -18,23 +18,21 @@ import {
 import { Label, Progress } from "@/components/ui/misc";
 import { Choice } from "@/components/ui/choice";
 import { baseName, downloadBlob, formatBytes } from "@/lib/download";
-import { COMPRESS_PRESETS } from "@/lib/pdf/compress";
-import { rasterizePages } from "@/lib/pdf/rasterize";
 import { useLoadedPdfs } from "@/lib/pdf/useLoadedPdfs";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { cn } from "@/lib/utils";
-import type { CompressWorkerApi } from "@/workers/compress.worker";
+import type { CompressLevel, CompressWorkerApi } from "@/workers/compress.worker";
 
 type Level = "light" | "recommended" | "extreme";
 
-async function compressInWorker(bytes: Uint8Array, level: "light" | "recommended", onProgress: (p: number) => void) {
+async function compressInWorker(bytes: Uint8Array, level: CompressLevel, onProgress: (p: number) => void) {
   const worker = new Worker(new URL("../../workers/compress.worker.ts", import.meta.url), { type: "module" });
   try {
     const api = Comlink.wrap<CompressWorkerApi>(worker);
     const copy = bytes.slice();
     const result = await api.compress(
       Comlink.transfer(copy, [copy.buffer]),
-      COMPRESS_PRESETS[level],
+      level,
       Comlink.proxy((done: number, total: number) => onProgress(total ? (done / total) * 100 : 100)),
     );
     return result.bytes;
@@ -58,10 +56,13 @@ export function CompressTool() {
     setResult(null);
     setProgress(0);
     try {
-      const out =
-        level === "extreme"
-          ? await rasterizePages(file.bytes, { dpi: 110, quality: 0.6 }, (d, n) => setProgress((d / n) * 100))
-          : await compressInWorker(file.bytes, level, setProgress);
+      let out: Uint8Array;
+      if (level === "extreme") {
+        const { rasterizePages } = await import("@/lib/pdf/rasterize");
+        out = await rasterizePages(file.bytes, { dpi: 110, quality: 0.6 }, (d, n) => setProgress((d / n) * 100));
+      } else {
+        out = await compressInWorker(file.bytes, level, setProgress);
+      }
       setResult({ bytes: out, level });
     } catch (e) {
       showError(e);

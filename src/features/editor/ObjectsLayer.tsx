@@ -5,9 +5,8 @@ import { Ellipse, Group, Image as KImage, Layer, Line, Rect, Shape, Stage, Trans
 import type Konva from "konva";
 import { useShallow } from "zustand/react/shallow";
 import { alignOffset, baselineOffset, cssFont, splitLines } from "@/lib/pdf/textLayout";
-import { arrowHeadPoints } from "./exportPdf";
 import { useAssetImage } from "./assets";
-import { makeBox, makeStroke, makeText, ONE_SHOT_TOOLS, scaleObject } from "./factory";
+import { arrowHeadPoints, makeBox, makeStroke, makeText, ONE_SHOT_TOOLS, scaleObject } from "./factory";
 import { beginGesture, endGesture, useEditor } from "./store";
 import type { EditorObject, StrokeObject, TextObject } from "./types";
 
