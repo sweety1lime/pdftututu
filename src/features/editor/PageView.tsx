@@ -13,6 +13,14 @@ import type { TextObject } from "./types";
 /** Не больше ~16 Мпикс на canvas — иначе на большом зуме браузеру не хватит памяти. */
 const MAX_PIXELS = 16_000_000;
 
+function scrollParent(el: HTMLElement): HTMLElement | null {
+  for (let p = el.parentElement; p; p = p.parentElement) {
+    const { overflowY } = getComputedStyle(p);
+    if (overflowY === "auto" || overflowY === "scroll") return p;
+  }
+  return null;
+}
+
 interface Props {
   index: number;
   fontsVersion: number;
@@ -37,13 +45,25 @@ export const PageView = memo(function PageView({ index, fontsVersion, onNoText }
   useEffect(() => {
     const el = boxRef.current;
     if (!el) return;
-    const io = new IntersectionObserver(([e]) => setNear(e.isIntersecting), { rootMargin: "150% 0px" });
+    // Корень — прокручиваемая область: иначе браузер обрезает страницы по её краю
+    // без учёта rootMargin, и соседние страницы не рисуются заранее
+    const io = new IntersectionObserver(([e]) => setNear(e.isIntersecting), {
+      root: scrollParent(el),
+      rootMargin: "150% 0px",
+    });
     io.observe(el);
     return () => io.disconnect();
   }, []);
 
   useEffect(() => {
-    if (!near || !pdf || !page) return;
+    if (!near) {
+      // Страница далеко от экрана — отдаём память холста. Иначе длинный документ держит
+      // сотни мегабайт, а на iPhone после лимита новые страницы рисуются пустыми
+      const canvas = canvasRef.current;
+      if (canvas) canvas.width = canvas.height = 0;
+      return;
+    }
+    if (!pdf || !page) return;
     let task: RenderTask | null = null;
     let cancelled = false;
     // Небольшая задержка — чтобы при плавном зуме не перерисовывать каждый шаг
@@ -56,16 +76,19 @@ export const PageView = memo(function PageView({ index, fontsVersion, onNoText }
       const maxScale = Math.sqrt(MAX_PIXELS / (page.width * page.height));
       // Рисуем во временный canvas, чтобы не мигало белым
       const tmp = document.createElement("canvas");
-      task = await renderPage(p, tmp, { scale: Math.min(zoom * dpr, maxScale), hideForms: hasWidgets });
       try {
+        task = await renderPage(p, tmp, { scale: Math.min(zoom * dpr, maxScale), hideForms: hasWidgets });
         await task.promise;
+        if (cancelled) return;
+        canvas.width = tmp.width;
+        canvas.height = tmp.height;
+        canvas.getContext("2d")!.drawImage(tmp, 0, 0);
       } catch {
-        return; // отменено
+        // отменено
+      } finally {
+        // Safari освобождает память холста сразу, только если обнулить его размер
+        tmp.width = tmp.height = 0;
       }
-      if (cancelled) return;
-      canvas.width = tmp.width;
-      canvas.height = tmp.height;
-      canvas.getContext("2d")!.drawImage(tmp, 0, 0);
     }, 120);
     return () => {
       cancelled = true;

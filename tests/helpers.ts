@@ -1,8 +1,18 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { randomBytes } from "node:crypto";
+import { createCipheriv, createHash, randomBytes } from "node:crypto";
 import { deflateSync } from "node:zlib";
-import { decodePDFRawStream, degrees, PDFDocument, PDFRawStream, StandardFonts } from "@cantoo/pdf-lib";
+import {
+  decodePDFRawStream,
+  degrees,
+  PDFDict,
+  PDFDocument,
+  PDFHexString,
+  PDFName,
+  PDFRawStream,
+  PDFString,
+  StandardFonts,
+} from "@cantoo/pdf-lib";
 import { setFontLoader } from "@/lib/pdf/fonts";
 
 /** В Node шрифты читаем с диска, а не через fetch. */
@@ -60,6 +70,38 @@ export async function fileContains(bytes: Uint8Array, text: string): Promise<boo
     if (found(s)) return true;
   }
   return false;
+}
+
+/**
+ * Подходит ли пароль как пароль владельца — тот, с которым ограничения не действуют.
+ * Проверка из ISO 32000-2 для AES-256 (ревизия 6): O[0..32] = хеш(пароль, O[32..40], U[0..48]).
+ */
+export async function isOwnerPassword(bytes: Uint8Array, password: string): Promise<boolean> {
+  const doc = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
+  const encrypt = doc.context.lookup(doc.context.trailerInfo.Encrypt, PDFDict);
+  const entry = (key: string) => {
+    const v = encrypt.get(PDFName.of(key));
+    if (!(v instanceof PDFHexString || v instanceof PDFString)) throw new Error(`no /${key}`);
+    return Buffer.from(v.asBytes());
+  };
+  const o = entry("O");
+  const u = entry("U").subarray(0, 48);
+  const pwd = Buffer.from(password, "utf8");
+  return hashR6(pwd, Buffer.concat([pwd, o.subarray(32, 40), u]), u).equals(o.subarray(0, 32));
+}
+
+/** Алгоритм 2.B: хеш пароля для ревизии 6. */
+function hashR6(password: Buffer, input: Buffer, userBytes: Buffer): Buffer {
+  let k = createHash("sha256").update(input).digest();
+  let e = Buffer.alloc(0);
+  for (let i = 0; i < 64 || e[e.length - 1] > i - 32; i++) {
+    const block = Buffer.concat([password, k, userBytes]);
+    const aes = createCipheriv("aes-128-cbc", k.subarray(0, 16), k.subarray(16, 32)).setAutoPadding(false);
+    e = Buffer.concat([aes.update(Buffer.concat(Array(64).fill(block))), aes.final()]);
+    const sum = e.subarray(0, 16).reduce((a, b) => a + b, 0);
+    k = createHash(["sha256", "sha384", "sha512"][sum % 3]).update(e).digest();
+  }
+  return k.subarray(0, 32);
 }
 
 /** Картинка PNG w×h: серая или из шума (шум почти не сжимается — «тяжёлый» файл). */

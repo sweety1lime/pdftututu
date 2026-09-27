@@ -40,6 +40,8 @@ const N = {
   N: PDFName.of("N"),
   ImageMask: PDFName.of("ImageMask"),
   Mask: PDFName.of("Mask"),
+  SMask: PDFName.of("SMask"),
+  Matte: PDFName.of("Matte"),
   Decode: PDFName.of("Decode"),
   Length: PDFName.of("Length"),
   Predictor: PDFName.of("Predictor"),
@@ -185,10 +187,20 @@ export async function compressPdfImages(
   const doc = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
   const ctx = doc.context;
 
-  const candidates: Array<[PDFRef, PDFRawStream]> = [];
+  const images: Array<[PDFRef, PDFRawStream]> = [];
   for (const [ref, obj] of ctx.enumerateIndirectObjects()) {
-    if (obj instanceof PDFRawStream && obj.dict.get(N.Subtype) === N.Image) candidates.push([ref, obj]);
+    if (obj instanceof PDFRawStream && obj.dict.get(N.Subtype) === N.Image) images.push([ref, obj]);
   }
+  // Маски прозрачности (/SMask, /Mask) — тоже картинки, но обязаны оставаться серыми,
+  // а JPEG из canvas всегда цветной. С цветной маской pdf.js и Acrobat не рисуют картинку совсем
+  const masks = new Set<PDFRef>();
+  for (const [, stream] of images) {
+    for (const key of [N.SMask, N.Mask]) {
+      const ref = stream.dict.get(key);
+      if (ref instanceof PDFRef) masks.add(ref);
+    }
+  }
+  const candidates = images.filter(([ref]) => !masks.has(ref));
 
   let replaced = 0;
   for (let i = 0; i < candidates.length; i++) {
@@ -217,6 +229,9 @@ async function recompress(ctx: Ctx, stream: PDFRawStream, opts: CompressOptions)
   if (ctx.lookup(dict.get(N.ImageMask))?.toString() === "true") return null;
   if (dict.has(N.Decode)) return null;
   if (ctx.lookup(dict.get(N.Mask)) instanceof PDFArray) return null; // маска по цвету
+  // С /Matte маска должна совпадать с картинкой по размеру — уменьшать картинку нельзя
+  const smask = ctx.lookup(dict.get(N.SMask));
+  if (smask instanceof PDFRawStream && smask.dict.has(N.Matte)) return null;
   if (num(ctx, dict, N.BitsPerComponent) !== 8) return null;
 
   const filter = singleFilter(ctx, dict);
