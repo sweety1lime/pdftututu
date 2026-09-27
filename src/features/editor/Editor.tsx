@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { History, Info } from "lucide-react";
 import { FileDropzone } from "@/components/FileDropzone";
 import { PdfThumb } from "@/components/PdfThumb";
+import { PrivacyNote } from "@/components/ToolWorkspace";
 import { Button } from "@/components/ui/button";
 import { prepareImage } from "@/lib/images";
 import { newId, readPdfFile, type PdfSource } from "@/lib/pdf/load";
@@ -94,9 +95,10 @@ export default function Editor({ entry = "editor", onOpenChange }: Props) {
 
   if (!source) {
     return (
-      <div className="mx-auto w-full max-w-3xl">
+      <div className="w-full">
         {draft && <DraftBanner draft={draft} onRestore={() => open({ id: draft.sourceId, name: draft.name, bytes: draft.bytes, wasEncrypted: false }, draft)} onDiscard={() => clearDraft().then(() => setDraft(null))} />}
         <FileDropzone onFiles={openFile} disabled={loading} />
+        <PrivacyNote className="mt-6 items-center justify-center text-center" />
       </div>
     );
   }

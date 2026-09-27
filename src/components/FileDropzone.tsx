@@ -15,11 +15,13 @@ interface Props {
   onFiles: (files: File[]) => void;
   /** Компактная кнопка «Добавить ещё» вместо большой зоны */
   compact?: boolean;
+  /** Невысокая зона «Перетащите сюда ещё файлы» — под списком уже добавленных */
+  more?: boolean;
   disabled?: boolean;
   className?: string;
 }
 
-export function FileDropzone({ kind = "pdf", multiple = false, onFiles, compact, disabled, className }: Props) {
+export function FileDropzone({ kind = "pdf", multiple = false, onFiles, compact, more, disabled, className }: Props) {
   const t = useTranslations("common");
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     accept: kind === "pdf" ? PDF_ACCEPT : IMAGE_ACCEPT,
@@ -42,11 +44,34 @@ export function FileDropzone({ kind = "pdf", multiple = false, onFiles, compact,
     );
   }
 
+  if (more) {
+    return (
+      <div
+        {...getRootProps({
+          className: cn(
+            "flex min-h-30 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-[1.5px] border-dashed border-input px-4 py-6 text-center text-muted-foreground transition-colors",
+            "hover:border-primary/60 hover:bg-primary/5",
+            isDragActive && "border-primary bg-primary/10",
+            disabled && "pointer-events-none opacity-60",
+            className,
+          ),
+        })}
+      >
+        <input {...getInputProps()} />
+        <Icon className="size-5" />
+        <p className="text-[15px] text-secondary-foreground">{isDragActive ? t("dropActive") : t("dropMore")}</p>
+        <p className="text-[13px]">
+          {t("orClick")} · {kind === "pdf" ? t("acceptPdf") : t("acceptImages")}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div
       {...getRootProps({
         className: cn(
-          "group flex cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed px-6 py-14 text-center transition-colors",
+          "group flex cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border-[1.5px] border-dashed border-input px-6 py-14 text-center transition-colors",
           "hover:border-primary/60 hover:bg-primary/5",
           isDragActive && "border-primary bg-primary/10",
           disabled && "pointer-events-none opacity-60",

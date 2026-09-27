@@ -1,52 +1,64 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { ShieldCheck } from "lucide-react";
 import { RelatedTools } from "@/components/RelatedTools";
+import { ToolSidebar } from "@/components/ToolSidebar";
 import { ToolStructuredData } from "@/components/StructuredData";
 import { ToolGuide } from "@/components/ToolGuide";
 import { pageMetadata } from "@/lib/metadata";
-import { getTool, TOOL_ICON_CLASS, type ToolId } from "@/lib/tools";
-import { cn } from "@/lib/utils";
+import { getTool, type ToolId } from "@/lib/tools";
 
-/** Страница инструмента: шапка, сам инструмент, подвал с инструкцией и вопросами. */
+/** Страница инструмента: заголовок, сам инструмент, под ним инструкция и вопросы. */
 export async function ToolPage({ id, children }: { id: ToolId; children: React.ReactNode }) {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:py-12">
+    <ToolShell id={id}>
       <ToolHeader id={id} />
       {children}
       <ToolFooter id={id} />
-    </main>
+    </ToolShell>
   );
 }
 
-/** Иконка, название, описание. */
-export async function ToolHeader({ id }: { id: ToolId }) {
-  const t = await getTranslations("tools");
-  const tool = getTool(id);
+/**
+ * Слева все инструменты, справа — сетка страницы. На широком экране в ней две колонки:
+ * заголовок, рабочая область и подвал в первой, панель «Итог» (aside из ToolWorkspace)
+ * во второй во всю высоту. Всё, кроме панели, попадает в первую колонку.
+ */
+export async function ToolShell({ id, children }: { id: ToolId; children: React.ReactNode }) {
   return (
-    <div className="mb-8 flex flex-col items-center gap-3 text-center">
-      <span className={cn("flex size-14 items-center justify-center rounded-2xl", TOOL_ICON_CLASS)}>
-        <tool.icon className="size-7" />
-      </span>
-      <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{t(`${id}.title`)}</h1>
-      <p className="max-w-xl text-muted-foreground">{t(`${id}.description`)}</p>
+    <div className="flex flex-1">
+      <ToolSidebar current={id} />
+      <main className="flex min-w-0 flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:grid-rows-[auto_1fr_auto] lg:[&>:not(aside)]:col-start-1">
+        {children}
+      </main>
     </div>
   );
 }
 
-/** «Файлы остаются у вас», как пользоваться, частые вопросы, другие инструменты. */
-export async function ToolFooter({ id }: { id: ToolId }) {
-  const t = await getTranslations("common");
+/** Группа, название, описание. */
+export async function ToolHeader({ id }: { id: ToolId }) {
+  const t = await getTranslations();
+  const tool = getTool(id);
   return (
-    <>
-      <p className="mt-10 flex items-center justify-center gap-2 text-center text-xs text-muted-foreground">
-        <ShieldCheck className="size-4 text-success" />
-        {t("filesStayLocal")}
+    <div className="flex w-full max-w-5xl flex-col gap-1.5 px-4 pt-6 lg:row-start-1 lg:px-8 lg:pt-7">
+      <p className="font-mono text-xs tracking-[0.08em] text-muted-foreground uppercase">
+        {t(`home.groups.${tool.group}`)}
       </p>
+      <h1 className="text-[26px] leading-tight font-semibold tracking-[-0.015em] lg:text-3xl">
+        {t(`tools.${id}.title`)}
+      </h1>
+      <p className="text-[15px] text-muted-foreground">{t(`tools.${id}.description`)}</p>
+    </div>
+  );
+}
+
+/** Как пользоваться, частые вопросы, другие инструменты. */
+export async function ToolFooter({ id }: { id: ToolId }) {
+  return (
+    <div className="w-full max-w-5xl px-4 pb-16 lg:row-start-3 lg:px-8">
       <ToolGuide id={id} />
       <RelatedTools id={id} />
       <ToolStructuredData id={id} />
-    </>
+    </div>
   );
 }
 

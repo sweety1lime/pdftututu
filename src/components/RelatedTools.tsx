@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 export async function RelatedTools({ id }: { id: ToolId }) {
   const t = await getTranslations();
   return (
-    <section className="mx-auto mt-16 max-w-3xl">
-      <h2 className="mb-5 text-2xl font-bold tracking-tight">{t("guide.relatedTitle")}</h2>
+    <section className="mt-16">
+      <h2 className="mb-5 text-xl font-semibold">{t("guide.relatedTitle")}</h2>
       <div className="grid gap-3 sm:grid-cols-2">
         {relatedTools(id).map((tool) => (
           <Link

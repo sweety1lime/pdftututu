@@ -3,11 +3,17 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import * as Comlink from "comlink";
-import { ArrowRight, Download, TriangleAlert } from "lucide-react";
+import { ArrowRight, Download, RefreshCw, TriangleAlert } from "lucide-react";
 import { FileDropzone } from "@/components/FileDropzone";
 import { FileCard } from "@/components/FileCard";
-import { ActionBar } from "@/components/ActionBar";
-import { Button } from "@/components/ui/button";
+import {
+  MainAction,
+  SecondaryAction,
+  Summary,
+  SummaryList,
+  SummaryRow,
+  ToolWorkspace,
+} from "@/components/ToolWorkspace";
 import { Label, Progress } from "@/components/ui/misc";
 import { Choice } from "@/components/ui/choice";
 import { baseName, downloadBlob, formatBytes } from "@/lib/download";
@@ -15,6 +21,7 @@ import { COMPRESS_PRESETS } from "@/lib/pdf/compress";
 import { rasterizePages } from "@/lib/pdf/rasterize";
 import { useLoadedPdfs } from "@/lib/pdf/useLoadedPdfs";
 import { useErrorToast } from "@/lib/useErrorToast";
+import { cn } from "@/lib/utils";
 import type { CompressWorkerApi } from "@/workers/compress.worker";
 
 type Level = "light" | "recommended" | "extreme";
@@ -67,62 +74,135 @@ export function CompressTool() {
     clear();
   };
 
-  if (!file) return <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />;
+  if (!file) {
+    return (
+      <ToolWorkspace>
+        <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />
+      </ToolWorkspace>
+    );
+  }
 
   const before = file.size;
   const after = result?.bytes.length ?? 0;
-  const gained = result && after < before * 0.98;
+  const gained = !!result && after < before * 0.98;
   const percent = result ? Math.round((1 - after / before) * 100) : 0;
+  const outName = `${baseName(file.name)}_compressed.pdf`;
+  const size = (n: number) => formatBytes(n, locale);
 
   return (
-    <div className="space-y-6">
-      <FileCard file={file} onClose={reset} />
-      <div className="space-y-2">
-        <Label>{t("compress.level")}</Label>
-        <Choice
-          value={level}
-          onChange={(v) => {
-            setLevel(v);
-            setResult(null);
-          }}
-          options={[
-            { value: "light", label: t("compress.light"), hint: t("compress.lightDesc") },
-            { value: "recommended", label: t("compress.recommended"), hint: t("compress.recommendedDesc") },
-            { value: "extreme", label: t("compress.extreme"), hint: t("compress.extremeDesc") },
-          ]}
-        />
-        {level === "extreme" && (
-          <p className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
-            <TriangleAlert className="size-4 shrink-0" />
-            {t("compress.extremeDesc")}
-          </p>
+    <ToolWorkspace
+      summary={
+        <Summary
+          status={progress !== null && <Progress value={progress} />}
+          actions={
+            result ? (
+              <>
+                {gained && (
+                  <MainAction onClick={() => downloadBlob(result.bytes, outName)}>
+                    <Download />
+                    {t("common.download")}
+                  </MainAction>
+                )}
+                {/* Вернуться к выбору степени: сжатие с теми же настройками дало бы тот же файл */}
+                <SecondaryAction onClick={() => setResult(null)}>
+                  <RefreshCw />
+                  {t("compress.again")}
+                </SecondaryAction>
+              </>
+            ) : (
+              <MainAction onClick={run} busy={progress !== null}>
+                {t("compress.action")}
+              </MainAction>
+            )
+          }
+        >
+          <SummaryList>
+            <SummaryRow label={t("summary.before")}>{size(before)}</SummaryRow>
+            {result && (
+              <SummaryRow label={t("summary.after")} className={cn(gained && "text-success")}>
+                {size(after)}
+              </SummaryRow>
+            )}
+            {gained && <SummaryRow label={t("summary.saved")}>{size(before - after)}</SummaryRow>}
+            <SummaryRow label={t("summary.level")} mono={false}>
+              {t(`compress.${result?.level ?? level}`)}
+            </SummaryRow>
+          </SummaryList>
+          <div className="h-px bg-border" />
+          <div className="flex flex-col gap-1.5 text-[13px]">
+            <p className="text-muted-foreground">{t("summary.downloadsAs")}</p>
+            <p className="font-mono break-all text-secondary-foreground">{outName}</p>
+          </div>
+        </Summary>
+      }
+    >
+      <div className="flex flex-col gap-6">
+        <FileCard file={file} onClose={reset} />
+
+        <div className="flex flex-col gap-2.5">
+          <Label className="font-semibold">{t("compress.level")}</Label>
+          <Choice
+            aria-label={t("compress.level")}
+            value={level}
+            onChange={(v) => {
+              setLevel(v);
+              setResult(null);
+            }}
+            options={[
+              { value: "light", label: t("compress.light"), hint: t("compress.lightDesc") },
+              { value: "recommended", label: t("compress.recommended"), hint: t("compress.recommendedDesc") },
+              {
+                value: "extreme",
+                label: t("compress.extreme"),
+                hint: t("compress.extremeDesc"),
+                icon: <TriangleAlert />,
+              },
+            ]}
+          />
+        </div>
+
+        {result && (
+          <section
+            aria-label={t("summary.after")}
+            className="flex flex-col gap-5 rounded-[14px] border bg-card p-5 sm:p-6"
+          >
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-2xl font-medium sm:text-3xl">
+              <span className="text-muted-foreground">{size(before)}</span>
+              <ArrowRight className="size-5 text-muted-foreground" />
+              <span className={cn(gained && "text-success")}>{size(after)}</span>
+              {gained && (
+                <span className="ml-auto rounded-md bg-success/12 px-3 py-1 text-sm text-success">−{percent}%</span>
+              )}
+            </div>
+            <SizeBars before={before} after={after} gained={gained} />
+            <p className="text-[15px] text-secondary-foreground">
+              {gained ? t("compress.saved", { percent }) : t("compress.noGain")}
+            </p>
+          </section>
         )}
       </div>
+    </ToolWorkspace>
+  );
+}
 
-      {result && (
-        <div className="flex flex-col items-center gap-4 rounded-xl border bg-card p-6 text-center">
-          <div className="flex items-center gap-3 text-2xl font-semibold">
-            <span className="text-muted-foreground">{formatBytes(before, locale)}</span>
-            <ArrowRight className="size-5 text-muted-foreground" />
-            <span className={gained ? "text-success" : undefined}>
-              {formatBytes(after, locale)}
-            </span>
-          </div>
-          <p className="text-muted-foreground">
-            {gained ? t("compress.saved", { percent }) : t("compress.noGain")}
-          </p>
-          {gained && (
-            <Button size="lg" onClick={() => downloadBlob(result.bytes, `${baseName(file.name)}_compressed.pdf`)}>
-              <Download />
-              {t("common.download")}
-            </Button>
-          )}
+/** Две полосы «Было / Стало» в масштабе большего из размеров. */
+function SizeBars({ before, after, gained }: { before: number; after: number; gained: boolean }) {
+  const t = useTranslations("summary");
+  const max = Math.max(before, after);
+  const bars = [
+    { label: t("before"), value: before, color: "bg-input" },
+    { label: t("after"), value: after, color: gained ? "bg-success" : "bg-input" },
+  ];
+  return (
+    <div className="grid grid-cols-[56px_minmax(0,1fr)] items-center gap-x-3.5 gap-y-2.5 text-[13px] text-muted-foreground">
+      {bars.map((b) => (
+        <div key={b.label} className="contents">
+          <span>{b.label}</span>
+          <span className="flex">
+            <span className={cn("h-2.5 rounded-full", b.color)} style={{ width: `${(b.value / max) * 100}%` }} />
+          </span>
         </div>
-      )}
-
-      <ActionBar action={t("compress.action")} onAction={run} busy={progress !== null}>
-        {progress !== null && <Progress value={progress} className="max-w-xs" />}
-      </ActionBar>
+      ))}
     </div>
   );
 }

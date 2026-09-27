@@ -7,6 +7,7 @@
   "common": {
     "dropHere": "Drop a file here",
     "dropHereMany": "Drop files here",
+    "dropMore": "Drop more files here",
     "orClick": "or click to choose",
     "chooseFile": "Choose file",
     "chooseFiles": "Choose files",
@@ -99,8 +100,7 @@
     "hint": "Drag files to change their order",
     "needTwo": "Add at least two files",
     "action": "Merge",
-    "sortByName": "By name",
-    "total": "Total: {pages}"
+    "sortByName": "By name"
   },
   "split": {
     "mode": "Mode",
@@ -209,6 +209,7 @@
     "extreme": "Maximum",
     "extremeDesc": "Pages become images. Text will no longer be selectable or searchable.",
     "action": "Compress",
+    "again": "Compress again",
     "result": "{before} → {after}",
     "saved": "Size reduced by {percent}%",
     "noGain": "The file is already well compressed — couldn't make it smaller without losing quality",
@@ -286,6 +287,17 @@
     "preview": "Recognized text",
     "note": "The recognition model is downloaded once and cached by your browser. Your files are never sent anywhere.",
     "nothing": "No text found"
+  },
+  "summary": {
+    "title": "Summary",
+    "files": "Files",
+    "pages": "Pages",
+    "totalSize": "Total size",
+    "before": "Before",
+    "after": "After",
+    "saved": "Saved",
+    "level": "Level",
+    "downloadsAs": "Will download as"
   },
   "editor": {
     "open": "Open a PDF to edit",

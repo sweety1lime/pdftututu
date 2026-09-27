@@ -16,27 +16,33 @@ const Editor = dynamic(() => import("./Editor"), {
 });
 
 /**
- * Пока файл не открыт — обычная страница инструмента: заголовок и инструкция
- * отрисованы на сервере (их видят поисковики). С открытым файлом — только редактор.
+ * Пока файл не открыт — обычная страница инструмента: список инструментов слева,
+ * заголовок и инструкция отрисованы на сервере (их видят поисковики).
+ * С открытым файлом — только редактор во всю ширину.
  */
 export function EditorLoader({
   entry,
+  sidebar,
   header,
   footer,
 }: {
   entry?: EditorEntry;
+  sidebar?: React.ReactNode;
   header?: React.ReactNode;
   footer?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <main className="flex flex-1 flex-col">
-      {!open && <div className="mx-auto w-full max-w-5xl px-4 pt-8 sm:pt-12">{header}</div>}
-      {/* Обёртка одна и та же: иначе React пересоздаст редактор при открытии файла */}
-      <div className={open ? "flex flex-1 flex-col" : "px-4"}>
-        <Editor entry={entry} onOpenChange={setOpen} />
-      </div>
-      {!open && <div className="mx-auto w-full max-w-5xl px-4 pb-12">{footer}</div>}
-    </main>
+    <div className="flex flex-1">
+      {!open && sidebar}
+      <main className="flex min-w-0 flex-1 flex-col">
+        {!open && header}
+        {/* Обёртка одна и та же: иначе React пересоздаст редактор при открытии файла */}
+        <div className={open ? "flex flex-1 flex-col" : "w-full max-w-5xl px-4 pt-5 pb-6 lg:px-8 lg:pt-6 lg:pb-10"}>
+          <Editor entry={entry} onOpenChange={setOpen} />
+        </div>
+        {!open && footer}
+      </main>
+    </div>
   );
 }

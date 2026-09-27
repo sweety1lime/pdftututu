@@ -20,6 +20,8 @@ const buttonVariants = cva(
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
         lg: "h-11 rounded-md px-6 text-base has-[>svg]:px-4",
+        // Главная кнопка инструмента
+        xl: "h-13 rounded-[10px] px-6 text-base font-semibold has-[>svg]:px-5",
         icon: "size-9",
         "icon-sm": "size-8",
       },
