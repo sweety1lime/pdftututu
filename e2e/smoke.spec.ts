@@ -92,6 +92,17 @@ test("поиск инструментов: Ctrl+K, ввод, Enter", async ({ pa
 test.describe("телефон", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
+  test("ни одна страница не прокручивается вбок", async ({ page, request }) => {
+    const xml = await (await request.get("/sitemap.xml")).text();
+    const paths = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+    for (const path of paths) {
+      await page.goto(path);
+      await expect(page.locator("h1"), path).toBeVisible();
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow, path).toBeLessThanOrEqual(0);
+    }
+  });
+
   test("поиск открывается кнопкой в шапке", async ({ page }) => {
     await page.goto("/ru/merge");
     await page.getByRole("button", { name: "Найти инструмент", exact: true }).click();
