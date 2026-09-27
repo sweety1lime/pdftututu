@@ -1,5 +1,7 @@
+import { randomBytes } from "node:crypto";
+import { deflateSync } from "node:zlib";
 import { strFromU8, unzipSync } from "fflate";
-import { PDFDict, PDFDocument, PDFName, rgb, StandardFonts } from "@cantoo/pdf-lib";
+import { PDFDict, PDFDocument, PDFName, PDFRawStream, rgb, StandardFonts } from "@cantoo/pdf-lib";
 import { extractText, fileContains, makePdf, makePng } from "../tests/helpers";
 import { download, dropPdf, expect, pixelOfThumb, test } from "./fixtures";
 
@@ -66,6 +68,51 @@ test("максимальное сжатие не оставляет в файл�
   expect(out.bytes.length).toBeLessThan(src.length);
   expect((await PDFDocument.load(out.bytes)).getPageCount()).toBe(1);
   expect(await fileContains(out.bytes, "SECRET TEXT")).toBe(false);
+});
+
+/**
+ * Картинка с мягкой тенью: цвет и маска прозрачности (/SMask) — отдельные картинки,
+ * как их пишут PowerPoint и браузеры (у pdf-lib маска другая, с /Decode). Обе из шума,
+ * чтобы сжатие за них взялось: маске хватает лёгкого шума, JPEG сжал бы её намного лучше.
+ */
+async function makeSoftMaskPdf() {
+  const doc = await PDFDocument.create();
+  const ctx = doc.context;
+  const size = 800;
+  const image = (data: Uint8Array, dict: Record<string, unknown>) => {
+    const packed = deflateSync(data);
+    const obj = { Type: "XObject", Subtype: "Image", Width: size, Height: size, BitsPerComponent: 8, ...dict };
+    return ctx.register(PDFRawStream.of(ctx.obj({ ...obj, Filter: "FlateDecode", Length: packed.length }), packed));
+  };
+  const alpha = randomBytes(size * size).map((v) => 200 + (v & 15));
+  const smask = image(alpha, { ColorSpace: "DeviceGray" });
+  const img = image(randomBytes(size * size * 3), { ColorSpace: "DeviceRGB", SMask: smask });
+  const page = doc.addPage([600, 600]);
+  page.node.setXObject(PDFName.of("Im0"), img);
+  page.node.set(PDFName.of("Contents"), ctx.register(ctx.flateStream("q 600 0 0 600 0 0 cm /Im0 Do Q")));
+  return doc.save();
+}
+
+test("сжатие не портит картинки с прозрачностью", async ({ page }) => {
+  const src = await makeSoftMaskPdf();
+  await page.goto("/ru/compress");
+  await dropPdf(page, { name: "shadow.pdf", bytes: src });
+  await page.getByRole("button", { name: "Сжать", exact: true }).click();
+  const out = await download(page, () => page.getByRole("button", { name: "Скачать", exact: true }).click());
+  expect(out.bytes.length).toBeLessThan(src.length);
+
+  // Маска осталась серой: с цветной pdf.js не рисует картинку совсем
+  const doc = await PDFDocument.load(out.bytes);
+  const masks = [...doc.context.enumerateIndirectObjects()].flatMap(([, obj]) => {
+    const mask = obj instanceof PDFRawStream ? doc.context.lookup(obj.dict.get(PDFName.of("SMask"))) : undefined;
+    return mask instanceof PDFRawStream ? [mask] : [];
+  });
+  expect(masks).toHaveLength(1);
+  expect(masks[0].dict.get(PDFName.of("ColorSpace"))).toBe(PDFName.of("DeviceGray"));
+
+  // И картинка видна: страница не белая
+  const { r, g, b } = await pixelOfThumb(page, out.bytes, 0.5, 0.5);
+  expect(r + g + b).toBeLessThan(600);
 });
 
 test("редактор: добавить текст с кириллицей и скачать", async ({ page }) => {
