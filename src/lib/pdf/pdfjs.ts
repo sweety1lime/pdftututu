@@ -125,6 +125,7 @@ export function renderThumbnail(doc: PDFDocumentProxy, pageIndex: number, width:
     const dpr = Math.min(2, typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1);
     const canvas = await renderPageToNewCanvas(page, (width * dpr) / base.width);
     const blob = await canvasToBlob(canvas, "image/jpeg", 0.8);
+    canvas.width = canvas.height = 0; // освобождаем память (на iPhone её мало)
     return URL.createObjectURL(blob);
   });
 }

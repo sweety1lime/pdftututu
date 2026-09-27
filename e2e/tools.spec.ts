@@ -130,6 +130,35 @@ test("редактор: добавить текст с кириллицей и �
   expect(text).toContain("Привет, мир");
 });
 
+test("редактор: страницы далеко от экрана не держат память", async ({ page }) => {
+  await page.goto("/ru/editor");
+  await dropPdf(page, { name: "long.pdf", bytes: await makePdf(30) });
+  const first = page.locator('[data-page-index="0"] > canvas');
+  const last = page.locator('[data-page-index="29"] > canvas');
+  const drawn = (canvas: typeof first) => canvas.evaluate((c: HTMLCanvasElement) => c.width > 0 && c.height > 0);
+  await expect.poll(() => drawn(first)).toBe(true);
+
+  // Листаем до конца по экрану за раз — по дороге рисуется каждая страница
+  const scroller = page.locator('[data-page-index="0"]').locator("xpath=ancestor::div[contains(@class, 'overflow-auto')][1]");
+  const scrollBy = () =>
+    scroller.evaluate((el) => {
+      el.scrollTop += el.clientHeight;
+      return el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+    });
+  while (!(await scrollBy())) await page.waitForTimeout(200);
+  await expect.poll(() => drawn(last)).toBe(true);
+
+  // Картинку держат только страницы рядом с экраном
+  const held = () =>
+    page.locator("[data-page-index] > canvas").evaluateAll((cs: HTMLCanvasElement[]) => cs.filter((c) => c.width > 0).length);
+  await expect.poll(held).toBeLessThanOrEqual(6);
+  expect(await drawn(first)).toBe(false);
+
+  // Вернулись наверх — первая страница нарисована снова
+  await scroller.evaluate((el) => (el.scrollTop = 0));
+  await expect.poll(() => drawn(first)).toBe(true);
+});
+
 test("OCR распознаёт текст и не ходит на сторонние сайты", async ({ page, baseURL }) => {
   test.setTimeout(120_000);
   const external: string[] = [];
