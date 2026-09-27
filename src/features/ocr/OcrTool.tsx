@@ -6,8 +6,7 @@ import { toast } from "sonner";
 import { Download, FileText, Info } from "lucide-react";
 import { FileDropzone } from "@/components/FileDropzone";
 import { FileCard } from "@/components/FileCard";
-import { ActionBar } from "@/components/ActionBar";
-import { Button } from "@/components/ui/button";
+import { MainAction, SecondaryAction, Summary, SummaryList, SummaryRow, ToolWorkspace } from "@/components/ToolWorkspace";
 import { Checkbox, Label, Progress } from "@/components/ui/misc";
 import { baseName, downloadBlob } from "@/lib/download";
 import { OCR_LANGUAGES, runOcr, type OcrProgress, type OcrResult } from "@/lib/ocr";
@@ -26,8 +25,11 @@ export function OcrTool() {
   const [result, setResult] = useState<OcrResult | null>(null);
   const abort = useRef<AbortController | null>(null);
 
-  const toggleLang = (code: string) =>
+  // Другие настройки — другой результат: снова показываем «Распознать»
+  const toggleLang = (code: string) => {
     setLangs((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]));
+    setResult(null);
+  };
 
   const run = async () => {
     if (!file || !langs.length) return;
@@ -56,7 +58,13 @@ export function OcrTool() {
     clear();
   };
 
-  if (!file) return <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />;
+  if (!file) {
+    return (
+      <ToolWorkspace>
+        <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />
+      </ToolWorkspace>
+    );
+  }
 
   const overall = progress
     ? progress.stage === "loading"
@@ -65,74 +73,103 @@ export function OcrTool() {
     : 0;
 
   return (
-    <div className="space-y-6">
-      <FileCard file={file} onClose={reset} />
-      <div className="space-y-4 rounded-xl border bg-card p-5">
-        <div className="space-y-2">
-          <Label>{t("ocr.languages")}</Label>
-          <div className="flex flex-wrap gap-2">
-            {OCR_LANGUAGES.map((l) => (
-              <button
-                key={l.code}
-                type="button"
-                aria-pressed={langs.includes(l.code)}
-                onClick={() => toggleLang(l.code)}
-                className={cn(
-                  "rounded-full border px-3 py-1 text-sm transition-colors",
-                  langs.includes(l.code) ? "border-primary bg-primary/10 font-medium" : "hover:bg-accent",
-                )}
-              >
-                {l.label}
-              </button>
-            ))}
+    <ToolWorkspace
+      summary={
+        <Summary
+          status={
+            progress && (
+              <div className="space-y-1.5">
+                <p>
+                  {progress.stage === "loading"
+                    ? t("ocr.loadingModel")
+                    : t("ocr.progress", { page: Math.max(1, progress.page), total: progress.total })}
+                </p>
+                <Progress value={overall} />
+              </div>
+            )
+          }
+          actions={
+            result ? (
+              <>
+                <MainAction onClick={() => downloadBlob(result.pdf, `${baseName(file.name)}_ocr.pdf`)}>
+                  <Download />
+                  {t("ocr.downloadPdf")}
+                </MainAction>
+                <SecondaryAction
+                  onClick={() =>
+                    downloadBlob(
+                      new Blob([result.text], { type: "text/plain;charset=utf-8" }),
+                      `${baseName(file.name)}.txt`,
+                    )
+                  }
+                >
+                  <FileText />
+                  {t("ocr.downloadTxt")}
+                </SecondaryAction>
+              </>
+            ) : (
+              <MainAction onClick={run} busy={progress !== null} disabled={!langs.length}>
+                {t("ocr.action")}
+              </MainAction>
+            )
+          }
+        >
+          <SummaryList>
+            <SummaryRow label={t("summary.pages")}>{file.pageCount}</SummaryRow>
+          </SummaryList>
+        </Summary>
+      }
+    >
+      <div className="flex flex-col gap-6">
+        <FileCard file={file} onClose={reset} />
+        <div className="space-y-4 rounded-xl border bg-card p-5">
+          <div className="space-y-2">
+            <Label>{t("ocr.languages")}</Label>
+            <div className="flex flex-wrap gap-2">
+              {OCR_LANGUAGES.map((l) => (
+                <button
+                  key={l.code}
+                  type="button"
+                  aria-pressed={langs.includes(l.code)}
+                  onClick={() => toggleLang(l.code)}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-sm transition-colors",
+                    langs.includes(l.code) ? "border-primary bg-primary/10 font-medium" : "hover:bg-accent",
+                  )}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
           </div>
+          <Label className="font-normal">
+            <Checkbox
+              checked={skipText}
+              onCheckedChange={(v) => {
+                setSkipText(v === true);
+                setResult(null);
+              }}
+            />
+            {t("ocr.skipText")}
+          </Label>
+          <p className="flex gap-2 text-xs text-muted-foreground">
+            <Info className="size-4 shrink-0" />
+            {t("ocr.note")}
+          </p>
         </div>
-        <Label className="font-normal">
-          <Checkbox checked={skipText} onCheckedChange={(v) => setSkipText(v === true)} />
-          {t("ocr.skipText")}
-        </Label>
-        <p className="flex gap-2 text-xs text-muted-foreground">
-          <Info className="size-4 shrink-0" />
-          {t("ocr.note")}
-        </p>
-      </div>
 
-      {result && (
-        <div className="space-y-3 rounded-xl border bg-card p-5">
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={() => downloadBlob(result.pdf, `${baseName(file.name)}_ocr.pdf`)}>
-              <Download />
-              {t("ocr.downloadPdf")}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => downloadBlob(new Blob([result.text], { type: "text/plain;charset=utf-8" }), `${baseName(file.name)}.txt`)}
-            >
-              <FileText />
-              {t("ocr.downloadTxt")}
-            </Button>
-          </div>
-          <Label>{t("ocr.preview")}</Label>
-          <textarea
-            readOnly
-            value={result.text || t("ocr.nothing")}
-            className="h-64 w-full resize-y rounded-md border bg-muted/40 p-3 font-mono text-sm"
-          />
-        </div>
-      )}
-
-      <ActionBar action={t("ocr.action")} onAction={run} busy={progress !== null} disabled={!langs.length}>
-        {progress && (
-          <div className="max-w-sm space-y-1.5">
-            <p>
-              {progress.stage === "loading"
-                ? t("ocr.loadingModel")
-                : t("ocr.progress", { page: Math.max(1, progress.page), total: progress.total })}
-            </p>
-            <Progress value={overall} />
+        {result && (
+          <div className="space-y-3 rounded-xl border bg-card p-5">
+            <Label>{t("ocr.preview")}</Label>
+            <textarea
+              readOnly
+              value={result.text || t("ocr.nothing")}
+              className="h-64 w-full resize-y rounded-md border bg-muted/40 p-3 font-mono text-sm"
+            />
           </div>
         )}
-      </ActionBar>
-    </div>
+
+      </div>
+    </ToolWorkspace>
   );
 }

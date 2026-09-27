@@ -1,7 +1,6 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Languages } from "lucide-react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
@@ -30,8 +29,12 @@ export function LocaleSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" aria-label={t("language")} className="gap-1.5 uppercase">
-          <Languages />
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label={`${t("language")}: ${locale.toUpperCase()}`}
+          className="h-11 rounded-[10px] px-3 font-mono text-[13px] font-normal text-secondary-foreground uppercase lg:h-10 lg:rounded-lg lg:border"
+        >
           {locale}
         </Button>
       </DropdownMenuTrigger>

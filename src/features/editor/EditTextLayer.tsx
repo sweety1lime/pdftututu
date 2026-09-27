@@ -111,7 +111,7 @@ export function EditTextLayer({
             type="button"
             title={l.text}
             onClick={() => replace(l)}
-            className="absolute cursor-text rounded-[2px] outline-1 outline-sky-500/50 outline-dashed transition-colors hover:bg-sky-400/20 hover:outline-sky-500 hover:outline-solid"
+            className="absolute cursor-text rounded-[2px] outline-1 outline-[#e3a21a]/60 outline-dashed transition-colors hover:bg-[#f2b53a]/20 hover:outline-[#e3a21a] hover:outline-solid"
             style={{ left: l.x * zoom - 1, top: l.y * zoom - 1, width: l.w * zoom + 2, height: l.h * zoom + 2 }}
           />
         ),

@@ -3,16 +3,17 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { ArrowDownAZ, GripVertical, Trash2, X } from "lucide-react";
+import { ArrowDownAZ, Download, GripVertical, Trash2, X } from "lucide-react";
 import { FileDropzone } from "@/components/FileDropzone";
 import { PdfThumb } from "@/components/PdfThumb";
 import { SortableGrid } from "@/components/SortableGrid";
-import { ActionBar } from "@/components/ActionBar";
+import { MainAction, Summary, SummaryList, SummaryRow, ToolWorkspace } from "@/components/ToolWorkspace";
 import { Button } from "@/components/ui/button";
 import { downloadBlob, formatBytes } from "@/lib/download";
 import { mergePdfs } from "@/lib/pdf/pages";
-import { useLoadedPdfs } from "@/lib/pdf/useLoadedPdfs";
+import { useLoadedPdfs, type LoadedPdf } from "@/lib/pdf/useLoadedPdfs";
 import { useErrorToast } from "@/lib/useErrorToast";
+import { cn } from "@/lib/utils";
 
 export function MergeTool() {
   const t = useTranslations();
@@ -22,6 +23,7 @@ export function MergeTool() {
   const [busy, setBusy] = useState(false);
 
   const totalPages = files.reduce((n, f) => n + f.pageCount, 0);
+  const totalSize = files.reduce((n, f) => n + f.size, 0);
 
   const merge = async () => {
     setBusy(true);
@@ -37,70 +39,126 @@ export function MergeTool() {
   };
 
   if (!files.length) {
-    return <FileDropzone multiple onFiles={add} disabled={loading} />;
+    return (
+      <ToolWorkspace>
+        <FileDropzone multiple onFiles={add} disabled={loading} />
+      </ToolWorkspace>
+    );
   }
 
   return (
-    <div>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <FileDropzone compact multiple onFiles={add} disabled={loading} />
-        <Button
-          variant="outline"
-          onClick={() => setFiles((prev) => [...prev].sort((a, b) => a.name.localeCompare(b.name, locale, { numeric: true })))}
+    <ToolWorkspace
+      summary={
+        <Summary
+          status={
+            files.length < 2 ? (
+              t("merge.needTwo")
+            ) : (
+              <span className="lg:hidden">
+                {t("common.files", { count: files.length })} · {t("common.pages", { count: totalPages })}
+              </span>
+            )
+          }
+          actions={
+            <MainAction onClick={merge} busy={busy} disabled={files.length < 2 || loading}>
+              {t("merge.action")}
+              <Download />
+            </MainAction>
+          }
         >
-          <ArrowDownAZ />
-          {t("merge.sortByName")}
-        </Button>
-        <Button variant="ghost" onClick={clear} className="ml-auto text-muted-foreground">
-          <Trash2 />
-          {t("common.clear")}
-        </Button>
+          <SummaryList>
+            <SummaryRow label={t("summary.files")}>{files.length}</SummaryRow>
+            <SummaryRow label={t("summary.pages")}>{totalPages}</SummaryRow>
+            <SummaryRow label={t("summary.totalSize")}>{formatBytes(totalSize, locale)}</SummaryRow>
+          </SummaryList>
+        </Summary>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="mr-auto text-[13px] text-muted-foreground">{t("merge.hint")}</p>
+          <FileDropzone compact multiple onFiles={add} disabled={loading} />
+          <Button
+            variant="outline"
+            onClick={() =>
+              setFiles((prev) => [...prev].sort((a, b) => a.name.localeCompare(b.name, locale, { numeric: true })))
+            }
+          >
+            <ArrowDownAZ />
+            {t("merge.sortByName")}
+          </Button>
+          <Button variant="ghost" onClick={clear} className="text-muted-foreground">
+            <Trash2 />
+            {t("common.clear")}
+          </Button>
+        </div>
+
+        <SortableGrid
+          layout="list"
+          items={files}
+          onReorder={setFiles}
+          renderItem={(f, i) => <MergeRow file={f} index={i} onRemove={() => remove(f.id)} />}
+        />
+
+        <FileDropzone more multiple onFiles={add} disabled={loading} />
       </div>
-      <p className="mb-4 text-sm text-muted-foreground">{t("merge.hint")}</p>
+    </ToolWorkspace>
+  );
+}
 
-      <SortableGrid
-        items={files}
-        onReorder={setFiles}
-        renderItem={(f, i) => (
-          <div className="group relative flex h-full cursor-grab flex-col gap-2 rounded-xl border bg-card p-3 shadow-xs active:cursor-grabbing">
-            <span className="absolute top-2 left-2 z-10 flex size-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-              {i + 1}
-            </span>
-            <button
-              type="button"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => remove(f.id)}
-              aria-label={t("common.remove")}
-              className="absolute top-2 right-2 z-10 rounded-full bg-background/90 p-1 text-muted-foreground opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:text-destructive focus-visible:opacity-100"
-            >
-              <X className="size-4" />
-            </button>
-            <PdfThumb doc={f.doc} pageIndex={0} width={180} className="mx-auto" />
-            <div className="flex items-start gap-1">
-              <GripVertical className="mt-0.5 size-4 shrink-0 text-muted-foreground/60" />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium" title={f.name}>
-                  {f.name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t("common.pages", { count: f.pageCount })} · {formatBytes(f.size, locale)}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-      />
+/** Сколько миниатюр страниц показать в строке файла: на телефоне меньше. */
+const THUMBS = 12;
+const THUMBS_PHONE = 3;
 
-      <ActionBar
-        action={t("merge.action")}
-        onAction={merge}
-        busy={busy}
-        disabled={files.length < 2 || loading}
+function MergeRow({ file, index, onRemove }: { file: LoadedPdf; index: number; onRemove: () => void }) {
+  const t = useTranslations("common");
+  const locale = useLocale();
+  const shown = Math.min(file.pageCount, THUMBS);
+  const more = (limit: number) => file.pageCount - limit;
+  const moreBadge = "flex h-14 w-10 shrink-0 items-center justify-center rounded-sm bg-accent font-mono text-xs text-muted-foreground";
+
+  return (
+    <div className="grid cursor-grab grid-cols-[16px_28px_minmax(0,1fr)_36px] items-center gap-x-3 rounded-xl border bg-card p-3 active:cursor-grabbing sm:gap-x-3.5">
+      <GripVertical className="size-4 text-muted-foreground" />
+      <span className="flex size-7 items-center justify-center rounded-md bg-accent font-mono text-[13px] font-medium">
+        {index + 1}
+      </span>
+      <div className="flex min-w-0 flex-col gap-2.5">
+        <p className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
+          <span className="max-w-full truncate text-[15px] font-semibold" title={file.name}>
+            {file.name}
+          </span>
+          <span className="font-mono text-xs text-muted-foreground">
+            {t("pages", { count: file.pageCount })} · {formatBytes(file.size, locale)}
+          </span>
+        </p>
+        <div className="flex gap-1.5">
+          {Array.from({ length: shown }, (_, p) => (
+            <PdfThumb
+              key={p}
+              doc={file.doc}
+              pageIndex={p}
+              width={40}
+              tight
+              className={cn("w-10 shrink-0", p >= THUMBS_PHONE && "max-sm:hidden")}
+            />
+          ))}
+          {more(THUMBS_PHONE) > 0 && <span className={cn(moreBadge, "sm:hidden")}>+{more(THUMBS_PHONE)}</span>}
+          {more(THUMBS) > 0 && <span className={cn(moreBadge, "max-sm:hidden")}>+{more(THUMBS)}</span>}
+        </div>
+      </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onClick={onRemove}
+        aria-label={t("remove")}
+        className="text-muted-foreground hover:text-destructive"
       >
-        {files.length < 2
-          ? t("merge.needTwo")
-          : `${t("common.files", { count: files.length })} · ${t("merge.total", { pages: t("common.pages", { count: totalPages }) })}`}
-      </ActionBar>
+        <X />
+      </Button>
     </div>
   );
 }

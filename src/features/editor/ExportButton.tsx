@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ChevronDown, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Checkbox, Label } from "@/components/ui/misc";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/menu";
 import { baseName, downloadBlob } from "@/lib/download";
@@ -66,14 +67,14 @@ export function ExportButton() {
 
   return (
     <div className="flex">
-      <Button onClick={run} disabled={busy} className={hasOptions ? "rounded-r-none" : undefined}>
+      <Button onClick={run} disabled={busy} className={cn("rounded-lg px-3.5 font-semibold", hasOptions && "rounded-r-none")}>
         {busy ? <Loader2 className="animate-spin" /> : <Download />}
         <span className="hidden sm:inline">{busy ? t("exporting") : t("download")}</span>
       </Button>
       {hasOptions && (
         <Popover>
           <PopoverTrigger asChild>
-            <Button className="rounded-l-none border-l border-primary-foreground/20 px-2" aria-label={t("options")}>
+            <Button className="w-8.5 rounded-l-none rounded-r-lg border-l border-primary-foreground/25 px-0" aria-label={t("options")}>
               <ChevronDown />
             </Button>
           </PopoverTrigger>

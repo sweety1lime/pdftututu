@@ -32,9 +32,9 @@ export async function ToolGuide({ id }: { id: ToolId }) {
   const t = await getTranslations("guide");
   const guide = await loadGuide(id);
   return (
-    <section className="mx-auto mt-16 max-w-3xl space-y-12">
+    <section className="mt-16 space-y-12">
       <div>
-        <h2 className="mb-5 text-2xl font-bold tracking-tight">{guide.howTo}</h2>
+        <h2 className="mb-5 text-xl font-semibold">{guide.howTo}</h2>
         <ol className="grid gap-4 sm:grid-cols-3">
           {guide.steps.map((step, i) => (
             <li key={i} className="rounded-xl border bg-card p-4">
@@ -47,7 +47,7 @@ export async function ToolGuide({ id }: { id: ToolId }) {
         </ol>
       </div>
       <div>
-        <h2 className="mb-5 text-2xl font-bold tracking-tight">{t("faqTitle")}</h2>
+        <h2 className="mb-5 text-xl font-semibold">{t("faqTitle")}</h2>
         <div className="divide-y rounded-xl border bg-card">
           {guide.faq.map((item) => (
             <details key={item.q} className="group px-5 py-4">

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { formatBytes } from "@/lib/download";
+import { usePendingFiles, type PendingItem, type ReadPdf } from "@/lib/pendingFiles";
 import { readPdfFile, type PdfSource } from "./load";
 import { closePdfjs, openPdfjs } from "./pdfjs";
 import { PdfError } from "./errors";
@@ -18,9 +19,12 @@ export interface LoadedPdf extends PdfSource {
 
 const BIG_FILE = 150 * 1024 * 1024;
 
-/** Открыть файл: проверка, пароль, pdf.js. Бросает PdfError. */
-export async function openLoadedPdf(file: File): Promise<LoadedPdf> {
-  const src = await readPdfFile(file);
+/**
+ * Открыть файл: проверка, пароль, pdf.js. Бросает PdfError.
+ * Уже прочитанный PDF (ReadPdf) только открывается в pdf.js — без повторного вопроса о пароле.
+ */
+export async function openLoadedPdf(file: File | ReadPdf): Promise<LoadedPdf> {
+  const src = file instanceof File ? await readPdfFile(file) : file;
   let doc: PDFDocumentProxy;
   try {
     doc = await openPdfjs(src.bytes);
@@ -30,8 +34,11 @@ export async function openLoadedPdf(file: File): Promise<LoadedPdf> {
   return { ...src, size: file.size, pageCount: doc.numPages, doc };
 }
 
-/** Список открытых PDF с автоматическим освобождением памяти. */
-export function useLoadedPdfs() {
+/**
+ * Список открытых PDF с автоматическим освобождением памяти.
+ * Файлы, переданные с главной, добавляются сами (pickUpPending: false — забрать их вручную).
+ */
+export function useLoadedPdfs({ pickUpPending = true }: { pickUpPending?: boolean } = {}) {
   const t = useTranslations("common");
   const showError = useErrorToast();
   const [files, setFiles] = useState<LoadedPdf[]>([]);
@@ -44,7 +51,7 @@ export function useLoadedPdfs() {
   useEffect(() => () => filesRef.current.forEach((f) => closePdfjs(f.doc)), []);
 
   const add = useCallback(
-    async (incoming: File[]): Promise<LoadedPdf[]> => {
+    async (incoming: PendingItem[]): Promise<LoadedPdf[]> => {
       setLoading(true);
       const added: LoadedPdf[] = [];
       try {
@@ -66,6 +73,8 @@ export function useLoadedPdfs() {
     },
     [showError, t],
   );
+
+  usePendingFiles(add, pickUpPending);
 
   const remove = useCallback((id: string) => {
     setFiles((prev) => {

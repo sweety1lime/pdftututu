@@ -11,6 +11,7 @@ import {
   Bold,
   Copy,
   Italic,
+  Plus,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ import { cn } from "@/lib/utils";
 import type { FontFamily } from "@/lib/pdf/fonts";
 import { withTextSize } from "./factory";
 import { beginGesture, endGesture, selectedObjects, useEditor } from "./store";
-import type { EditorObject, TextObject } from "./types";
+import type { EditorObject, TextObject, Tool } from "./types";
 
 const COLORS = ["#111111", "#6b7280", "#ffffff", "#e11d48", "#f97316", "#eab308", "#16a34a", "#0ea5e9", "#2563eb", "#7c3aed"];
 const HIGHLIGHTS = ["#fde047", "#86efac", "#f9a8d4", "#93c5fd", "#fdba74"];
@@ -66,9 +67,21 @@ export function PropertiesPanel() {
 
   const setDefaults = useEditor.getState().setDefaults;
 
+  // Заголовок: что выделено (или какой инструмент настраиваем)
+  const title = !kind ? null : kind === "mixed" ? t("props.mixed") : t(`tools.${first ? toolOf(first.type) : tool}`);
+
   return (
-    <aside className="hidden w-64 shrink-0 flex-col gap-5 overflow-y-auto border-l bg-background p-4 md:flex">
+    <aside
+      aria-label={t("props.title")}
+      className="hidden w-68 shrink-0 flex-col gap-5 overflow-y-auto border-l bg-panel px-4 pt-4.5 pb-4 md:flex"
+    >
       {!kind && <p className="text-sm text-muted-foreground">{t("props.nothing")}</p>}
+      {title && (
+        <div className="flex items-center justify-between gap-2 font-mono text-xs text-muted-foreground">
+          <h2 className="font-medium tracking-[0.08em] uppercase">{title}</h2>
+          {selected.length > 0 && <span>{t("props.objects", { count: selected.length })}</span>}
+        </div>
+      )}
 
       {kind === "text" && (
         <TextProps
@@ -170,6 +183,11 @@ export function PropertiesPanel() {
   );
 }
 
+/** Инструмент, которым рисуют объект такого типа (для заголовка панели). */
+function toolOf(type: EditorObject["type"]): Tool {
+  return type === "path" ? "pen" : type;
+}
+
 function groupOf(type: EditorObject["type"]): string {
   if (type === "rect" || type === "ellipse") return "shape";
   if (type === "line" || type === "arrow") return "line";
@@ -221,31 +239,32 @@ function TextProps({ o, onChange }: { o: Partial<TextObject>; onChange: (p: Part
   );
 }
 
+const actionButton = "h-9 w-full rounded-lg px-0 text-secondary-foreground";
+
 function ObjectActions() {
   const t = useTranslations("editor.actions");
   const s = useEditor.getState();
   return (
-    <div className="grid grid-cols-4 gap-1 border-t pt-4">
+    <div className="mt-auto grid grid-cols-4 gap-1.5 border-t pt-3.5">
       <Tip label={`${t("duplicate")} (Ctrl+D)`}>
-        <Button variant="outline" size="icon-sm" onClick={() => s.duplicate(useEditor.getState().selectedIds)}>
+        <Button variant="outline" className={actionButton} onClick={() => s.duplicate(useEditor.getState().selectedIds)}>
           <Copy />
         </Button>
       </Tip>
       <Tip label={t("bringForward")}>
-        <Button variant="outline" size="icon-sm" onClick={() => s.moveZ(useEditor.getState().selectedIds, 1)}>
+        <Button variant="outline" className={actionButton} onClick={() => s.moveZ(useEditor.getState().selectedIds, 1)}>
           <ArrowUp />
         </Button>
       </Tip>
       <Tip label={t("sendBackward")}>
-        <Button variant="outline" size="icon-sm" onClick={() => s.moveZ(useEditor.getState().selectedIds, -1)}>
+        <Button variant="outline" className={actionButton} onClick={() => s.moveZ(useEditor.getState().selectedIds, -1)}>
           <ArrowDown />
         </Button>
       </Tip>
       <Tip label={`${t("delete")} (Del)`}>
         <Button
           variant="outline"
-          size="icon-sm"
-          className="hover:text-destructive"
+          className={cn(actionButton, "text-destructive hover:text-destructive")}
           onClick={() => s.removeObjects(useEditor.getState().selectedIds)}
         >
           <Trash2 />
@@ -272,11 +291,11 @@ function ToggleIcon({
     <Tip label={label}>
       <Button
         variant="outline"
-        size="icon-sm"
+        size="icon"
         aria-pressed={active}
         disabled={disabled}
         onClick={onClick}
-        className={cn(active && "border-primary bg-primary/10 text-primary")}
+        className={cn("rounded-lg text-secondary-foreground", active && "border-primary bg-primary/10 text-primary-ink")}
       >
         {children}
       </Button>
@@ -354,15 +373,15 @@ function ColorField({
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-2">
         {allowNone && (
           <button
             type="button"
             title={t("noFill")}
             onClick={() => onChange(null)}
             className={cn(
-              "relative size-6 overflow-hidden rounded-full border bg-background",
-              value === null && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+              "relative size-7 overflow-hidden rounded-full border bg-background",
+              value === null && "ring-2 ring-primary ring-offset-2 ring-offset-panel",
             )}
           >
             <span className="absolute top-1/2 left-1/2 h-px w-8 -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-destructive" />
@@ -375,19 +394,20 @@ function ColorField({
             title={c}
             onClick={() => onChange(c)}
             className={cn(
-              "size-6 rounded-full border border-black/15",
-              value?.toLowerCase() === c && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+              "size-7 rounded-full border border-black/15",
+              value?.toLowerCase() === c && "ring-2 ring-primary ring-offset-2 ring-offset-panel",
             )}
             style={{ background: c }}
           />
         ))}
         <label
-          className="relative size-6 cursor-pointer overflow-hidden rounded-full border"
-          style={{ background: "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)" }}
-          title="…"
+          className="relative flex size-7 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-dashed border-muted-foreground/70 text-secondary-foreground"
+          title={t("customColor")}
         >
+          <Plus className="size-3.5" />
           <input
             type="color"
+            aria-label={t("customColor")}
             className="absolute inset-0 cursor-pointer opacity-0"
             value={value ?? "#000000"}
             onFocus={beginGesture}

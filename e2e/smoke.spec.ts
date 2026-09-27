@@ -68,3 +68,45 @@ test("картинка для превью ссылки отдаётся", async
   expect(res.status()).toBe(200);
   expect(res.headers()["content-type"]).toBe("image/png");
 });
+
+test("поиск инструментов: Ctrl+K, ввод, Enter", async ({ page }) => {
+  await page.goto("/ru");
+  const input = page.getByRole("combobox", { name: "Найти инструмент" });
+  // Пока страница не ожила, горячая клавиша не работает — повторяем
+  await expect(async () => {
+    await page.keyboard.press("Control+k");
+    await expect(input).toBeFocused({ timeout: 500 });
+  }).toPass();
+
+  await input.fill("ЧЕРНО");
+  await expect(page.getByRole("option")).toHaveText([/Чёрно-белый PDF/]);
+  await input.fill("абракадабра");
+  await expect(page.getByText("Ничего не нашлось")).toBeVisible();
+
+  await input.fill("сжать");
+  await input.press("Enter");
+  await expect(page).toHaveURL(/\/ru\/compress$/);
+  await expect(page.getByRole("heading", { name: "Сжать PDF", exact: true })).toBeVisible();
+});
+
+test.describe("телефон", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("ни одна страница не прокручивается вбок", async ({ page, request }) => {
+    const xml = await (await request.get("/sitemap.xml")).text();
+    const paths = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+    for (const path of paths) {
+      await page.goto(path);
+      await expect(page.locator("h1"), path).toBeVisible();
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow, path).toBeLessThanOrEqual(0);
+    }
+  });
+
+  test("поиск открывается кнопкой в шапке", async ({ page }) => {
+    await page.goto("/ru/merge");
+    await page.getByRole("button", { name: "Найти инструмент", exact: true }).click();
+    await page.getByRole("option", { name: /Сжать PDF/ }).click();
+    await expect(page).toHaveURL(/\/ru\/compress$/);
+  });
+});

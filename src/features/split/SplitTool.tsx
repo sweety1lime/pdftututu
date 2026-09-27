@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { FileDropzone } from "@/components/FileDropzone";
 import { FileCard } from "@/components/FileCard";
-import { ActionBar } from "@/components/ActionBar";
+import { MainAction, Summary, SummaryList, SummaryRow, ToolWorkspace } from "@/components/ToolWorkspace";
 import { PdfThumb } from "@/components/PdfThumb";
 import { Input } from "@/components/ui/input";
 import { Checkbox, Label } from "@/components/ui/misc";
@@ -68,69 +68,96 @@ export function SplitTool() {
     }
   };
 
-  if (!file) return <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />;
+  if (!file) {
+    return (
+      <ToolWorkspace>
+        <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />
+      </ToolWorkspace>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <FileCard file={file} onClose={clear} />
+    <ToolWorkspace
+      summary={
+        <Summary
+          status={
+            plan.groups.length > 0 && (
+              <span className="lg:hidden">
+                {t("split.willCreate", { files: t("common.files", { count: plan.groups.length }) })}
+              </span>
+            )
+          }
+          actions={
+            <MainAction onClick={run} busy={busy} disabled={!plan.groups.length}>
+              {t("split.action")}
+            </MainAction>
+          }
+        >
+          <SummaryList>
+            <SummaryRow label={t("summary.files")}>{plan.groups.length}</SummaryRow>
+            <SummaryRow label={t("summary.pages")}>{selected.size}</SummaryRow>
+          </SummaryList>
+        </Summary>
+      }
+    >
+      <div className="flex flex-col gap-6">
+        <FileCard file={file} onClose={clear} />
 
-      <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)} className="space-y-4">
-        <TabsList className="flex h-auto w-full flex-wrap sm:w-fit">
-          <TabsTrigger value="ranges">{t("split.modeRanges")}</TabsTrigger>
-          <TabsTrigger value="every">{t("split.modeEvery")}</TabsTrigger>
-          <TabsTrigger value="each">{t("split.modeEach")}</TabsTrigger>
-        </TabsList>
-        <TabsContent value="ranges" className="max-w-md space-y-3">
-          <Label htmlFor="ranges">{t("split.rangesLabel")}</Label>
-          <Input
-            id="ranges"
-            value={ranges}
-            onChange={(e) => setRanges(e.target.value)}
-            placeholder={t("split.rangesPlaceholder")}
-            aria-invalid={Boolean(ranges && plan.error)}
-            autoFocus
-          />
-          <p className={cn("text-sm", ranges && plan.error ? "text-destructive" : "text-muted-foreground")}>
-            {ranges && plan.error ? plan.error : t("split.rangesHelp")}
-          </p>
-          <Label className="font-normal">
-            <Checkbox checked={mergeRanges} onCheckedChange={(v) => setMergeRanges(v === true)} />
-            {t("split.mergeRanges")}
-          </Label>
-        </TabsContent>
-        <TabsContent value="every" className="max-w-md space-y-3">
-          <Label htmlFor="every">{t("split.everyLabel")}</Label>
-          <Input
-            id="every"
-            type="number"
-            min={1}
-            max={file.pageCount}
-            value={every}
-            onChange={(e) => setEvery(Math.max(1, Math.min(file.pageCount, Number(e.target.value) || 1)))}
-            className="w-32"
-          />
-        </TabsContent>
-        <TabsContent value="each" />
-      </Tabs>
+        <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)} className="space-y-4">
+          <TabsList className="flex h-auto w-full flex-wrap sm:w-fit">
+            <TabsTrigger value="ranges">{t("split.modeRanges")}</TabsTrigger>
+            <TabsTrigger value="every">{t("split.modeEvery")}</TabsTrigger>
+            <TabsTrigger value="each">{t("split.modeEach")}</TabsTrigger>
+          </TabsList>
+          <TabsContent value="ranges" className="max-w-md space-y-3">
+            <Label htmlFor="ranges">{t("split.rangesLabel")}</Label>
+            <Input
+              id="ranges"
+              value={ranges}
+              onChange={(e) => setRanges(e.target.value)}
+              placeholder={t("split.rangesPlaceholder")}
+              aria-invalid={Boolean(ranges && plan.error)}
+              autoFocus
+            />
+            <p className={cn("text-sm", ranges && plan.error ? "text-destructive" : "text-muted-foreground")}>
+              {ranges && plan.error ? plan.error : t("split.rangesHelp")}
+            </p>
+            <Label className="font-normal">
+              <Checkbox checked={mergeRanges} onCheckedChange={(v) => setMergeRanges(v === true)} />
+              {t("split.mergeRanges")}
+            </Label>
+          </TabsContent>
+          <TabsContent value="every" className="max-w-md space-y-3">
+            <Label htmlFor="every">{t("split.everyLabel")}</Label>
+            <Input
+              id="every"
+              type="number"
+              min={1}
+              max={file.pageCount}
+              value={every}
+              onChange={(e) => setEvery(Math.max(1, Math.min(file.pageCount, Number(e.target.value) || 1)))}
+              className="w-32"
+            />
+          </TabsContent>
+          <TabsContent value="each" />
+        </Tabs>
 
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">
-        {Array.from({ length: file.pageCount }, (_, i) => (
-          <div
-            key={i}
-            className={cn(
-              "rounded-lg border p-1.5 transition-colors",
-              selected.has(i) ? "border-primary bg-primary/5" : "opacity-45",
-            )}
-          >
-            <PdfThumb doc={file.doc} pageIndex={i} width={110} className="mx-auto" />
-            <p className="mt-1 text-center text-xs text-muted-foreground">{i + 1}</p>
-          </div>
-        ))}
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8">
+          {Array.from({ length: file.pageCount }, (_, i) => (
+            <div
+              key={i}
+              className={cn(
+                "rounded-lg border p-1.5 transition-colors",
+                selected.has(i) ? "border-primary bg-primary/5" : "opacity-45",
+              )}
+            >
+              <PdfThumb doc={file.doc} pageIndex={i} width={110} className="mx-auto" />
+              <p className="mt-1 text-center text-xs text-muted-foreground">{i + 1}</p>
+            </div>
+          ))}
+        </div>
+
       </div>
-
-      <ActionBar action={t("split.action")} onAction={run} busy={busy} disabled={!plan.groups.length}>
-        {plan.groups.length > 0 && t("split.willCreate", { files: t("common.files", { count: plan.groups.length }) })}
-      </ActionBar>
-    </div>
+    </ToolWorkspace>
   );
 }

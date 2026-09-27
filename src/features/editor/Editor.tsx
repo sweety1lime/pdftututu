@@ -3,17 +3,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { History, Info } from "lucide-react";
+import { CircleCheck, History, Info } from "lucide-react";
 import { FileDropzone } from "@/components/FileDropzone";
 import { PdfThumb } from "@/components/PdfThumb";
+import { PrivacyNote } from "@/components/ToolWorkspace";
 import { Button } from "@/components/ui/button";
 import { prepareImage } from "@/lib/images";
 import { newId, readPdfFile, type PdfSource } from "@/lib/pdf/load";
 import { CSS_FAMILY } from "@/lib/pdf/fonts";
+import { takeDraftRestore, usePendingFiles } from "@/lib/pendingFiles";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { cn } from "@/lib/utils";
 import { assetFromImage, fitSize } from "./assets";
-import { clearDraft, loadDraft, useAutosave, type Draft } from "./autosave";
+import { clearDraft, loadDraft, useAutosave, useDraftStatus, type Draft } from "./autosave";
 import { ExportButton } from "./ExportButton";
 import { useEditorHotkeys } from "./hotkeys";
 import { openDocument } from "./openDocument";
@@ -32,6 +34,8 @@ interface Props {
   onOpenChange?: (open: boolean) => void;
 }
 
+const draftSource = (d: Draft): PdfSource => ({ id: d.sourceId, name: d.name, bytes: d.bytes, wasEncrypted: false });
+
 export default function Editor({ entry = "editor", onOpenChange }: Props) {
   const t = useTranslations("editor");
   const tRoot = useTranslations();
@@ -45,9 +49,6 @@ export default function Editor({ entry = "editor", onOpenChange }: Props) {
 
   useEffect(() => onOpenChange?.(!!source), [source, onOpenChange]);
 
-  useEffect(() => {
-    if (!useEditor.getState().source) loadDraft().then(setDraft);
-  }, []);
 
   const open = useCallback(
     async (src: PdfSource, restore?: Draft) => {
@@ -92,11 +93,28 @@ export default function Editor({ entry = "editor", onOpenChange }: Props) {
     }
   };
 
+  usePendingFiles(([item]) => {
+    if (!item) return;
+    if (item instanceof File) openFile([item]);
+    else clearDraft().then(() => open(item));
+  });
+
+  // Черновик: предложить восстановить, а если нажали «Восстановить» на главной — сразу открыть
+  useEffect(() => {
+    if (useEditor.getState().source) return;
+    const restore = takeDraftRestore();
+    loadDraft().then((d) => {
+      if (d && restore) open(draftSource(d), d);
+      else setDraft(d);
+    });
+  }, [open]);
+
   if (!source) {
     return (
-      <div className="mx-auto w-full max-w-3xl">
-        {draft && <DraftBanner draft={draft} onRestore={() => open({ id: draft.sourceId, name: draft.name, bytes: draft.bytes, wasEncrypted: false }, draft)} onDiscard={() => clearDraft().then(() => setDraft(null))} />}
+      <div className="w-full">
+        {draft && <DraftBanner draft={draft} onRestore={() => open(draftSource(draft), draft)} onDiscard={() => clearDraft().then(() => setDraft(null))} />}
         <FileDropzone onFiles={openFile} disabled={loading} />
+        <PrivacyNote className="mt-6 items-center justify-center text-center" />
       </div>
     );
   }
@@ -104,13 +122,40 @@ export default function Editor({ entry = "editor", onOpenChange }: Props) {
   return <Workspace signOpen={signOpen} setSignOpen={setSignOpen} />;
 }
 
+/** Строка состояния: страница, сохранён ли черновик, подсказки по клавишам. */
+function StatusBar() {
+  const t = useTranslations("editor.status");
+  const locale = useLocale();
+  const page = useEditor((s) => s.currentPage);
+  const total = useEditor((s) => s.pages.length);
+  const savedAt = useDraftStatus((s) => s.savedAt);
+  return (
+    <div className="flex h-8 shrink-0 items-center gap-6 overflow-hidden border-t bg-panel px-4 font-mono text-xs whitespace-nowrap text-muted-foreground">
+      <span>{t("page", { n: page + 1, total })}</span>
+      {savedAt !== null && (
+        <span className="inline-flex items-center gap-1.5" title={new Date(savedAt).toLocaleTimeString(locale)}>
+          <CircleCheck className="size-3.5 text-success" />
+          {t("draftSaved")}
+        </span>
+      )}
+      <span className="ml-auto hidden gap-4 xl:flex">
+        {t("hints")
+          .split(" · ")
+          .map((hint) => (
+            <span key={hint}>{hint}</span>
+          ))}
+      </span>
+    </div>
+  );
+}
+
 function DraftBanner({ draft, onRestore, onDiscard }: { draft: Draft; onRestore: () => void; onDiscard: () => void }) {
   const t = useTranslations("editor.draft");
   const locale = useLocale();
   const date = new Date(draft.savedAt).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" });
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
-      <History className="size-5 shrink-0 text-amber-600 dark:text-amber-400" />
+    <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-input bg-card p-4">
+      <History className="size-5 shrink-0 text-primary-ink" />
       <div className="min-w-0 flex-1">
         <p className="font-medium">{t("title")}</p>
         <p className="truncate text-sm text-muted-foreground">{t("description", { name: draft.name, date })}</p>
@@ -125,6 +170,7 @@ function DraftBanner({ draft, onRestore, onDiscard }: { draft: Draft; onRestore:
 
 function Workspace({ signOpen, setSignOpen }: { signOpen: boolean; setSignOpen: (o: boolean) => void }) {
   const t = useTranslations("editor");
+  const tc = useTranslations("common");
   const showError = useErrorToast();
   const pages = useEditor((s) => s.pages);
   const pdf = useEditor((s) => s.pdf);
@@ -268,7 +314,7 @@ function Workspace({ signOpen, setSignOpen }: { signOpen: boolean; setSignOpen: 
     tool === "editText" ? t("editTextHint") : tool === "forms" ? (hasForms ? t("formsHint") : t("formsNone")) : null;
 
   return (
-    <div className="flex h-[calc(100dvh-3.5rem)] flex-col overflow-hidden">
+    <div className="flex h-[calc(100dvh-3.5rem)] flex-col overflow-hidden lg:h-[calc(100dvh-3.75rem)]">
       {picker.input}
       <Toolbar
         onPickImage={picker.open}
@@ -282,24 +328,28 @@ function Workspace({ signOpen, setSignOpen }: { signOpen: boolean; setSignOpen: 
         exportButton={<ExportButton />}
       />
       <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-36 shrink-0 overflow-y-auto border-r bg-background p-3 lg:block">
-          <div className="space-y-3">
+        <nav aria-label={t("pagesNav")} className="hidden w-36 shrink-0 overflow-y-auto border-r bg-panel p-3 lg:block">
+          <div className="space-y-2.5">
             {pages.map((_, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => scrollToPage(i)}
+                aria-label={tc("pageN", { n: i + 1 })}
+                aria-current={i === currentPage ? "true" : undefined}
                 className={cn(
-                  "block w-full rounded-lg border-2 p-1 transition-colors",
-                  i === currentPage ? "border-primary" : "border-transparent hover:border-border",
+                  "flex w-full flex-col items-center gap-1.5 rounded-lg border-2 p-1.5 font-mono text-xs transition-colors",
+                  i === currentPage
+                    ? "border-primary text-foreground"
+                    : "border-transparent text-muted-foreground hover:border-border",
                 )}
               >
                 <PdfThumb doc={pdf} pageIndex={i} width={100} className="mx-auto" />
-                <span className="text-xs text-muted-foreground">{i + 1}</span>
+                {i + 1}
               </button>
             ))}
           </div>
-        </aside>
+        </nav>
 
         <div ref={scrollRef} onScroll={onScroll} className="relative min-w-0 flex-1 overflow-auto bg-canvas">
           {hint && (
@@ -328,6 +378,8 @@ function Workspace({ signOpen, setSignOpen }: { signOpen: boolean; setSignOpen: 
 
         <PropertiesPanel />
       </div>
+
+      <StatusBar />
 
       <SignatureDialog open={signOpen} onOpenChange={setSignOpen} onInsert={insertSignature} />
       <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />

@@ -12,32 +12,13 @@ import { getTool, type ToolId } from "@/lib/tools";
  */
 export const OG_SIZE = { width: 1200, height: 630 };
 
-const PRIMARY = "#2663e7";
-const FOREGROUND = "#0f1522";
-const MUTED = "#5f6573";
-
-// Tailwind-600 для акцентов плиток (tools.ts: "text-sky-600 …")
-const ACCENT: Record<string, string> = {
-  sky: "#0284c7",
-  purple: "#9333ea",
-  stone: "#57534e",
-  zinc: "#52525b",
-  slate: "#475569",
-  blue: "#2563eb",
-  cyan: "#0891b2",
-  indigo: "#4f46e5",
-  violet: "#7c3aed",
-  fuchsia: "#c026d3",
-  emerald: "#059669",
-  teal: "#0d9488",
-  green: "#16a34a",
-  amber: "#d97706",
-  orange: "#ea580c",
-  yellow: "#ca8a04",
-  rose: "#e11d48",
-  red: "#dc2626",
-  pink: "#db2777",
-};
+// Цвета тёмной темы сайта (globals.css)
+const BACKGROUND = "#131416";
+const CARD = "#1B1D20";
+const BORDER = "#2E3237";
+const FOREGROUND = "#ECEDEE";
+const MUTED = "#9097A0";
+const PRIMARY = "#F2B53A";
 
 type IconNode = [tag: string, attrs: Record<string, string>][];
 
@@ -73,7 +54,6 @@ const font = (file: string) => readFile(join(process.cwd(), "public", "fonts", f
 export async function ogImage(locale: string, id?: ToolId) {
   const t = await getTranslations({ locale });
   const tool = id ? getTool(id) : null;
-  const accent = (tool && ACCENT[/text-(\w+)-600/.exec(tool.accent)?.[1] ?? ""]) || PRIMARY;
   const Icon = tool?.icon ?? FileText;
   const title = id ? t(`tools.${id}.title`) : t("home.title");
   const description = id ? t(`tools.${id}.description`) : t("home.subtitle");
@@ -91,8 +71,7 @@ export async function ogImage(locale: string, id?: ToolId) {
           padding: 72,
           fontFamily: "PT Sans",
           color: FOREGROUND,
-          backgroundColor: "#ffffff",
-          backgroundImage: "linear-gradient(160deg, #e9efff 0%, #ffffff 55%)",
+          backgroundColor: BACKGROUND,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
@@ -107,7 +86,7 @@ export async function ogImage(locale: string, id?: ToolId) {
               backgroundColor: PRIMARY,
             }}
           >
-            <LucideSvg icon={FileText} size={36} color="#ffffff" />
+            <LucideSvg icon={FileText} size={36} color={BACKGROUND} />
           </div>
           <div style={{ fontSize: 40, fontWeight: 700 }}>{t("meta.siteName")}</div>
         </div>
@@ -123,12 +102,12 @@ export async function ogImage(locale: string, id?: ToolId) {
                 width: 168,
                 height: 168,
                 borderRadius: 40,
-                // Полупрозрачный акцент поверх белого, а не поверх градиента фона
-                backgroundColor: "#ffffff",
-                backgroundImage: `linear-gradient(${accent}1f, ${accent}1f)`,
+                // Янтарный с прозрачностью 12% поверх фона
+                backgroundColor: BACKGROUND,
+                backgroundImage: `linear-gradient(${PRIMARY}1f, ${PRIMARY}1f)`,
               }}
             >
-              <LucideSvg icon={Icon} size={92} color={accent} />
+              <LucideSvg icon={Icon} size={92} color={PRIMARY} />
             </div>
           )}
           {/* Ширина задана явно — иначе Satori не переносит длинное описание */}
@@ -146,8 +125,8 @@ export async function ogImage(locale: string, id?: ToolId) {
                 display: "flex",
                 padding: "10px 24px",
                 borderRadius: 999,
-                border: "2px solid #e3e6ee",
-                backgroundColor: "#ffffff",
+                border: `2px solid ${BORDER}`,
+                backgroundColor: CARD,
                 fontSize: 26,
               }}
             >

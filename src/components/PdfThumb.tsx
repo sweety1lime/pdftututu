@@ -15,10 +15,12 @@ interface Props {
   className?: string;
   /** Что нарисовать поверх самой страницы (не всего квадратного контейнера) */
   children?: React.ReactNode;
+  /** Контейнер по форме страницы, а не квадратный — для лент миниатюр без поворота */
+  tight?: boolean;
 }
 
 /** Миниатюра страницы. Рисуется, только когда появляется на экране. */
-export function PdfThumb({ doc, pageIndex, width = 160, rotation = 0, className, children }: Props) {
+export function PdfThumb({ doc, pageIndex, width = 160, rotation = 0, className, children, tight }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
@@ -61,14 +63,14 @@ export function PdfThumb({ doc, pageIndex, width = 160, rotation = 0, className,
   return (
     <div
       ref={ref}
-      className={cn("flex aspect-square w-full items-center justify-center", className)}
-      style={{ maxWidth: width }}
+      className={cn("flex w-full items-center justify-center", !tight && "aspect-square", className)}
+      style={{ maxWidth: width, aspectRatio: tight ? String(aspect) : undefined }}
     >
       <div
         className="relative overflow-hidden rounded-sm bg-white shadow-sm ring-1 ring-black/10 transition-transform duration-200"
         style={{
           aspectRatio: String(aspect),
-          width: aspect >= 1 ? "100%" : `${aspect * 100}%`,
+          width: tight || aspect >= 1 ? "100%" : `${aspect * 100}%`,
           transform: `rotate(${rotation}deg)`,
         }}
       >

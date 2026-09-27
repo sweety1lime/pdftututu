@@ -7,6 +7,7 @@
   "common": {
     "dropHere": "Drop a file here",
     "dropHereMany": "Drop files here",
+    "dropMore": "Drop more files here",
     "orClick": "or click to choose",
     "chooseFile": "Choose file",
     "chooseFiles": "Choose files",
@@ -26,6 +27,11 @@
     "startOver": "Start over",
     "done": "Done!",
     "allTools": "All tools",
+    "sourceCode": "Source code",
+    "back": "Back",
+    "findTool": "Find a tool",
+    "searchTools": "Find a tool: compress, sign, password…",
+    "searchEmpty": "Nothing found",
     "filesStayLocal": "Files are processed in your browser and never uploaded",
     "pages": "{count, plural, one {# page} other {# pages}}",
     "files": "{count, plural, one {# file} other {# files}}",
@@ -47,6 +53,14 @@
     "feature1": "Free forever",
     "feature2": "No sign-up",
     "feature3": "Files stay on your device",
+    "dropTitle": "Drop a PDF here",
+    "dropTitleTouch": "Choose a PDF",
+    "dropSubtitle": "File first — then choose what to do with it",
+    "imagesInstead": "I have images",
+    "continue": "Continue",
+    "draftMeta": "Unsaved draft · {date}",
+    "popular": "Most used",
+    "toolsCount": "{count, plural, one {# tool} other {# tools}}",
     "groups": {
       "edit": "Edit",
       "pages": "Pages",
@@ -96,8 +110,7 @@
     "hint": "Drag files to change their order",
     "needTwo": "Add at least two files",
     "action": "Merge",
-    "sortByName": "By name",
-    "total": "Total: {pages}"
+    "sortByName": "By name"
   },
   "split": {
     "mode": "Mode",
@@ -206,6 +219,7 @@
     "extreme": "Maximum",
     "extremeDesc": "Pages become images. Text will no longer be selectable or searchable.",
     "action": "Compress",
+    "again": "Compress again",
     "result": "{before} → {after}",
     "saved": "Size reduced by {percent}%",
     "noGain": "The file is already well compressed — couldn't make it smaller without losing quality",
@@ -284,7 +298,39 @@
     "note": "The recognition model is downloaded once and cached by your browser. Your files are never sent anywhere.",
     "nothing": "No text found"
   },
+  "actions": {
+    "opened": "File opened",
+    "title": "What do you want to do with this file?",
+    "keysHint": "Press <k>1</k> <k>2</k> <k>3</k> or pick below",
+    "all": "Everything you can do with this file",
+    "replace": "Replace file",
+    "addMore": "Add more files",
+    "mergeWithOthers": "Merge with other files",
+    "hasText": "Selectable text",
+    "noText": "Looks like a scan",
+    "noPassword": "No password",
+    "wasEncrypted": "Was password-protected",
+    "hasForms": "Has form fields",
+    "noForms": "No form fields"
+  },
+  "summary": {
+    "title": "Summary",
+    "files": "Files",
+    "pages": "Pages",
+    "totalSize": "Total size",
+    "before": "Before",
+    "after": "After",
+    "saved": "Saved",
+    "level": "Level",
+    "downloadsAs": "Will download as"
+  },
   "editor": {
+    "pagesNav": "Document pages",
+    "status": {
+      "page": "Page {n} of {total}",
+      "draftSaved": "Draft saved in this browser",
+      "hints": "V — select · T — text · Del — delete · Ctrl+Z — undo"
+    },
     "open": "Open a PDF to edit",
     "tools": {
       "select": "Select",
@@ -303,6 +349,10 @@
       "forms": "Form"
     },
     "props": {
+      "title": "Object properties",
+      "objects": "{count, plural, one {# object} other {# objects}}",
+      "mixed": "Mixed objects",
+      "customColor": "Custom color",
       "font": "Font",
       "fontSans": "Sans-serif",
       "fontSerif": "Serif",

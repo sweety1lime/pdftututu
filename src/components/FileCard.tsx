@@ -1,32 +1,35 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { FileText, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PdfThumb } from "@/components/PdfThumb";
 import { formatBytes } from "@/lib/download";
 import type { LoadedPdf } from "@/lib/pdf/useLoadedPdfs";
 
-/** Карточка открытого файла с кнопкой «закрыть». */
+/** Строка открытого файла: миниатюра, имя, «N страниц · размер», «Начать заново». */
 export function FileCard({ file, onClose }: { file: LoadedPdf; onClose: () => void }) {
   const t = useTranslations("common");
   const locale = useLocale();
   return (
-    <div className="flex items-center gap-4 rounded-xl border bg-card p-3 shadow-xs">
-      <div className="w-14 shrink-0">
-        <PdfThumb doc={file.doc} pageIndex={0} width={56} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="flex items-center gap-1.5 truncate font-medium" title={file.name}>
-          <FileText className="size-4 shrink-0 text-muted-foreground" />
-          <span className="truncate">{file.name}</span>
+    <div className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-x-3 rounded-xl border bg-card py-3 pr-1.5 pl-3 sm:grid-cols-[44px_minmax(0,1fr)_auto] sm:gap-x-4 sm:py-3.5 sm:pr-3.5 sm:pl-4">
+      <PdfThumb doc={file.doc} pageIndex={0} width={44} tight className="w-10 sm:w-11" />
+      <div className="flex min-w-0 flex-col gap-1">
+        <p className="truncate text-[15px] font-semibold" title={file.name}>
+          {file.name}
         </p>
-        <p className="text-sm text-muted-foreground">
+        <p className="font-mono text-xs text-muted-foreground">
           {t("pages", { count: file.pageCount })} · {formatBytes(file.size, locale)}
         </p>
       </div>
-      <Button variant="ghost" size="icon" onClick={onClose} aria-label={t("startOver")}>
+      <Button
+        variant="ghost"
+        onClick={onClose}
+        aria-label={t("startOver")}
+        className="size-11 rounded-[10px] text-muted-foreground sm:h-9 sm:w-auto sm:px-3"
+      >
         <X />
+        <span className="hidden sm:inline">{t("startOver")}</span>
       </Button>
     </div>
   );

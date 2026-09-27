@@ -50,7 +50,7 @@ function PasswordForm({
     >
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
-          <KeyRound className="size-5 text-primary" />
+          <KeyRound className="size-5 text-primary-ink" />
           {t("password.title")}
         </DialogTitle>
         <DialogDescription>{t("password.description", { name: fileName })}</DialogDescription>

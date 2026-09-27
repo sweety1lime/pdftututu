@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Onest } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -9,9 +8,9 @@ import { routing } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/site";
 import { Providers } from "@/components/Providers";
 import { SiteHeader } from "@/components/SiteHeader";
+import { fontVariables } from "../fonts";
 import "../globals.css";
 
-const ui = Onest({ subsets: ["latin", "cyrillic"], variable: "--font-ui", display: "swap" });
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -40,7 +39,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className={ui.variable} suppressHydrationWarning>
+    <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <body className="flex min-h-dvh flex-col">
         <NextIntlClientProvider>
           <Providers>

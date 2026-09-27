@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Kbd } from "@/components/ui/misc";
 import { TOOL_KEYS } from "./Toolbar";
 import type { Tool } from "./types";
 
@@ -9,9 +10,7 @@ function Keys({ keys }: { keys: string[] }) {
   return (
     <span className="flex flex-wrap justify-end gap-1">
       {keys.map((k) => (
-        <kbd key={k} className="rounded border bg-muted px-1.5 py-0.5 font-mono text-xs">
-          {k}
-        </kbd>
+        <Kbd key={k}>{k}</Kbd>
       ))}
     </span>
   );

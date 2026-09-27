@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { FileDropzone } from "@/components/FileDropzone";
 import { FileCard } from "@/components/FileCard";
-import { ActionBar } from "@/components/ActionBar";
+import { DownloadsAs, MainAction, Summary, SummaryList, SummaryRow, ToolWorkspace } from "@/components/ToolWorkspace";
 import { PdfThumb } from "@/components/PdfThumb";
 import { Choice } from "@/components/ui/choice";
 import { Input } from "@/components/ui/input";
@@ -64,12 +64,14 @@ export function PageNumbersTool() {
     setPagesMode(mode);
   };
 
+  const outName = file ? `${baseName(file.name)}_numbered.pdf` : "";
+
   const run = async () => {
     if (!file || !pages.list.length) return;
     setBusy(true);
     try {
       const out = await addPageNumbers(file.bytes, { position, format, start, pages: pages.list, fontSize: size });
-      downloadBlob(out, `${baseName(file.name)}_numbered.pdf`);
+      downloadBlob(out, outName);
       toast.success(t("common.done"));
     } catch (e) {
       showError(e);
@@ -78,111 +80,136 @@ export function PageNumbersTool() {
     }
   };
 
-  if (!file) return <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />;
+  if (!file) {
+    return (
+      <ToolWorkspace>
+        <FileDropzone onFiles={(f) => add(f.slice(0, 1))} disabled={loading} />
+      </ToolWorkspace>
+    );
+  }
 
   const previewPage = pages.list[0] ?? 0;
 
   return (
-    <div className="space-y-6">
-      <FileCard file={file} onClose={clear} />
+    <ToolWorkspace
+      summary={
+        <Summary
+          status={
+            pages.list.length > 0 && (
+              <span className="lg:hidden">{t("common.pages", { count: pages.list.length })}</span>
+            )
+          }
+          actions={
+            <MainAction onClick={run} busy={busy} disabled={!pages.list.length}>
+              {t("pageNumbers.action")}
+            </MainAction>
+          }
+        >
+          <SummaryList>
+            <SummaryRow label={t("summary.pages")}>{pages.list.length}</SummaryRow>
+          </SummaryList>
+          <DownloadsAs name={outName} />
+        </Summary>
+      }
+    >
+      <div className="flex flex-col gap-6">
+        <FileCard file={file} onClose={clear} />
 
-      <div className="grid gap-8 md:grid-cols-[1fr_auto]">
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <Label>{t("pageNumbers.format")}</Label>
-            <Choice value={format} onChange={setFormat} options={formats.map((f) => ({ value: f, label: sample(f) }))} />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("pageNumbers.pages")}</Label>
-            <Choice
-              value={pagesMode}
-              onChange={changePagesMode}
-              options={[
-                { value: "all", label: t("pageNumbers.pagesAll") },
-                { value: "skipFirst", label: t("pageNumbers.pagesSkipFirst") },
-                { value: "custom", label: t("pageNumbers.pagesCustom") },
-              ]}
-            />
-            {pagesMode === "custom" && (
-              <div className="max-w-md space-y-1.5 pt-1">
-                <Input
-                  value={ranges}
-                  onChange={(e) => setRanges(e.target.value)}
-                  placeholder={t("split.rangesPlaceholder")}
-                  aria-label={t("pageNumbers.pagesCustom")}
-                  aria-invalid={Boolean(ranges && pages.error)}
-                  autoFocus
-                />
-                <p className={cn("text-sm", ranges && pages.error ? "text-destructive" : "text-muted-foreground")}>
-                  {ranges && pages.error ? pages.error : t("split.rangesHelp")}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-wrap gap-6">
+        <div className="grid gap-8 md:grid-cols-[1fr_auto]">
+          <div className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="start">{t("pageNumbers.start")}</Label>
-              <Input
-                id="start"
-                type="number"
-                min={0}
-                value={start}
-                onChange={(e) => setStart(Math.max(0, Math.floor(Number(e.target.value) || 0)))}
-                className="w-28"
-              />
+              <Label>{t("pageNumbers.format")}</Label>
+              <Choice value={format} onChange={setFormat} options={formats.map((f) => ({ value: f, label: sample(f) }))} />
             </div>
+
             <div className="space-y-2">
-              <Label>{t("pageNumbers.size")}</Label>
+              <Label>{t("pageNumbers.pages")}</Label>
               <Choice
-                value={size}
-                onChange={setSize}
+                value={pagesMode}
+                onChange={changePagesMode}
                 options={[
-                  { value: 10, label: t("pageNumbers.sizeSmall") },
-                  { value: 12, label: t("pageNumbers.sizeMedium") },
-                  { value: 16, label: t("pageNumbers.sizeLarge") },
+                  { value: "all", label: t("pageNumbers.pagesAll") },
+                  { value: "skipFirst", label: t("pageNumbers.pagesSkipFirst") },
+                  { value: "custom", label: t("pageNumbers.pagesCustom") },
                 ]}
               />
+              {pagesMode === "custom" && (
+                <div className="max-w-md space-y-1.5 pt-1">
+                  <Input
+                    value={ranges}
+                    onChange={(e) => setRanges(e.target.value)}
+                    placeholder={t("split.rangesPlaceholder")}
+                    aria-label={t("pageNumbers.pagesCustom")}
+                    aria-invalid={Boolean(ranges && pages.error)}
+                    autoFocus
+                  />
+                  <p className={cn("text-sm", ranges && pages.error ? "text-destructive" : "text-muted-foreground")}>
+                    {ranges && pages.error ? pages.error : t("split.rangesHelp")}
+                  </p>
+                </div>
+              )}
             </div>
+
+            <div className="flex flex-wrap gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="start">{t("pageNumbers.start")}</Label>
+                <Input
+                  id="start"
+                  type="number"
+                  min={0}
+                  value={start}
+                  onChange={(e) => setStart(Math.max(0, Math.floor(Number(e.target.value) || 0)))}
+                  className="w-28"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>{t("pageNumbers.size")}</Label>
+                <Choice
+                  value={size}
+                  onChange={setSize}
+                  options={[
+                    { value: 10, label: t("pageNumbers.sizeSmall") },
+                    { value: 12, label: t("pageNumbers.sizeMedium") },
+                    { value: 16, label: t("pageNumbers.sizeLarge") },
+                  ]}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t("pageNumbers.position")}</Label>
+            <PdfThumb doc={file.doc} pageIndex={previewPage} width={208} className="w-52">
+              <div role="radiogroup" aria-label={t("pageNumbers.position")} className="absolute inset-0 grid grid-rows-2">
+                {[POSITIONS.slice(0, 3), POSITIONS.slice(3)].map((row, r) => (
+                  <div key={r} className={cn("flex justify-between px-1", r === 0 ? "items-start pt-1" : "items-end pb-1")}>
+                    {row.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        role="radio"
+                        aria-checked={position === p}
+                        aria-label={t(`pageNumbers.positions.${p}`)}
+                        onClick={() => setPosition(p)}
+                        className={cn(
+                          "transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
+                          position === p
+                            ? "rounded-md bg-primary px-1.5 py-0.5 text-xs font-medium whitespace-nowrap text-primary-foreground shadow-sm"
+                            : "size-4 rounded-full border-2 border-primary bg-white hover:bg-primary/30",
+                        )}
+                      >
+                        {/* В выбранном месте — сам номер, как он встанет на страницу */}
+                        {position === p && sample(format)}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </PdfThumb>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label>{t("pageNumbers.position")}</Label>
-          <PdfThumb doc={file.doc} pageIndex={previewPage} width={208} className="w-52">
-            <div role="radiogroup" aria-label={t("pageNumbers.position")} className="absolute inset-0 grid grid-rows-2">
-              {[POSITIONS.slice(0, 3), POSITIONS.slice(3)].map((row, r) => (
-                <div key={r} className={cn("flex justify-between px-1", r === 0 ? "items-start pt-1" : "items-end pb-1")}>
-                  {row.map((p) => (
-                    <button
-                      key={p}
-                      type="button"
-                      role="radio"
-                      aria-checked={position === p}
-                      aria-label={t(`pageNumbers.positions.${p}`)}
-                      onClick={() => setPosition(p)}
-                      className={cn(
-                        "transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
-                        position === p
-                          ? "rounded-md bg-primary px-1.5 py-0.5 text-xs font-medium whitespace-nowrap text-primary-foreground shadow-sm"
-                          : "size-4 rounded-full border-2 border-primary bg-white hover:bg-primary/30",
-                      )}
-                    >
-                      {/* В выбранном месте — сам номер, как он встанет на страницу */}
-                      {position === p && sample(format)}
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </PdfThumb>
-        </div>
       </div>
-
-      <ActionBar action={t("pageNumbers.action")} onAction={run} busy={busy} disabled={!pages.list.length}>
-        {pages.list.length > 0 && t("common.pages", { count: pages.list.length })}
-      </ActionBar>
-    </div>
+    </ToolWorkspace>
   );
 }

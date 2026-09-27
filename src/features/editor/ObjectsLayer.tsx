@@ -11,6 +11,8 @@ import { makeBox, makeStroke, makeText, ONE_SHOT_TOOLS, scaleObject } from "./fa
 import { beginGesture, endGesture, useEditor } from "./store";
 import type { EditorObject, StrokeObject, TextObject } from "./types";
 
+const SELECTION_COLOR = "#e3a21a";
+
 const DRAW_TOOLS = new Set(["rect", "ellipse", "highlight", "whiteout", "redact", "line", "arrow", "pen"]);
 const CORNERS = ["top-left", "top-right", "bottom-left", "bottom-right"];
 const ALL_ANCHORS = [...CORNERS, "top-center", "bottom-center", "middle-left", "middle-right"];
@@ -255,8 +257,9 @@ export function ObjectsLayer({ pageIndex, width, height, zoom, fontsVersion }: P
           ignoreStroke
           anchorSize={9}
           anchorCornerRadius={3}
-          borderStroke="#3b82f6"
-          anchorStroke="#3b82f6"
+          // Янтарный акцент сайта, чуть темнее — страница всегда белая
+          borderStroke={SELECTION_COLOR}
+          anchorStroke={SELECTION_COLOR}
           boundBoxFunc={(oldBox, newBox) => (Math.abs(newBox.width) < 4 || Math.abs(newBox.height) < 4 ? oldBox : newBox)}
         />
       </Layer>

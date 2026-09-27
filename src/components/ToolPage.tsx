@@ -1,52 +1,75 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { ShieldCheck } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { RelatedTools } from "@/components/RelatedTools";
+import { ToolSidebar } from "@/components/ToolSidebar";
 import { ToolStructuredData } from "@/components/StructuredData";
 import { ToolGuide } from "@/components/ToolGuide";
+import { Link } from "@/i18n/navigation";
 import { pageMetadata } from "@/lib/metadata";
 import { getTool, type ToolId } from "@/lib/tools";
-import { cn } from "@/lib/utils";
 
-/** Страница инструмента: шапка, сам инструмент, подвал с инструкцией и вопросами. */
+/** Страница инструмента: заголовок, сам инструмент, под ним инструкция и вопросы. */
 export async function ToolPage({ id, children }: { id: ToolId; children: React.ReactNode }) {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:py-12">
+    <ToolShell id={id}>
       <ToolHeader id={id} />
       {children}
       <ToolFooter id={id} />
-    </main>
+    </ToolShell>
   );
 }
 
-/** Иконка, название, описание. */
-export async function ToolHeader({ id }: { id: ToolId }) {
-  const t = await getTranslations("tools");
-  const tool = getTool(id);
+/**
+ * Слева все инструменты, справа — сетка страницы. На широком экране в ней две колонки:
+ * заголовок, рабочая область и подвал в первой, панель «Итог» (aside из ToolWorkspace)
+ * во второй во всю высоту. Всё, кроме панели, попадает в первую колонку.
+ */
+export async function ToolShell({ id, children }: { id: ToolId; children: React.ReactNode }) {
   return (
-    <div className="mb-8 flex flex-col items-center gap-3 text-center">
-      <span className={cn("flex size-14 items-center justify-center rounded-2xl", tool.accent)}>
-        <tool.icon className="size-7" />
-      </span>
-      <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{t(`${id}.title`)}</h1>
-      <p className="max-w-xl text-muted-foreground">{t(`${id}.description`)}</p>
+    <div className="flex flex-1">
+      <ToolSidebar current={id} />
+      <main className="flex min-w-0 flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:grid-rows-[auto_1fr_auto] lg:[&>:not(aside)]:col-start-1">
+        {children}
+      </main>
     </div>
   );
 }
 
-/** «Файлы остаются у вас», как пользоваться, частые вопросы, другие инструменты. */
-export async function ToolFooter({ id }: { id: ToolId }) {
-  const t = await getTranslations("common");
+/** Группа, название, описание. На телефоне вместо группы — кнопка «Назад» рядом с названием. */
+export async function ToolHeader({ id }: { id: ToolId }) {
+  const t = await getTranslations();
+  const tool = getTool(id);
   return (
-    <>
-      <p className="mt-10 flex items-center justify-center gap-2 text-center text-xs text-muted-foreground">
-        <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
-        {t("filesStayLocal")}
+    <div className="flex w-full max-w-5xl flex-col gap-1 px-4 pt-3 lg:row-start-1 lg:gap-1.5 lg:px-8 lg:pt-7">
+      <p className="hidden font-mono text-xs tracking-[0.08em] text-muted-foreground uppercase lg:block">
+        {t(`home.groups.${tool.group}`)}
       </p>
+      <div className="flex items-center gap-1">
+        <Link
+          href="/"
+          aria-label={t("common.back")}
+          className="-ml-3 flex size-11 shrink-0 items-center justify-center rounded-[10px] transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 lg:hidden"
+        >
+          <ArrowLeft className="size-5" />
+        </Link>
+        <h1 className="text-[22px] leading-tight font-semibold tracking-[-0.015em] lg:text-3xl">
+          {t(`tools.${id}.title`)}
+        </h1>
+      </div>
+      <p className="text-sm text-muted-foreground lg:text-[15px]">{t(`tools.${id}.description`)}</p>
+    </div>
+  );
+}
+
+/** Как пользоваться, частые вопросы, другие инструменты. */
+export async function ToolFooter({ id }: { id: ToolId }) {
+  return (
+    <div className="w-full max-w-5xl px-4 pb-16 lg:row-start-3 lg:px-8">
       <ToolGuide id={id} />
       <RelatedTools id={id} />
       <ToolStructuredData id={id} />
-    </>
+    </div>
   );
 }
 
