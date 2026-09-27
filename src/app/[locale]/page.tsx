@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { DraftCard } from "@/components/DraftCard";
 import { HomeDropzone } from "@/components/HomeDropzone";
+import { HomeShell } from "@/components/HomeShell";
 import { SiteStructuredData } from "@/components/StructuredData";
 import { Link } from "@/i18n/navigation";
 import { pageMetadata } from "@/lib/metadata";
@@ -21,7 +22,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const t = await getTranslations();
 
   return (
-    <>
+    <HomeShell>
       <main className="mx-auto flex w-full max-w-[90rem] flex-1 flex-col gap-4 px-4 pt-4 pb-6 lg:gap-10 lg:px-10 lg:pt-8 lg:pb-10">
         <SiteStructuredData />
 
@@ -94,6 +95,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           {t("common.sourceCode")} · MIT
         </a>
       </footer>
-    </>
+    </HomeShell>
   );
 }

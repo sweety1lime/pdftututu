@@ -93,7 +93,11 @@ export default function Editor({ entry = "editor", onOpenChange }: Props) {
     }
   };
 
-  usePendingFiles(openFile);
+  usePendingFiles(([item]) => {
+    if (!item) return;
+    if (item instanceof File) openFile([item]);
+    else clearDraft().then(() => open(item));
+  });
 
   // Черновик: предложить восстановить, а если нажали «Восстановить» на главной — сразу открыть
   useEffect(() => {

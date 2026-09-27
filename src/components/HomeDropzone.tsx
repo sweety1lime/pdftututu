@@ -9,17 +9,20 @@ import { setPendingFiles } from "@/lib/pendingFiles";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { PrivacyNote } from "@/components/ToolWorkspace";
+import { useOpenFile } from "@/components/HomeShell";
 
 const ACCEPT: Accept = { "application/pdf": [".pdf"], ...IMAGE_ACCEPT };
 const isPdf = (f: File) => f.type === "application/pdf" || /\.pdf$/i.test(f.name);
 
 /**
  * Первый экран главной: сначала файл, потом выбор действия.
- * Несколько PDF — сразу в «Объединить», картинки — в «Картинки в PDF».
+ * Один PDF — экран «Что сделать с файлом?», несколько — сразу в «Объединить»,
+ * картинки — в «Картинки в PDF».
  */
 export function HomeDropzone() {
   const t = useTranslations();
   const router = useRouter();
+  const openFile = useOpenFile();
 
   const go = (href: string, files: File[]) => {
     setPendingFiles(files);
@@ -29,7 +32,7 @@ export function HomeDropzone() {
   const onFiles = (files: File[]) => {
     const pdfs = files.filter(isPdf);
     if (pdfs.length > 1) go("/merge", pdfs);
-    else if (pdfs.length === 1) go("/editor", pdfs);
+    else if (pdfs.length === 1) openFile(pdfs[0]);
     else if (files.length) go("/images-to-pdf", files);
   };
 

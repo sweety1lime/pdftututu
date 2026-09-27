@@ -15,20 +15,12 @@ import { closePdfjs, openPdfjs } from "@/lib/pdf/pdfjs";
 import { getTextLines } from "@/lib/pdf/textLines";
 import { blocksToDocx, blocksToText, linesToBlocks, type LineInput } from "@/lib/pdf/toWord";
 import { useLoadedPdfs } from "@/lib/pdf/useLoadedPdfs";
+import { hasTextLayer } from "@/lib/pdfInfo";
 import { useErrorToast } from "@/lib/useErrorToast";
 
 type Format = "docx" | "txt";
 
 const DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-
-/** Есть ли в документе текст (смотрим первые страницы — для сканов его нет). */
-async function hasTextLayer(pdf: PDFDocumentProxy): Promise<boolean> {
-  for (let i = 1; i <= Math.min(3, pdf.numPages); i++) {
-    const content = await (await pdf.getPage(i)).getTextContent();
-    if (content.items.some((it) => "str" in it && it.str.trim())) return true;
-  }
-  return false;
-}
 
 /** Строки всех страниц. getOperatorList загружает шрифты — без него не узнать жирный и курсив. */
 async function extractLines(pdf: PDFDocumentProxy, onPage: (done: number) => void): Promise<LineInput[][]> {

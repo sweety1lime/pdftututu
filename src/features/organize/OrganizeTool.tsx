@@ -14,7 +14,7 @@ import { baseName, downloadBlob } from "@/lib/download";
 import { newId } from "@/lib/pdf/load";
 import { buildFromItems, PAGE_SIZES, type PageItem } from "@/lib/pdf/pages";
 import { useLoadedPdfs, type LoadedPdf } from "@/lib/pdf/useLoadedPdfs";
-import { usePendingFiles } from "@/lib/pendingFiles";
+import { usePendingFiles, type PendingItem } from "@/lib/pendingFiles";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { cn } from "@/lib/utils";
 
@@ -63,7 +63,7 @@ export function OrganizeTool() {
     return () => window.removeEventListener("keydown", onKey);
   }, [undo]);
 
-  const addFiles = async (incoming: File[]) => {
+  const addFiles = async (incoming: PendingItem[]) => {
     const loaded = await add(incoming);
     if (loaded.length) setItems((prev) => [...prev, ...loaded.flatMap(pagesOf)]);
   };

@@ -297,6 +297,21 @@
     "note": "The recognition model is downloaded once and cached by your browser. Your files are never sent anywhere.",
     "nothing": "No text found"
   },
+  "actions": {
+    "opened": "File opened",
+    "title": "What do you want to do with this file?",
+    "keysHint": "Press <k>1</k> <k>2</k> <k>3</k> or pick below",
+    "all": "Everything you can do with this file",
+    "replace": "Replace file",
+    "addMore": "Add more files",
+    "mergeWithOthers": "Merge with other files",
+    "hasText": "Selectable text",
+    "noText": "Looks like a scan",
+    "noPassword": "No password",
+    "wasEncrypted": "Was password-protected",
+    "hasForms": "Has form fields",
+    "noForms": "No form fields"
+  },
   "summary": {
     "title": "Summary",
     "files": "Files",

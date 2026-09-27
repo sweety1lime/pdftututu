@@ -51,7 +51,7 @@ export function ImagesToPdfTool() {
     setLoading(false);
   };
 
-  usePendingFiles(add);
+  usePendingFiles((items) => add(items.filter((i): i is File => i instanceof File)));
 
   const remove = (id: string) =>
     setItems((prev) => {
