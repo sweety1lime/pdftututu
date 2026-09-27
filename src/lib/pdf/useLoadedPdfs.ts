@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { formatBytes } from "@/lib/download";
+import { usePendingFiles } from "@/lib/pendingFiles";
 import { readPdfFile, type PdfSource } from "./load";
 import { closePdfjs, openPdfjs } from "./pdfjs";
 import { PdfError } from "./errors";
@@ -30,8 +31,11 @@ export async function openLoadedPdf(file: File): Promise<LoadedPdf> {
   return { ...src, size: file.size, pageCount: doc.numPages, doc };
 }
 
-/** Список открытых PDF с автоматическим освобождением памяти. */
-export function useLoadedPdfs() {
+/**
+ * Список открытых PDF с автоматическим освобождением памяти.
+ * Файлы, переданные с главной, добавляются сами (pickUpPending: false — забрать их вручную).
+ */
+export function useLoadedPdfs({ pickUpPending = true }: { pickUpPending?: boolean } = {}) {
   const t = useTranslations("common");
   const showError = useErrorToast();
   const [files, setFiles] = useState<LoadedPdf[]>([]);
@@ -66,6 +70,8 @@ export function useLoadedPdfs() {
     },
     [showError, t],
   );
+
+  usePendingFiles(add, pickUpPending);
 
   const remove = useCallback((id: string) => {
     setFiles((prev) => {

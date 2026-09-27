@@ -14,6 +14,7 @@ import { baseName, downloadBlob } from "@/lib/download";
 import { newId } from "@/lib/pdf/load";
 import { buildFromItems, PAGE_SIZES, type PageItem } from "@/lib/pdf/pages";
 import { useLoadedPdfs, type LoadedPdf } from "@/lib/pdf/useLoadedPdfs";
+import { usePendingFiles } from "@/lib/pendingFiles";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +30,8 @@ const pagesOf = (f: LoadedPdf): PageItem[] =>
 export function OrganizeTool() {
   const t = useTranslations();
   const showError = useErrorToast();
-  const { files, add, clear, loading } = useLoadedPdfs();
+  // Файлы с главной забираем сами: для них ещё нужно построить список страниц
+  const { files, add, clear, loading } = useLoadedPdfs({ pickUpPending: false });
   const [items, setItemsRaw] = useState<PageItem[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
@@ -65,6 +67,8 @@ export function OrganizeTool() {
     const loaded = await add(incoming);
     if (loaded.length) setItems((prev) => [...prev, ...loaded.flatMap(pagesOf)]);
   };
+
+  usePendingFiles(addFiles);
 
   const targets = (id?: string) => (id ? [id] : [...selected]);
 

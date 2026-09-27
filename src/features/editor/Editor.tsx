@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { prepareImage } from "@/lib/images";
 import { newId, readPdfFile, type PdfSource } from "@/lib/pdf/load";
 import { CSS_FAMILY } from "@/lib/pdf/fonts";
+import { takeDraftRestore, usePendingFiles } from "@/lib/pendingFiles";
 import { useErrorToast } from "@/lib/useErrorToast";
 import { cn } from "@/lib/utils";
 import { assetFromImage, fitSize } from "./assets";
@@ -33,6 +34,8 @@ interface Props {
   onOpenChange?: (open: boolean) => void;
 }
 
+const draftSource = (d: Draft): PdfSource => ({ id: d.sourceId, name: d.name, bytes: d.bytes, wasEncrypted: false });
+
 export default function Editor({ entry = "editor", onOpenChange }: Props) {
   const t = useTranslations("editor");
   const tRoot = useTranslations();
@@ -46,9 +49,6 @@ export default function Editor({ entry = "editor", onOpenChange }: Props) {
 
   useEffect(() => onOpenChange?.(!!source), [source, onOpenChange]);
 
-  useEffect(() => {
-    if (!useEditor.getState().source) loadDraft().then(setDraft);
-  }, []);
 
   const open = useCallback(
     async (src: PdfSource, restore?: Draft) => {
@@ -93,10 +93,22 @@ export default function Editor({ entry = "editor", onOpenChange }: Props) {
     }
   };
 
+  usePendingFiles(openFile);
+
+  // Черновик: предложить восстановить, а если нажали «Восстановить» на главной — сразу открыть
+  useEffect(() => {
+    if (useEditor.getState().source) return;
+    const restore = takeDraftRestore();
+    loadDraft().then((d) => {
+      if (d && restore) open(draftSource(d), d);
+      else setDraft(d);
+    });
+  }, [open]);
+
   if (!source) {
     return (
       <div className="w-full">
-        {draft && <DraftBanner draft={draft} onRestore={() => open({ id: draft.sourceId, name: draft.name, bytes: draft.bytes, wasEncrypted: false }, draft)} onDiscard={() => clearDraft().then(() => setDraft(null))} />}
+        {draft && <DraftBanner draft={draft} onRestore={() => open(draftSource(draft), draft)} onDiscard={() => clearDraft().then(() => setDraft(null))} />}
         <FileDropzone onFiles={openFile} disabled={loading} />
         <PrivacyNote className="mt-6 items-center justify-center text-center" />
       </div>

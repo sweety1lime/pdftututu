@@ -14,6 +14,7 @@ import { downloadBlob } from "@/lib/download";
 import { prepareImage } from "@/lib/images";
 import { newId } from "@/lib/pdf/load";
 import { imagesToPdf, type ImagesToPdfOptions, type PreparedImage } from "@/lib/pdf/pages";
+import { usePendingFiles } from "@/lib/pendingFiles";
 import { useErrorToast } from "@/lib/useErrorToast";
 
 interface Item extends PreparedImage {
@@ -49,6 +50,8 @@ export function ImagesToPdfTool() {
     }
     setLoading(false);
   };
+
+  usePendingFiles(add);
 
   const remove = (id: string) =>
     setItems((prev) => {

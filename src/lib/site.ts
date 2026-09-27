@@ -21,3 +21,6 @@ export function languageAlternates(path: string, base = ""): Record<string, stri
     "x-default": base + localizedPath(routing.defaultLocale, path),
   };
 }
+
+/** Исходный код сайта. */
+export const REPO_URL = "https://github.com/sweety1lime/pdftututu";

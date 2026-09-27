@@ -1,48 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { del, get, set } from "idb-keyval";
+import { set } from "idb-keyval";
 import type { PdfSource } from "@/lib/pdf/load";
 import { useEditor } from "./store";
-import type { Asset, EditorObject, FormValue } from "./types";
+import { BYTES_KEY, STATE_KEY, type DraftState } from "./draftStorage";
 
 /**
  * Черновик в IndexedDB: исходный PDF + правки. Если вкладку случайно закрыли,
  * при следующем открытии редактор предложит восстановить работу.
  */
-const BYTES_KEY = "pdftutut:draft-bytes";
-const STATE_KEY = "pdftutut:draft-state";
-
-export interface DraftState {
-  sourceId: string;
-  name: string;
-  savedAt: number;
-  objects: EditorObject[];
-  formValues: Record<string, FormValue>;
-  assets: Record<string, Asset>;
-}
-
-export interface Draft extends DraftState {
-  bytes: Uint8Array;
-}
-
-export async function loadDraft(): Promise<Draft | null> {
-  try {
-    const [state, bytes] = await Promise.all([get<DraftState>(STATE_KEY), get<Uint8Array>(BYTES_KEY)]);
-    if (!state || !bytes || (!state.objects.length && !Object.keys(state.formValues).length)) return null;
-    return { ...state, bytes };
-  } catch {
-    return null;
-  }
-}
-
-export async function clearDraft() {
-  try {
-    await Promise.all([del(STATE_KEY), del(BYTES_KEY)]);
-  } catch {
-    /* IndexedDB недоступен (приватный режим) — не страшно */
-  }
-}
+export { clearDraft, loadDraft, type Draft, type DraftState } from "./draftStorage";
 
 /**
  * Черновик возможен, только если файл был без пароля: байты зашифрованного PDF
