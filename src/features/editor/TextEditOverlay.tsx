@@ -85,7 +85,7 @@ export function TextEditOverlay({ obj, zoom }: { obj: TextObject; zoom: number }
         }
       }}
       onPointerDown={(e) => e.stopPropagation()}
-      className="absolute z-30 m-0 resize-none overflow-hidden border-0 bg-transparent p-0 outline-2 outline-offset-2 outline-sky-500 outline-dashed"
+      className="absolute z-30 m-0 resize-none overflow-hidden border-0 bg-transparent p-0 outline-2 outline-offset-2 outline-[#e3a21a] outline-dashed"
       style={{
         left: obj.x * zoom - shift,
         top: obj.y * zoom,

@@ -324,6 +324,12 @@
     "downloadsAs": "Will download as"
   },
   "editor": {
+    "pagesNav": "Document pages",
+    "status": {
+      "page": "Page {n} of {total}",
+      "draftSaved": "Draft saved in this browser",
+      "hints": "V — select · T — text · Del — delete · Ctrl+Z — undo"
+    },
     "open": "Open a PDF to edit",
     "tools": {
       "select": "Select",
@@ -342,6 +348,10 @@
       "forms": "Form"
     },
     "props": {
+      "title": "Object properties",
+      "objects": "{count, plural, one {# object} other {# objects}}",
+      "mixed": "Mixed objects",
+      "customColor": "Custom color",
       "font": "Font",
       "fontSans": "Sans-serif",
       "fontSerif": "Serif",
